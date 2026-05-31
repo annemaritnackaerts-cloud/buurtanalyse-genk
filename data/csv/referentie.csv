@@ -1,0 +1,14 @@
+﻿indicator,jaar,genk,limburg,vlaanderen
+screening,2020,0.528,0.534,0.565
+screening,2021,0.533,0.545,0.578
+screening,2022,0.529,0.552,0.588
+screening,2023,0.547,0.571,0.606
+screening,2024,0.555,0.572,0.606
+screening_leeftijd_25_29,2024,0.547,0.561,0.598
+screening_leeftijd_30_34,2024,0.646,0.662,0.691
+screening_leeftijd_35_39,2024,0.629,0.647,0.679
+screening_leeftijd_40_44,2024,0.598,0.625,0.66
+screening_leeftijd_45_49,2024,0.596,0.608,0.64
+screening_leeftijd_50_54,2024,0.546,0.565,0.601
+screening_leeftijd_55_59,2024,0.467,0.498,0.529
+screening_leeftijd_60_64,2024,0.444,0.439,0.463

@@ -1,0 +1,15 @@
+﻿indicator,label,eenheid,decimalen,kleurschaal,niveaus,tab_label,tab_icoon,beschrijving
+screening,Borstkankerscreening BHK,%,1,rood-groen,"sector,campagnebuurt",Screening BHK,🩺,Dekkingsgraad borstkankerscreening (BHK) bij vrouwen 50–69 jaar.
+demografie_65plus,% 65+ jaar,%,1,blauw,"sector,campagnebuurt",Demografie,👥,Aandeel inwoners van 65 jaar en ouder.
+demografie_0_19,% 0–19 jaar,%,1,blauw,"sector,campagnebuurt",Demografie,👥,Aandeel inwoners jonger dan 20 jaar.
+demografie_20_64,% 20–64 jaar,%,1,blauw,"sector,campagnebuurt",Demografie,👥,Aandeel inwoners tussen 20 en 64 jaar.
+inkomen_mediaan,Mediaan netto belastbaar inkomen,€,0,blauw,"sector,campagnebuurt",Inkomen,💶,Mediaan netto belastbaar inkomen per aangifte (FOD Financiën).
+inkomen_gemiddeld,Gemiddeld netto belastbaar inkomen,€,0,blauw,"sector,campagnebuurt",Inkomen,💶,Gemiddeld netto belastbaar inkomen per aangifte (FOD Financiën).
+onderwijs_hoog,% hooggeschoold,%,1,blauw,"sector,campagnebuurt",Onderwijs,🎓,Aandeel bevolking (25+) met hoger onderwijs (ISCED 5–8). Census 2021.
+onderwijs_middel,% middelhooggeschoold,%,1,blauw,"sector,campagnebuurt",Onderwijs,🎓,Aandeel bevolking (25+) met middelbaar onderwijs (ISCED 3–4). Census 2021.
+onderwijs_laag,% laaggeschoold,%,1,rood-groen-omgekeerd,"sector,campagnebuurt",Onderwijs,🎓,Aandeel bevolking (25+) zonder diploma of enkel lager onderwijs (ISCED 0–2). Census 2021.
+nationaliteit_niet_belg,% niet-Belgisch,%,1,paars,"wijk,campagnebuurt",Nationaliteit,🌍,"Aandeel inwoners zonder Belgische nationaliteit (interne migratiepopulatie, 2025)."
+nationaliteit_belg,% Belgisch,%,1,blauw,"wijk,campagnebuurt",Nationaliteit,🌍,"Aandeel inwoners met Belgische nationaliteit (interne migratiepopulatie, 2025)."
+bevolking,Bevolking (totaal),personen,0,blauw,"sector,campagnebuurt",Niveaus & Bronnen,🗺️,Totale bevolking volgens Statbel opendata.
+bevolking_dichtheid,Bevolkingsdichtheid,per km²,0,blauw,campagnebuurt,Niveaus & Bronnen,🗺️,Bevolkingsdichtheid per km².
+vergrijzingsindex,Vergrijzingsindex,,1,blauw,campagnebuurt,Demografie,👥,Verhouding 65+ t.o.v. 0–14 jaar × 100.

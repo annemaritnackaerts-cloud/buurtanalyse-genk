@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Buurtanalyse Genk 2024–2025</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  --font: 'Segoe UI', Arial, sans-serif;
+  --dark: #2E4057;
+  --bg: #f0f2f5;
+  --border: #e0e4ea;
+  --panel: #ffffff;
+  --radius: 8px;
+}
+* { box-sizing:border-box; margin:0; padding:0; font-family:var(--font); }
+body { background:var(--bg); color:#222; height:100vh; display:flex; flex-direction:column; font-size:14px; }
+
+/* HEADER */
+header { background:var(--dark); color:#fff; padding:9px 20px; display:flex; align-items:center; gap:14px; flex-shrink:0; }
+header h1 { font-size:1.05rem; font-weight:700; letter-spacing:.2px; }
+header span { font-size:.78rem; opacity:.7; }
+.badge { background:rgba(255,255,255,.15); border-radius:4px; padding:2px 8px; font-size:.75rem; margin-left:auto; display:flex; gap:8px; }
+.badge span { white-space:nowrap; }
+
+/* TABS */
+nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex-shrink:0;
+       box-shadow:0 1px 4px rgba(0,0,0,.06); }
+.tab-btn { padding:10px 20px; border:none; background:none; cursor:pointer; font-size:.85rem;
+             font-weight:600; color:#666; border-bottom:3px solid transparent; margin-bottom:-2px;
+             transition:all .18s; display:flex; align-items:center; gap:5px; font-family:var(--font); }
+.tab-btn:hover { color:var(--dark); background:#f7f9fc; }
+.tab-btn.active { color:var(--dark); border-bottom-color:var(--dark); background:#f7f9fc; }
+
+/* WORKSPACE */
+.workspace { flex:1; display:flex; overflow:hidden; }
+.tab-pane { display:none; width:100%; height:100%; }
+.tab-pane.active { display:flex; }
+.map-wrap { flex:1; position:relative; }
+.leaflet-map { width:100%; height:100%; }
+
+/* LAYER CONTROL (overlay on map top-center) */
+.layer-ctrl { position:absolute; top:10px; left:50%; transform:translateX(-50%);
+               z-index:1000; display:flex; align-items:center; gap:10px;
+               background:rgba(255,255,255,.96); border-radius:22px; padding:5px 14px;
+               box-shadow:0 2px 10px rgba(0,0,0,.18); white-space:nowrap; }
+.level-badge { font-size:.75rem; font-weight:600; color:var(--dark); }
+.tgl-pill { background:#eef0f3; border-radius:14px; display:flex; padding:2px; }
+.tgl-opt { padding:3px 11px; border-radius:12px; cursor:pointer; color:#777;
+             font-size:.75rem; font-weight:600; transition:all .18s; user-select:none; }
+.tgl-opt.active { background:var(--dark); color:#fff; }
+
+/* YEAR BAR (screening) */
+.year-bar { position:absolute; bottom:36px; left:50%; transform:translateX(-50%);
+             z-index:1000; display:flex; gap:4px;
+             background:rgba(255,255,255,.96); border-radius:22px; padding:4px 10px;
+             box-shadow:0 2px 8px rgba(0,0,0,.14); }
+.yr-btn { padding:3px 11px; border:none; background:none; cursor:pointer; font-size:.78rem;
+            font-weight:600; color:#888; border-radius:12px; transition:all .18s; font-family:var(--font); }
+.yr-btn.active { background:var(--dark); color:#fff; }
+
+/* LEGEND */
+.map-legend { position:absolute; bottom:28px; left:10px; z-index:1000;
+               background:rgba(255,255,255,.95); border-radius:var(--radius); padding:10px 13px;
+               font-size:.76rem; box-shadow:0 2px 8px rgba(0,0,0,.14); min-width:128px; }
+.map-legend h5 { font-size:.72rem; font-weight:700; color:#444; margin-bottom:6px;
+                  text-transform:uppercase; letter-spacing:.5px; }
+.leg-row { display:flex; align-items:center; gap:6px; margin:3px 0; }
+.leg-swatch { width:15px; height:11px; border-radius:2px; flex-shrink:0; border:1px solid rgba(0,0,0,.08); }
+
+/* SIDE PANEL */
+.side-panel { width:350px; flex-shrink:0; background:var(--panel); overflow-y:auto;
+               border-left:1px solid var(--border); display:flex; flex-direction:column; }
+.panel-header { background:var(--dark); color:#fff; padding:13px 16px; font-size:.92rem; font-weight:700; }
+.panel-section { padding:13px 16px; border-bottom:1px solid #f0f2f5; }
+.panel-section h4 { font-size:.72rem; text-transform:uppercase; letter-spacing:.7px; color:#999; margin-bottom:8px; font-weight:700; }
+.kpi-grid { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
+.kpi-card { background:#f7f9fc; border-radius:var(--radius); padding:9px 11px; border-left:4px solid var(--dark); }
+.kpi-card.Noord { border-color:#70AD47; }
+.kpi-card.Oost   { border-color:#4472C4; }
+.kpi-card.West   { border-color:#ED7D31; }
+.kpi-card.Centrum { border-color:#FFC000; }
+.kpi-val { font-size:1.1rem; font-weight:700; color:var(--dark); line-height:1.1; }
+.kpi-lbl { font-size:.7rem; color:#999; margin-top:2px; line-height:1.3; }
+.ref-box { background:#f7f9fc; border-radius:var(--radius); padding:9px 13px; font-size:.8rem; display:flex; flex-direction:column; gap:4px; }
+.ref-row { display:flex; justify-content:space-between; align-items:center; }
+.ref-name { color:#777; }
+.ref-val { font-weight:700; color:var(--dark); }
+.ref-val.genk { color:#2c7bb6; }
+.ref-val.limb  { color:#d7191c; }
+.ref-val.vl    { color:#1a9641; }
+.chart-wrap { padding:12px 14px; flex:1; min-height:180px; }
+.buurt-sel { display:flex; gap:5px; flex-wrap:wrap; padding:9px 14px; border-bottom:1px solid #f0f2f5; }
+.b-btn { padding:4px 10px; border-radius:18px; border:2px solid; font-size:.75rem; font-weight:600;
+           cursor:pointer; transition:all .14s; background:white; font-family:var(--font); }
+.b-btn.Noord.active   { background:#70AD47; color:#fff; border-color:#70AD47; }
+.b-btn.Oost.active    { background:#4472C4; color:#fff; border-color:#4472C4; }
+.b-btn.West.active    { background:#ED7D31; color:#fff; border-color:#ED7D31; }
+.b-btn.Centrum.active { background:#FFC000; color:#fff; border-color:#FFC000; }
+.b-btn.Noord  { border-color:#70AD47; color:#70AD47; }
+.b-btn.Oost   { border-color:#4472C4; color:#4472C4; }
+.b-btn.West   { border-color:#ED7D31; color:#ED7D31; }
+.b-btn.Centrum{ border-color:#FFC000; color:#888; }
+.side-panel::-webkit-scrollbar { width:4px; }
+.side-panel::-webkit-scrollbar-thumb { background:#ddd; border-radius:3px; }
+.leaflet-tooltip { font-family:var(--font); font-size:.8rem; border-radius:6px;
+                    box-shadow:0 3px 10px rgba(0,0,0,.18); border:none; padding:8px 12px; }
+.tt-title { font-weight:700; font-size:.85rem; margin-bottom:4px; color:var(--dark); }
+.tt-row { display:flex; justify-content:space-between; gap:14px; margin:2px 0; }
+.tt-lbl { color:#888; }
+.tt-val { font-weight:600; color:#222; }
+
+/* DATASOURCE BADGE */
+.datasource-badge { position:absolute; bottom:28px; right:10px; z-index:1000;
+  background:rgba(255,255,255,.92); border-radius:var(--radius); padding:5px 10px;
+  font-size:.68rem; color:#777; box-shadow:0 1px 6px rgba(0,0,0,.13);
+  text-align:right; line-height:1.6; pointer-events:none; }
+.datasource-badge strong { color:var(--dark); display:block; }
+
+/* NIVEAUS */
+.niv-steps-ctrl { position:absolute; top:10px; left:50%; transform:translateX(-50%);
+  z-index:1000; display:flex; align-items:center; gap:4px;
+  background:rgba(255,255,255,.97); border-radius:24px; padding:5px 14px;
+  box-shadow:0 2px 12px rgba(0,0,0,.18); white-space:nowrap; }
+.niv-step { display:flex; align-items:center; gap:5px; padding:4px 11px;
+  border-radius:16px; cursor:pointer; transition:all .18s; color:#555; }
+.niv-step:hover { background:#f0f2f5; }
+.niv-step.active { background:var(--dark); color:white; }
+.niv-num { width:20px; height:20px; border-radius:50%; background:rgba(46,64,87,.13);
+  display:flex; align-items:center; justify-content:center;
+  font-size:.7rem; font-weight:700; flex-shrink:0; }
+.niv-step.active .niv-num { background:rgba(255,255,255,.22); }
+.niv-lbl { font-size:.75rem; font-weight:600; }
+.niv-arrow { color:#ccc; font-size:1rem; padding:0 1px; }
+.niv-block h3 { font-size:.92rem; font-weight:700; color:var(--dark); margin-bottom:8px;
+  border-left:4px solid; padding-left:9px; }
+.niv-block p { font-size:.8rem; line-height:1.65; color:#444; margin-bottom:7px; }
+.niv-block ul { font-size:.8rem; line-height:1.8; color:#444; padding-left:18px; margin-bottom:7px; }
+.niv-table { width:100%; border-collapse:collapse; font-size:.76rem; margin-top:10px; }
+.niv-table th { background:#f0f2f5; padding:5px 8px; text-align:left; font-weight:700; color:#555;
+  position:sticky; top:0; }
+.niv-table td { padding:4px 8px; border-bottom:1px solid #f3f4f6; }
+.niv-table tr:hover td { background:#fafafa; }
+.niv-badge { display:inline-block; width:11px; height:11px; border-radius:2px;
+  margin-right:5px; vertical-align:middle; flex-shrink:0; }
+.niv-camp-star { color:#FFC000; font-size:.8rem; }
+
+/* ── LANDINGSPAGINA ────────────────────────────────────────────────── */
+#pane-project.active { display:block; overflow-y:auto; }
+.proj-page { max-width:980px; margin:0 auto; padding:28px 24px 48px; }
+
+.proj-hero {
+  background:linear-gradient(135deg,#4A1275 0%,#7B3FBE 55%,#9B6DD6 100%);
+  border-radius:14px; padding:32px 36px; display:flex; align-items:center;
+  gap:32px; margin-bottom:28px; box-shadow:0 4px 20px rgba(75,18,117,.25);
+}
+.proj-hero-logo { flex-shrink:0; }
+.proj-hero-logo img { width:150px; height:150px; object-fit:contain;
+  filter:drop-shadow(0 3px 10px rgba(0,0,0,.35)); }
+.proj-hero-logo-placeholder {
+  width:150px; height:150px; border-radius:50%;
+  background:rgba(255,255,255,.15); border:3px dashed rgba(255,255,255,.4);
+  display:flex; align-items:center; justify-content:center;
+  font-size:.72rem; color:rgba(255,255,255,.6); text-align:center; padding:12px; }
+.proj-hero-text { color:#fff; }
+.proj-hero-text h2 {
+  font-size:1.65rem; font-weight:800; line-height:1.2;
+  letter-spacing:-.3px; margin-bottom:8px; }
+.proj-hero-text .proj-tagline {
+  font-size:.93rem; opacity:.88; line-height:1.55; max-width:520px; }
+.proj-hero-text .proj-badge {
+  display:inline-block; background:rgba(255,255,255,.18);
+  border:1px solid rgba(255,255,255,.35); border-radius:20px;
+  padding:4px 14px; font-size:.78rem; font-weight:700; margin-top:12px;
+  letter-spacing:.3px; }
+
+.proj-cards { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:24px; }
+@media(max-width:700px){ .proj-cards{ grid-template-columns:1fr; } }
+
+.proj-card {
+  background:#fff; border-radius:12px; padding:24px 26px;
+  box-shadow:0 2px 10px rgba(0,0,0,.07); border-top:4px solid #7B3FBE; }
+.proj-card h3 {
+  font-size:.95rem; font-weight:800; color:#4A1275;
+  margin-bottom:14px; display:flex; align-items:center; gap:8px; }
+.proj-card h3 .card-icon {
+  width:28px; height:28px; background:linear-gradient(135deg,#7B3FBE,#9B6DD6);
+  border-radius:6px; display:flex; align-items:center; justify-content:center;
+  font-size:.9rem; flex-shrink:0; }
+.proj-card p {
+  font-size:.84rem; line-height:1.75; color:#3a3a4a; margin-bottom:10px; }
+.proj-card p:last-child { margin-bottom:0; }
+.proj-card strong { color:#4A1275; }
+
+.proj-highlight {
+  background:linear-gradient(135deg,#f8f3ff,#f0e8ff);
+  border-radius:10px; padding:14px 18px; margin-top:14px;
+  border-left:4px solid #7B3FBE; }
+.proj-highlight p { margin:0; font-size:.82rem; color:#4A1275; font-weight:600; }
+
+.proj-target-pills { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.proj-pill {
+  background:linear-gradient(135deg,#7B3FBE,#9B6DD6); color:#fff;
+  border-radius:20px; padding:5px 13px; font-size:.76rem; font-weight:700; }
+
+.proj-partners {
+  background:#fff; border-radius:12px; padding:20px 26px;
+  box-shadow:0 2px 10px rgba(0,0,0,.07); }
+.proj-partners h4 {
+  font-size:.72rem; text-transform:uppercase; letter-spacing:.7px;
+  color:#999; font-weight:700; margin-bottom:14px; }
+.partners-grid {
+  display:flex; gap:16px; flex-wrap:wrap; align-items:center; }
+.partner-chip {
+  background:#f8f3ff; border:1px solid #e0d0f5; border-radius:8px;
+  padding:10px 18px; font-size:.82rem; font-weight:700; color:#4A1275;
+  flex:1; min-width:160px; text-align:center; }
+
+.proj-closing {
+  text-align:center; margin-top:28px; padding:20px;
+  font-size:.83rem; color:#777; line-height:1.7; font-style:italic; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Buurtanalyse Genk</h1>
+    <span>Noord · Oost · West · Centrum</span>
+  </div>
+  <div class="badge">
+    <span>🗺 59 sectoren (2025)</span>
+    <span>53 sectoren (2024)</span>
+    <span>31 wijken</span>
+  </div>
+</header>
+
+<nav>
+  <button class="tab-btn active" onclick="switchTab('project',this)"><span></span> Over het project</button>
+  <button class="tab-btn" onclick="switchTab('screening',this)"><span></span> Screening BHK</button>
+  <button class="tab-btn" onclick="switchTab('demografie',this)"><span></span> Demografie</button>
+  <button class="tab-btn" onclick="switchTab('inkomen',this)"><span></span> Inkomen</button>
+  <button class="tab-btn" onclick="switchTab('onderwijs',this)"><span></span> Onderwijs</button>
+  <button class="tab-btn" onclick="switchTab('nationaliteit',this)"><span></span> Nationaliteit</button>
+  <button class="tab-btn" onclick="switchTab('niveaus',this)"><span></span> Niveaus &amp; Bronnen</button>
+</nav>
+
+<div class="workspace">
+
+<!-- ══ PROJECT LANDINGSPAGINA ══════════════════════════════════════════════ -->
+<div id="pane-project" class="tab-pane active">
+<div class="proj-page">
+
+  <!-- HERO -->
+  <div class="proj-hero">
+    <div class="proj-hero-logo">
+      <img src="data:image/png;base64,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" alt="Together for HPV Elimination 90/90/2030 in Genk">
+    </div>
+    <div class="proj-hero-text">
+      <h2>Naar een HPV-vrij Genk</h2>
+      <p class="proj-tagline">
+        Geïnspireerd door de Zweedse aanpak, waar men streeft naar eliminatie van
+        baarmoederhalskanker tegen 2027, zetten we ook in Genk een ambitieuze stap
+        richting eliminatie van HPV.
+      </p>
+      <span class="proj-badge">Together for HPV Elimination &nbsp;·&nbsp; 90/90/2030</span>
+    </div>
+  </div>
+
+  <!-- TWEE INHOUDSKAARTEN -->
+  <div class="proj-cards">
+
+    <div class="proj-card">
+      <h3><span class="card-icon"></span> Het project</h3>
+      <p>
+        We verhogen het bewustzijn van HPV en gerelateerde kankers en versterken de
+        preventiestrategieën. In dat kader kan <strong>inhaalvaccinatie</strong> aangeboden
+        worden aan jongvolwassenen die niet deelnamen aan het gemeenschapsprogramma voor
+        basisvaccinatie tegen HPV. Tegelijk vestigen we de aandacht op
+        <strong>regelmatige screening</strong> bij vrouwen vanaf 25 jaar.
+      </p>
+      <p>
+        We richten ons in het bijzonder op buurten met een lagere vaccinatiegraad en een
+        grote(re) populatie moeilijk bereikbare doelgroepen.
+      </p>
+      <div class="proj-highlight">
+        <p>Doelgroepen: jongvolwassenen (15–30 jaar, niet-gevaccineerd) &amp;
+        vrouwen (25–65 jaar) in aanmerking voor screening</p>
+      </div>
+      <div class="proj-target-pills" style="margin-top:14px">
+        <span class="proj-pill">Met aandacht voor</span>
+        <span class="proj-pill">Lage scholing</span>
+        <span class="proj-pill">Socio-economische kwetsbaarheid</span>
+        <span class="proj-pill">Migratieachtergrond</span>
+      </div>
+    </div>
+
+    <div class="proj-card">
+      <h3><span class="card-icon"></span> Datagedreven &amp; buurtgerichte aanpak</h3>
+      <p>
+        Het project betreft de <strong>lokale implementatie</strong> van een buurtgericht,
+        datagedreven HPV-preventieprogramma in Genk. Het wordt uitgerold in vooraf
+        gedefinieerde, kwetsbare wijken, met inzet van
+        <strong>multidisciplinaire wijkteams</strong>.
+      </p>
+      <p>
+        We evalueren de vaccinatiegraad en de evolutie van het bewustzijn rond
+        baarmoederhalskanker <strong>voor en na het project</strong> en bekijken zo in
+        welke mate een datagedreven en buurtgerichte aanpak daaraan kan bijdragen.
+      </p>
+      <div class="proj-highlight">
+        <p>Ambitie: aantonen dat bewustzijn rond HPV-gerelateerde aandoeningen en
+        toegang tot preventie ook in kwetsbare buurten vergroot kan worden door een
+        interdisciplinaire, buurtgerichte en datagedreven aanpak.</p>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- PARTNERS -->
+  <div class="proj-partners">
+    <h4>Samenwerking</h4>
+    <div class="partners-grid">
+      <div class="partner-chip">Apotheia</div>
+      <div class="partner-chip">MSD Belgium</div>
+      <div class="partner-chip">Solidaris Limburg</div>
+      <div class="partner-chip">Stad Genk</div>
+    </div>
+  </div>
+
+  <p class="proj-closing">
+    We nodigen u graag uit voor een gesprek waarin we het project uitgebreider toelichten
+    en samen verkennen hoe we onze krachten kunnen bundelen.<br>
+    Indien u interesse heeft, plannen we graag een moment in dat voor u het best past.
+  </p>
+
+</div>
+</div>
+
+<!-- ══ SCREENING ═══════════════════════════════════════════════════════════ -->
+<div id="pane-screening" class="tab-pane">
+  <div class="map-wrap">
+    <div id="map-screening" class="leaflet-map"></div>
+    <div class="layer-ctrl">
+      <span class="level-badge" id="lvl-screening">📍 Statistisch sector (2025)</span>
+      <div class="tgl-pill">
+        <span class="tgl-opt active" onclick="setScrLayer('sector',this)">Sector</span>
+        <span class="tgl-opt" onclick="setScrLayer('stad',this)">Genk stad</span>
+      </div>
+    </div>
+    <div class="year-bar" id="scr-years"></div>
+    <div class="map-legend" id="scr-map-legend">
+      <h5>Dekkingsgraad</h5>
+      <div id="leg-scr"></div>
+      <div class="leg-row" id="scr-leg-hidden"><div class="leg-swatch" style="background:#aaa;background-image:repeating-linear-gradient(45deg,transparent,transparent 2px,rgba(0,0,0,.3) 2px,rgba(0,0,0,.3) 4px)"></div><span>Verborgen (.)</span></div>
+      <div class="leg-row" id="scr-leg-nodata"><div class="leg-swatch" style="background:#ddd"></div><span>Geen data</span></div>
+      <div class="leg-row"><div class="leg-swatch" style="border:2px solid #222;background:none"></div><span>Buurtgrens</span></div>
+    </div>
+    <div class="datasource-badge" id="scr-src-badge"><strong>CVKO</strong>BHK dekkingsgraad · 2020–2024<br>Statistische sectoren 2025 (59)</div>
+  </div>
+  <div class="side-panel">
+    <div class="panel-header">🩺 Borstkankerscreening BHK</div>
+    <div class="panel-section">
+      <h4>Referentie 2024</h4>
+      <div class="ref-box">
+        <div class="ref-row"><span class="ref-name">Genk (campagnebuurten)</span><span class="ref-val genk">53.9%</span></div>
+        <div class="ref-row"><span class="ref-name">Genk (stad totaal)</span><span class="ref-val genk">55.5%</span></div>
+        <div class="ref-row"><span class="ref-name">Limburg</span><span class="ref-val limb">57.2%</span></div>
+        <div class="ref-row"><span class="ref-name">Vlaanderen</span><span class="ref-val vl">60.6%</span></div>
+      </div>
+    </div>
+    <div class="panel-section">
+      <h4>Evolutie dekkingsgraad per buurt (2020–2024)</h4>
+      <div class="chart-wrap" style="padding:0;min-height:160px;"><canvas id="chart-scr-evol"></canvas></div>
+    </div>
+    <div class="panel-section">
+      <h4>Dekkingsgraad per leeftijdscategorie — Genk stad (2024)</h4>
+      <div class="chart-wrap" style="padding:0;min-height:220px;"><canvas id="chart-scr-age"></canvas></div>
+    </div>
+    <div class="chart-wrap">
+      <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:8px;font-weight:700;">Sectoren gerangschikt (geselecteerd jaar)</h4>
+      <canvas id="chart-screening"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ══ DEMOGRAFIE ══════════════════════════════════════════════════════════ -->
+<div id="pane-demografie" class="tab-pane">
+  <div class="map-wrap">
+    <div id="map-demografie" class="leaflet-map"></div>
+    <div class="layer-ctrl">
+      <span class="level-badge" id="lvl-demografie">📍 Statistisch sector (2025)</span>
+      <div class="tgl-pill">
+        <span class="tgl-opt active" onclick="setLayer('demografie','sector',this)">Sector</span>
+        <span class="tgl-opt" onclick="setLayer('demografie','buurt',this)">Buurt</span>
+      </div>
+    </div>
+    <div class="map-legend">
+      <h5 id="dem-leg-title">% 65+ jaar</h5>
+      <div id="leg-dem"></div>
+    </div>
+    <div class="datasource-badge"><strong>Statbel</strong>Demografische sectoren · 2025<br>Sectorcodes 2025 (59 sectoren)</div>
+  </div>
+  <div class="side-panel">
+    <div class="panel-header">👥 Leeftijdsstructuur 2025</div>
+    <div class="panel-section">
+      <h4>Vergrijzingsindex per buurt</h4>
+      <div class="kpi-grid" id="dem-kpi"></div>
+    </div>
+    <div class="chart-wrap">
+      <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:8px;font-weight:700;">Leeftijdsgroepen per buurt (%)</h4>
+      <canvas id="chart-demografie"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ══ INKOMEN ════════════════════════════════════════════════════════════ -->
+<div id="pane-inkomen" class="tab-pane">
+  <div class="map-wrap">
+    <div id="map-inkomen" class="leaflet-map"></div>
+    <div class="layer-ctrl">
+      <span class="level-badge" id="lvl-inkomen">📍 Statistisch sector (2024)</span>
+      <div class="tgl-pill">
+        <span class="tgl-opt active" onclick="setLayer('inkomen','sector',this)">Sector</span>
+        <span class="tgl-opt" onclick="setLayer('inkomen','buurt',this)">Buurt</span>
+      </div>
+    </div>
+    <div class="map-legend">
+      <h5>Mediaan inkomen 2023</h5>
+      <div id="leg-ink"></div>
+    </div>
+    <div class="datasource-badge"><strong>FOD Financiën</strong>Belastbaar inkomen · 2023<br>Sectorcodes 2024 (53 sectoren)</div>
+  </div>
+  <div class="side-panel">
+    <div class="panel-header">💶 Belastbaar inkomen 2023</div>
+    <div class="panel-section">
+      <h4>Mediaan inkomen per buurt</h4>
+      <div class="kpi-grid" id="ink-kpi"></div>
+    </div>
+    <div class="chart-wrap">
+      <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:8px;font-weight:700;">Evolutie mediaan inkomen 2005–2023</h4>
+      <canvas id="chart-inkomen"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ONDERWIJS ══════════════════════════════════════════════════════════ -->
+<div id="pane-onderwijs" class="tab-pane">
+  <div class="map-wrap">
+    <div id="map-onderwijs" class="leaflet-map"></div>
+    <div class="layer-ctrl">
+      <span class="level-badge" id="lvl-onderwijs">📍 Statistisch sector (2024)</span>
+      <div class="tgl-pill">
+        <span class="tgl-opt active" onclick="setLayer('onderwijs','sector',this)">Sector</span>
+        <span class="tgl-opt" onclick="setLayer('onderwijs','buurt',this)">Buurt</span>
+      </div>
+    </div>
+    <div class="map-legend">
+      <h5>% Hooggeschoold</h5>
+      <div id="leg-edu"></div>
+    </div>
+    <div class="datasource-badge"><strong>Statbel</strong>Census 2021<br>Sectorcodes 2024 (53 sectoren)</div>
+  </div>
+  <div class="side-panel">
+    <div class="panel-header">🎓 Opleidingsniveau (Census 2021)</div>
+    <div class="panel-section">
+      <h4>% hooggeschoold per buurt</h4>
+      <div class="kpi-grid" id="edu-kpi"></div>
+    </div>
+    <div class="chart-wrap">
+      <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:8px;font-weight:700;">Laag · Middel · Hoog per buurt (%)</h4>
+      <canvas id="chart-onderwijs"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NATIONALITEIT ══════════════════════════════════════════════════════ -->
+<div id="pane-nationaliteit" class="tab-pane">
+  <div class="map-wrap">
+    <div id="map-nationaliteit" class="leaflet-map"></div>
+    <div class="layer-ctrl">
+      <span class="level-badge" id="lvl-nationaliteit">📍 Wijkniveau (31 wijken)</span>
+      <div class="tgl-pill">
+        <span class="tgl-opt active" onclick="setLayer('nationaliteit','wijk',this)">Wijk</span>
+        <span class="tgl-opt" onclick="setLayer('nationaliteit','buurt',this)">Buurt</span>
+      </div>
+    </div>
+    <div class="map-legend">
+      <h5>% Niet-Belgisch</h5>
+      <div id="leg-nat"></div>
+    </div>
+    <div class="datasource-badge"><strong>Stad Genk · provincies.incijfers.be</strong>Huidige nationaliteit · 2025<br>Wijkniveau (31 wijken)</div>
+  </div>
+  <div class="side-panel">
+    <div class="panel-header">🌍 Nationaliteit (huidige, 2025)</div>
+    <div class="panel-section">
+      <h4>% niet-Belgisch per buurt</h4>
+      <div class="kpi-grid" id="nat-kpi"></div>
+    </div>
+    <div class="buurt-sel" id="nat-sel"></div>
+    <div class="chart-wrap">
+      <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:8px;font-weight:700;">Top-10 niet-Belgische nationaliteiten</h4>
+      <canvas id="chart-nationaliteit"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- ══ NIVEAUS ════════════════════════════════════════════════════════════════ -->
+<div id="pane-niveaus" class="tab-pane">
+  <div class="map-wrap">
+    <div id="map-niveaus" class="leaflet-map"></div>
+    <div class="niv-steps-ctrl">
+      <div class="niv-step active" id="nstep-1" onclick="setNiveauStep(1)">
+        <span class="niv-num">1</span><span class="niv-lbl">Sectoren</span>
+      </div>
+      <span class="niv-arrow">›</span>
+      <div class="niv-step" id="nstep-2" onclick="setNiveauStep(2)">
+        <span class="niv-num">2</span><span class="niv-lbl">Wijken</span>
+      </div>
+      <span class="niv-arrow">›</span>
+      <div class="niv-step" id="nstep-3" onclick="setNiveauStep(3)">
+        <span class="niv-num">3</span><span class="niv-lbl">8 Buurten</span>
+      </div>
+      <span class="niv-arrow">›</span>
+      <div class="niv-step" id="nstep-4" onclick="setNiveauStep(4)">
+        <span class="niv-num">4</span><span class="niv-lbl">Campagne</span>
+      </div>
+    </div>
+    <div class="map-legend" id="niv-legend" style="max-height:60vh;overflow-y:auto;min-width:155px"></div>
+  </div>
+  <div class="side-panel" style="width:410px">
+    <div class="panel-header">🗺 Geografische niveaus &amp; databronnen</div>
+    <div id="niv-info" style="padding:14px 16px;overflow-y:auto;flex:1"></div>
+  </div>
+</div>
+
+</div><!-- /workspace -->
+
+<!-- Laadoverlay -->
+<div id="loading-overlay" style="
+  position:fixed;inset:0;background:#f0f2f5;z-index:9999;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;">
+  <div style="font-size:1.1rem;font-weight:700;color:#2E4057">Buurtanalyse Genk laden…</div>
+  <div style="width:220px;height:6px;background:#e0e4ea;border-radius:3px;overflow:hidden">
+    <div id="loading-bar" style="height:100%;width:0%;background:#2E4057;transition:width .3s"></div>
+  </div>
+  <div id="loading-status" style="font-size:.82rem;color:#888">Kaartdata ophalen…</div>
+  <div id="loading-error" style="font-size:.82rem;color:#c00;display:none;max-width:400px;text-align:center"></div>
+</div>
+
+<script>
+// ── CONFIGURATIE ──────────────────────────────────────────────────────────────
+// Vul hier je Google Sheets ID in zodra de spreadsheet klaarstaat:
+const SHEET_ID = '14juUOmxxH02gDJU4XUU89fffOJm-aZBd';
+
+const LOCAL_CSV = 'data/csv/';
+const LOCAL_GEO = 'data/geojson/';
+
+// ── STATISCHE CONFIGURATIE ────────────────────────────────────────────────────
+const BUURTEN  = ['Noord','Oost','West','Centrum'];
+const BLABEL   = {Noord:'Genk-Noord',Oost:'Genk-Oost',West:'Genk-West',Centrum:'Genk-Centrum'};
+const BCOLOR   = {Noord:'#70AD47',Oost:'#4472C4',West:'#ED7D31',Centrum:'#FFC000'};
+const BCOLOR8  = {"Genk-Centrum": "#FFC000", "Genk-Noord": "#70AD47", "Genk-Oost": "#4472C4", "Genk-West": "#ED7D31", "Genk-Midden": "#9B59B6", "Genk-Zuid": "#E74C3C", "Bret-Gelieren-Kattevenne": "#2ECC71", "Kolderbos-Langerlo": "#7F8C8D"};
+const WIJK_COLORS = {"Bokrijk": "#c44545", "Boxbergheide": "#c45c45", "Bret": "#c47645", "Driehoeven": "#c48d45", "Gelieren": "#c4a745", "Genk-Centrum": "#c4c045", "Genk-Centrum-Noord": "#b1c445", "Hasseltweg": "#98c445", "Hoevenzavel": "#80c445", "Industrieterrein Genk-Noord": "#67c445", "Industrieterrein Genk-Zuid": "#4dc445", "Kattevenne": "#45c454", "Kolderbos": "#45c46d", "Langerlo": "#45c485", "Molenblook": "#45c49e", "Nieuw Sledderlo": "#45c4b8", "Nieuw-Driehoeven": "#45bac4", "Nieuw-Termien": "#45a0c4", "Nieuw-Texas": "#4587c4", "Nieuwe Kempen": "#456fc4", "Oud-Sledderlo": "#4556c4", "Oud-Termien": "#4b45c4", "Oud-Waterschei": "#6545c4", "Oud-Winterslag": "#7e45c4", "Vlakveld": "#9645c4", "Waterschei-Noord": "#af45c4", "Waterschei-Zuid": "#c445c2", "Winterslag 1": "#c445a9", "Winterslag 2 en 4": "#c4458f", "Zwartberg-Noord": "#c44578", "Zwartberg-Zuid": "#c4455e"};
+const WIJK_TABLE  = [{"wijk": "Bokrijk", "buurt8": "Genk-Midden"}, {"wijk": "Boxbergheide", "buurt8": "Genk-West"}, {"wijk": "Bret", "buurt8": "Bret-Gelieren-Kattevenne"}, {"wijk": "Driehoeven", "buurt8": "Genk-Noord"}, {"wijk": "Gelieren", "buurt8": "Bret-Gelieren-Kattevenne"}, {"wijk": "Genk-Centrum", "buurt8": "Genk-Centrum"}, {"wijk": "Genk-Centrum-Noord", "buurt8": "Genk-Centrum"}, {"wijk": "Hasseltweg", "buurt8": "Genk-Midden"}, {"wijk": "Hoevenzavel", "buurt8": "Genk-Noord"}, {"wijk": "Industrieterrein Genk-Noord", "buurt8": "Genk-Noord"}, {"wijk": "Industrieterrein Genk-Zuid", "buurt8": "Genk-Zuid"}, {"wijk": "Kattevenne", "buurt8": "Bret-Gelieren-Kattevenne"}, {"wijk": "Kolderbos", "buurt8": "Kolderbos-Langerlo"}, {"wijk": "Langerlo", "buurt8": "Kolderbos-Langerlo"}, {"wijk": "Molenblook", "buurt8": "Genk-Centrum"}, {"wijk": "Nieuw Sledderlo", "buurt8": "Genk-Zuid"}, {"wijk": "Nieuw-Driehoeven", "buurt8": "Genk-Noord"}, {"wijk": "Nieuw-Termien", "buurt8": "Genk-Midden"}, {"wijk": "Nieuw-Texas", "buurt8": "Genk-Oost"}, {"wijk": "Nieuwe Kempen", "buurt8": "Genk-Noord"}, {"wijk": "Oud-Sledderlo", "buurt8": "Genk-Zuid"}, {"wijk": "Oud-Termien", "buurt8": "Genk-Midden"}, {"wijk": "Oud-Waterschei", "buurt8": "Genk-Oost"}, {"wijk": "Oud-Winterslag", "buurt8": "Genk-West"}, {"wijk": "Vlakveld", "buurt8": "Genk-Midden"}, {"wijk": "Waterschei-Noord", "buurt8": "Genk-Oost"}, {"wijk": "Waterschei-Zuid", "buurt8": "Genk-Oost"}, {"wijk": "Winterslag 1", "buurt8": "Genk-West"}, {"wijk": "Winterslag 2 en 4", "buurt8": "Genk-West"}, {"wijk": "Zwartberg-Noord", "buurt8": "Genk-Noord"}, {"wijk": "Zwartberg-Zuid", "buurt8": "Genk-Noord"}];
+const TOP10    = {"Noord": [{"land": "Itali\u00eb", "n": 635, "pct": 6.9}, {"land": "Bulgarije", "n": 183, "pct": 2.0}, {"land": "Turkije", "n": 170, "pct": 1.9}, {"land": "Nederland", "n": 166, "pct": 1.8}, {"land": "Griekenland", "n": 75, "pct": 0.8}, {"land": "Marokko", "n": 60, "pct": 0.7}, {"land": "Spanje", "n": 59, "pct": 0.6}, {"land": "Polen", "n": 54, "pct": 0.6}, {"land": "Afghanistan", "n": 29, "pct": 0.3}, {"land": "Oekra\u00efne", "n": 23, "pct": 0.3}], "Oost": [{"land": "Itali\u00eb", "n": 441, "pct": 3.9}, {"land": "Turkije", "n": 300, "pct": 2.7}, {"land": "Bulgarije", "n": 290, "pct": 2.6}, {"land": "Nederland", "n": 213, "pct": 1.9}, {"land": "Griekenland", "n": 85, "pct": 0.8}, {"land": "Oekra\u00efne", "n": 64, "pct": 0.6}, {"land": "Marokko", "n": 57, "pct": 0.5}, {"land": "Spanje", "n": 52, "pct": 0.5}, {"land": "Portugal", "n": 42, "pct": 0.4}, {"land": "Afghanistan", "n": 37, "pct": 0.3}], "West": [{"land": "Itali\u00eb", "n": 587, "pct": 4.6}, {"land": "Turkije", "n": 150, "pct": 1.2}, {"land": "Nederland", "n": 149, "pct": 1.2}, {"land": "Bulgarije", "n": 103, "pct": 0.8}, {"land": "Marokko", "n": 68, "pct": 0.5}, {"land": "Griekenland", "n": 56, "pct": 0.4}, {"land": "Spanje", "n": 55, "pct": 0.4}, {"land": "Oekra\u00efne", "n": 49, "pct": 0.4}, {"land": "Afghanistan", "n": 27, "pct": 0.2}, {"land": "Polen", "n": 22, "pct": 0.2}], "Centrum": [{"land": "Itali\u00eb", "n": 306, "pct": 2.5}, {"land": "Nederland", "n": 296, "pct": 2.5}, {"land": "Oekra\u00efne", "n": 127, "pct": 1.1}, {"land": "Turkije", "n": 107, "pct": 0.9}, {"land": "Bulgarije", "n": 103, "pct": 0.9}, {"land": "Afghanistan", "n": 101, "pct": 0.8}, {"land": "Spanje", "n": 78, "pct": 0.6}, {"land": "Marokko", "n": 67, "pct": 0.6}, {"land": "Polen", "n": 59, "pct": 0.5}, {"land": "Syri\u00eb", "n": 42, "pct": 0.3}]};  // nationaliteit top-10 per buurt (complex formaat, hard-coded)
+const NIV_INFO = {"1": {"color": "#4472C4", "title": "Stap 1 \u2014 Statistische sectoren (59)", "body": "<p>Statistische sectoren zijn de <strong>kleinst mogelijke territoriale basiseenheden</strong> in Belgi\u00eb, gecre\u00eberd door Statbel om statistieken op een fijnmaziger niveau dan de gemeente te verspreiden.</p><p>Genk telt <strong>59 statistische sectoren</strong> in de codering van 2025, en 53 in de 2024-codering. Datasets van FOD Financi\u00ebn en de Census 2021 gebruiken nog de oudere 2024-codering.</p><p style=\"background:#f7f9fc;border-left:3px solid #4472C4;padding:6px 10px;border-radius:3px;font-size:.78rem\">Elke sector heeft een unieke code, bv. <code>71016A00A</code> \u2014 de eerste 5 cijfers zijn de NIS-gemeentecode (71016 = Genk).</p>", "showTable": false, "tableHighlight": false}, "2": {"color": "#2ECC71", "title": "Stap 2 \u2014 Wijken (31)", "body": "<p>Voor sommige statistieken zijn statistische sectoren te klein om betrouwbare cijfers te publiceren. Sinds juni 2019 bevat <strong>provincies.incijfers.be</strong> daarom op statistische sectoren gebaseerde wijken.</p><p>Elke wijk bestaat uit minstens \u00e9\u00e9n sector; elke sector behoort tot <strong>precies \u00e9\u00e9n wijk</strong>. De indeling volgt bij voorkeur de gebiedsindeling die de gemeente zelf hanteert.</p><p>Genk heeft <strong>31 wijken</strong>, elk met een herkenbare naam zoals Waterschei, Winterslag of Bokrijk.</p>", "showTable": true, "tableHighlight": false}, "3": {"color": "#9B59B6", "title": "Stap 3 \u2014 Buurten (8)", "body": "<p>De buurten zijn een eigen indeling van de <strong>stad Genk</strong>, samengesteld uit aaneensluitende wijken. Genk is opgedeeld in <strong>8 buurten</strong> die elk een ruimer geografisch geheel vormen:</p><div style=\"display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:8px 0\"><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:11px;height:11px;border-radius:2px;background:#FFC000;display:inline-block;flex-shrink:0\"></span>Genk-Centrum</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:11px;height:11px;border-radius:2px;background:#70AD47;display:inline-block;flex-shrink:0\"></span>Genk-Noord</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:11px;height:11px;border-radius:2px;background:#4472C4;display:inline-block;flex-shrink:0\"></span>Genk-Oost</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:11px;height:11px;border-radius:2px;background:#ED7D31;display:inline-block;flex-shrink:0\"></span>Genk-West</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:11px;height:11px;border-radius:2px;background:#9B59B6;display:inline-block;flex-shrink:0\"></span>Genk-Midden</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:11px;height:11px;border-radius:2px;background:#E74C3C;display:inline-block;flex-shrink:0\"></span>Genk-Zuid</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:11px;height:11px;border-radius:2px;background:#2ECC71;display:inline-block;flex-shrink:0\"></span>Bret-Gelieren-Kattevenne</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:11px;height:11px;border-radius:2px;background:#7F8C8D;display:inline-block;flex-shrink:0\"></span>Kolderbos-Langerlo</div></div>", "showTable": true, "tableHighlight": false}, "4": {"color": "#ED7D31", "title": "Stap 4 \u2014 Campagnebuurten (4 geselecteerd)", "body": "<p>Voor de HPV-awareness campagne zijn <strong>4 van de 8 buurten</strong> geselecteerd op basis van lage screeningsdekkingsgraad en socio-economische kwetsbaarheid:</p><div style=\"display:flex;flex-direction:column;gap:5px;margin:8px 0 12px\"><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:13px;height:13px;border-radius:2px;background:#70AD47;display:inline-block;flex-shrink:0\"></span>Genk-Noord</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:13px;height:13px;border-radius:2px;background:#4472C4;display:inline-block;flex-shrink:0\"></span>Genk-Oost</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:13px;height:13px;border-radius:2px;background:#ED7D31;display:inline-block;flex-shrink:0\"></span>Genk-West</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:13px;height:13px;border-radius:2px;background:#FFC000;display:inline-block;flex-shrink:0\"></span>Genk-Centrum</div></div><p>De overige 4 buurten (Genk-Midden, Genk-Zuid, Bret-Gelieren-Kattevenne en Kolderbos-Langerlo) zijn <strong>niet geselecteerd</strong> voor de campagne en worden grijs weergegeven.</p>", "showTable": true, "tableHighlight": true}};
+const CAMP_COLORS = {'Genk-Centrum':'#FFC000','Genk-Noord':'#70AD47','Genk-Oost':'#4472C4','Genk-West':'#ED7D31'};
+
+// ── GLOBALE DATA STORES ───────────────────────────────────────────────────────
+let SHDATA   = {};  // code → indicator → jaar → waarde
+let REFDATA  = {};  // indicator → jaar → {genk, limburg, vlaanderen}
+let GEO      = {};  // geladen GeoJSON-bestanden
+let SCR_JAREN = [];   // beschikbare screeningsjaren (gesorteerd)
+
+// ── CSV HELPERS ───────────────────────────────────────────────────────────────
+function csvNaarObjecten(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.replace(/"/g,'').trim());
+  return lines.slice(1).map(line => {
+    const vals = [];
+    let inQ = false, cur = '';
+    for (const ch of line + ',') {
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { vals.push(cur.trim()); cur = ''; }
+      else { cur += ch; }
+    }
+    const obj = {};
+    headers.forEach((h, i) => {
+      const v = (vals[i] || '').replace(/"/g,'').trim();
+      obj[h] = v === '' ? null : isNaN(v) || v === '' ? v : Number(v);
+    });
+    return obj;
+  });
+}
+
+function buildLookup(rows) {
+  const lk = {};
+  rows.forEach(r => {
+    const code = String(r.code || '');
+    const ind  = String(r.indicator || '');
+    const jaar = parseInt(r.jaar);
+    const val  = r.waarde === null || r.waarde === '' ? null : Number(r.waarde);
+    if (!lk[code]) lk[code] = {};
+    if (!lk[code][ind]) lk[code][ind] = {};
+    lk[code][ind][jaar] = val;
+  });
+  return lk;
+}
+
+function buildRefLookup(rows) {
+  const lk = {};
+  rows.forEach(r => {
+    const ind  = String(r.indicator || '');
+    const jaar = parseInt(r.jaar);
+    if (!lk[ind]) lk[ind] = {};
+    lk[ind][jaar] = {
+      genk:       r.genk        === null ? null : Number(r.genk),
+      limburg:    r.limburg     === null ? null : Number(r.limburg),
+      vlaanderen: r.vlaanderen  === null ? null : Number(r.vlaanderen),
+    };
+  });
+  return lk;
+}
+
+function getVal(code, ind, jaar) {
+  return SHDATA[code]?.[ind]?.[jaar] ?? null;
+}
+
+function getRef(ind, jaar, col) {
+  return REFDATA[ind]?.[jaar]?.[col] ?? null;
+}
+
+// ── DATA LADEN ────────────────────────────────────────────────────────────────
+function sheetUrl(tab) {
+  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${tab}`;
+}
+
+function setProgress(pct, msg) {
+  const bar = document.getElementById('loading-bar');
+  const status = document.getElementById('loading-status');
+  if (bar) bar.style.width = pct + '%';
+  if (status) status.textContent = msg;
+}
+
+async function laadAlleData() {
+  const useSheets = SHEET_ID.length > 0;
+
+  setProgress(10, 'GeoJSON-kaartlagen ophalen…');
+  const geoFiles = [
+    ['sectorScr',  LOCAL_GEO + 'sectoren_screening.geojson'],
+    ['sectorDemo', LOCAL_GEO + 'sectoren_demografie.geojson'],
+    ['sectorInk',  LOCAL_GEO + 'sectoren_inkomen.geojson'],
+    ['sectorEdu',  LOCAL_GEO + 'sectoren_onderwijs.geojson'],
+    ['wijkNat',    LOCAL_GEO + 'wijken_nationaliteit.geojson'],
+    ['buurt',      LOCAL_GEO + 'buurten.geojson'],
+    ['wijkNiv',    LOCAL_GEO + 'wijken_niveaus.geojson'],
+    ['achtBuurt',  LOCAL_GEO + 'acht_buurten.geojson'],
+    ['genk',       LOCAL_GEO + 'genk_stad.geojson'],
+  ];
+
+  const dataUrl = useSheets ? sheetUrl('data')      : LOCAL_CSV + 'data.csv';
+  const refUrl  = useSheets ? sheetUrl('referentie'): LOCAL_CSV + 'referentie.csv';
+
+  const [geoResults, dataText, refText] = await Promise.all([
+    Promise.all(geoFiles.map(([, url]) => fetch(url).then(r => { if(!r.ok) throw new Error(`Kan ${url} niet laden`); return r.json(); })))
+      .then(res => { setProgress(50, 'Statistieken ophalen…'); return res; }),
+    fetch(dataUrl).then(r => { if(!r.ok) throw new Error(`Kan data.csv niet laden`); return r.text(); }),
+    fetch(refUrl).then(r  => { if(!r.ok) throw new Error(`Kan referentie.csv niet laden`); return r.text(); }),
+  ]);
+
+  setProgress(80, 'Data verwerken…');
+  geoFiles.forEach(([key], i) => GEO[key] = geoResults[i]);
+  SHDATA  = buildLookup(csvNaarObjecten(dataText));
+  REFDATA = buildRefLookup(csvNaarObjecten(refText));
+
+  SCR_JAREN = [...new Set(
+    Object.values(SHDATA).flatMap(inds => Object.keys(inds['screening'] || {}))
+  )].map(Number).sort();
+
+  setProgress(100, 'Klaar');
+}
+
+// ── CHART.JS ──────────────────────────────────────────────────────────────────
+Chart.defaults.font.family = "'Segoe UI', Arial, sans-serif";
+Chart.defaults.font.size   = 11;
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+const GENK_CENTER = [50.9667, 5.5];
+const maps = {}, inited = {}, layerState = {};
+
+function lerp(a,b,t){ return a+(b-a)*t; }
+function fmtPct(v){ return v!=null ? v.toFixed(1)+'%':'—'; }
+function fmtEuro(v){ return v!=null ? '€'+Math.round(v).toLocaleString('nl-BE'):'—'; }
+
+function makeMap(id){
+  if(maps[id]) return maps[id];
+  const m = L.map(id,{zoomControl:true,attributionControl:false}).setView(GENK_CENTER,13);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png').addTo(m);
+  maps[id] = m; return m;
+}
+
+const RdYlGn = [[215,25,28],[253,174,97],[255,255,192],[166,217,106],[26,150,65]];
+function scrColor(rate){
+  if(rate==null) return '#dddddd';
+  const mn=0.35,mx=0.80, t=Math.min(Math.max((rate-mn)/(mx-mn),0),1);
+  const idx=t*(RdYlGn.length-1), lo=RdYlGn[Math.floor(idx)], hi=RdYlGn[Math.min(Math.ceil(idx),RdYlGn.length-1)];
+  const f=idx-Math.floor(idx), c=lo.map((v,i)=>Math.round(lerp(v,hi[i],f)));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
+function hslToHex(h,s,l){
+  s/=100; l/=100;
+  const a=s*Math.min(l,1-l);
+  const f=n=>{const k=(n+h/30)%12; return l-a*Math.max(Math.min(k-3,9-k,1),-1);};
+  const toHex=x=>Math.round(f(x)*255).toString(16).padStart(2,'0');
+  return `#${toHex(0)}${toHex(8)}${toHex(4)}`;
+}
+function seqColor(val,mn,mx,hue){
+  if(val==null||!isFinite(val)) return '#e8e8e8';
+  const L = (!isFinite(mn)||!isFinite(mx)||mn===mx) ? 58 : Math.round(lerp(90,38,Math.min(Math.max((val-mn)/(mx-mn),0),1)));
+  return hslToHex(hue,62,L);
+}
+
+function makeTooltip(rows){
+  return rows.map((r,i)=>i===0
+    ?`<div class="tt-title">${r}</div>`
+    :`<div class="tt-row"><span class="tt-lbl">${r[0]}</span><span class="tt-val">${r[1]}</span></div>`
+  ).join('');
+}
+
+function gradLegend(id, stops, labels){
+  const el=document.getElementById(id); if(!el) return;
+  el.innerHTML=`<div style="display:flex;gap:5px;align-items:stretch;">
+    <div style="width:14px;height:70px;border-radius:3px;background:linear-gradient(to bottom,${stops.join(',')});border:1px solid rgba(0,0,0,.08)"></div>
+    <div style="display:flex;flex-direction:column;justify-content:space-between;font-size:.7rem;color:#666;">
+      ${labels.map(l=>`<span>${l}</span>`).join('')}
+    </div></div>`;
+}
+function appendHatchLegend(id){
+  const el=document.getElementById(id); if(!el) return;
+  el.insertAdjacentHTML('beforeend',
+    '<div style="margin-top:6px;display:flex;gap:6px;align-items:center;">' +
+    '<div style="width:14px;height:14px;border-radius:2px;flex-shrink:0;background:#d8d8d8;' +
+    'border:2px dashed #888;box-sizing:border-box"></div>' +
+    '<span style="font-size:.7rem;color:#666;">Laag bevolkt (&lt;50 inw.)</span></div>');
+}
+
+const LOW_POP_STYLE={fillColor:'#d8d8d8',fillOpacity:0.75,color:'#888',weight:1.5,dashArray:'5,3'};
+
+function addBuurtBorder(map){
+  L.geoJSON(GEO.buurt,{style:{color:'#222',weight:2.5,fill:false,opacity:.7},interactive:false}).addTo(map);
+}
+
+function hl(layer,on){
+  if(on){ layer.setStyle({weight:2.5,color:'#333',dashArray:null}); }
+  else if(layer._lowPop){ layer.setStyle({weight:1.5,color:'#888',dashArray:'5,3'}); }
+  else{ layer.setStyle({weight:0.7,color:'white',dashArray:null}); }
+}
+function hlBuurt(layer,on){
+  layer.setStyle(on?{weight:3,color:'#333'}:{weight:1.5,color:'#fff'});
+}
+
+// ── TAB SWITCHER ──────────────────────────────────────────────────────────────
+function switchTab(name,btn){
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pane-'+name).classList.add('active');
+  btn.classList.add('active');
+  setTimeout(()=>{
+    if(maps['map-'+name]) maps['map-'+name].invalidateSize();
+    if(!inited[name]){ initTab(name); inited[name]=true; }
+  },50);
+}
+
+function initTab(name){
+  if(name==='project')     return;
+  if(name==='screening')   initScreening();
+  if(name==='demografie')  initDemografie();
+  if(name==='inkomen')     initInkomen();
+  if(name==='onderwijs')   initOnderwijs();
+  if(name==='nationaliteit') initNationaliteit();
+  if(name==='niveaus')     initNiveaus();
+}
+
+// ── LAYER TOGGLE ──────────────────────────────────────────────────────────────
+const layerGroups = {};
+
+function setLayer(tab, level, btn){
+  btn.closest('.tgl-pill').querySelectorAll('.tgl-opt').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  layerState[tab] = level;
+  const grps = layerGroups[tab];
+  if(!grps) return;
+  const tabMap = maps['map-'+tab];
+  if(!tabMap) return;
+  Object.entries(grps).forEach(([k,lg])=>{
+    if(lg) { if(k===level) tabMap.addLayer(lg); else tabMap.removeLayer(lg); }
+  });
+  const badges = {
+    demografie:   {sector:'📍 Statistisch sector (2025)', buurt:'📍 Campagnebuurt'},
+    inkomen:      {sector:'📍 Statistisch sector (2024)', buurt:'📍 Campagnebuurt'},
+    onderwijs:    {sector:'📍 Statistisch sector (2024)', buurt:'📍 Campagnebuurt'},
+    nationaliteit:{wijk:'📍 Wijkniveau (31 wijken)',      buurt:'📍 Campagnebuurt'},
+  };
+  const el = document.getElementById('lvl-'+tab);
+  if(el && badges[tab]) el.textContent = badges[tab][level]||'';
+}
+
+// ══ SCREENING ═════════════════════════════════════════════════════════════════
+let scrYear = 2024;
+let scrBarChart = null;
+let scrMapLayer = null;
+let scrCityMarker = null;
+let scrLayerMode = 'sector';
+
+function buildScrChartData(jaar){
+  const rows = [];
+  GEO.sectorScr.features.forEach(f=>{
+    const p = f.properties;
+    if(p.hidden) return;
+    const rate = getVal(p.code, 'screening', jaar);
+    if(rate===null) return;
+    const bev = getVal(p.code, 'bevolking', 2025);
+    if(bev!==null && bev<50) return;
+    rows.push({naam:p.naam, rate, buurt:p.Buurt});
+  });
+  rows.sort((a,b)=>a.rate-b.rate);
+  return {
+    labels:  rows.map(r=>r.naam),
+    rates:   rows.map(r=>+(r.rate*100).toFixed(1)),
+    buurten: rows.map(r=>r.buurt),
+    genk:    getRef('screening', jaar, 'genk'),
+    limburg: getRef('screening', jaar, 'limburg'),
+    flanders:getRef('screening', jaar, 'vlaanderen'),
+  };
+}
+
+function setScrLayer(mode, btn){
+  scrLayerMode = mode;
+  btn.closest('.tgl-pill').querySelectorAll('.tgl-opt').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const m = maps['map-screening'];
+  if(!m) return;
+  drawScrMap(m);
+  const hiddenRow = document.getElementById('scr-leg-hidden');
+  const nodataRow = document.getElementById('scr-leg-nodata');
+  const srcBadge  = document.getElementById('scr-src-badge');
+  if(mode==='stad'){
+    if(hiddenRow) hiddenRow.style.display='none';
+    if(nodataRow) nodataRow.style.display='none';
+    if(srcBadge) srcBadge.innerHTML='<strong>CVKO</strong>BHK dekkingsgraad Genk stad · ' + SCR_JAREN.join('–');
+  }else{
+    if(hiddenRow) hiddenRow.style.display='';
+    if(nodataRow) nodataRow.style.display='';
+    if(srcBadge) srcBadge.innerHTML=`<strong>CVKO</strong>BHK dekkingsgraad · ${SCR_JAREN.join('–')}<br>Statistische sectoren 2025 (${GEO.sectorScr.features.length})`;
+  }
+}
+
+function initScreening(){
+  const m = makeMap('map-screening');
+
+  const bar = document.getElementById('scr-years');
+  SCR_JAREN.forEach(yr=>{
+    const b=document.createElement('button');
+    b.className='yr-btn'+(yr===scrYear?' active':'');
+    b.textContent=yr;
+    b.onclick=()=>{
+      document.querySelectorAll('.yr-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      scrYear=yr; drawScrMap(m); updateScrBarChart();
+    };
+    bar.appendChild(b);
+  });
+
+  drawScrMap(m);
+  addBuurtBorder(m);
+  gradLegend('leg-scr',['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641'],['35%','','57%','','80%']);
+  appendHatchLegend('leg-scr');
+
+  // Evolutie lijndiagram
+  const ectx = document.getElementById('chart-scr-evol').getContext('2d');
+  const latestYr = Math.max(...SCR_JAREN);
+  const evDs = BUURTEN.map(b=>{
+    const data = SCR_JAREN.map(yr=>{ const v=getVal(b,'screening',yr); return v!==null?+(v*100).toFixed(1):null; });
+    return {label:BLABEL[b],data,borderColor:BCOLOR[b],backgroundColor:'transparent',
+             borderWidth:2,pointRadius:3,pointHoverRadius:5,tension:0.3,spanGaps:true};
+  });
+  const genkData = SCR_JAREN.map(yr=>{ const v=getRef('screening',yr,'genk'); return v!==null?+(v*100).toFixed(1):null; });
+  evDs.push({label:'Genk stad',data:genkData,borderColor:'#2E4057',backgroundColor:'transparent',
+    borderWidth:2.5,borderDash:[5,3],pointRadius:3,tension:0.3,spanGaps:true});
+  const limRef = getRef('screening', latestYr, 'limburg');
+  const vlRef  = getRef('screening', latestYr, 'vlaanderen');
+  if(limRef) evDs.push({label:'Limburg',   data:SCR_JAREN.map(()=>+(limRef*100).toFixed(1)),
+    borderColor:'#d7191c',borderWidth:1.5,borderDash:[3,4],pointRadius:0,backgroundColor:'transparent'});
+  if(vlRef)  evDs.push({label:'Vlaanderen',data:SCR_JAREN.map(()=>+(vlRef*100).toFixed(1)),
+    borderColor:'#1a9641',borderWidth:1.5,borderDash:[3,4],pointRadius:0,backgroundColor:'transparent'});
+
+  new Chart(ectx,{type:'line',data:{labels:SCR_JAREN,datasets:evDs},
+    options:{responsive:true,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}},
+               tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw+'%'}}},
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:10}}},
+        y:{min:40,max:80,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'#f0f0f0'}}
+      }
+    }});
+
+  // Leeftijdscategorie screenchart
+  const ageScrData = buildAgeScrData();
+  const actx = document.getElementById('chart-scr-age').getContext('2d');
+  new Chart(actx,{type:'bar',
+    data:{
+      labels: ageScrData.ages,
+      datasets:[
+        {label:'Genk',      data:ageScrData.genk.map(v=>v!==null?+(v*100).toFixed(1):null),    backgroundColor:'#2E4057cc',borderWidth:0},
+        {label:'Limburg',   data:ageScrData.limburg.map(v=>v!==null?+(v*100).toFixed(1):null), backgroundColor:'#d7191caa',borderWidth:0},
+        {label:'Vlaanderen',data:ageScrData.vlaams.map(v=>v!==null?+(v*100).toFixed(1):null),  backgroundColor:'#1a9641aa',borderWidth:0},
+      ]
+    },
+    options:{
+      indexAxis:'y',responsive:true,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}},
+               tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw.toFixed(1)+'%'}}},
+      scales:{
+        x:{min:30,max:80,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'#f0f0f0'}},
+        y:{ticks:{font:{size:10}},grid:{display:false}}
+      }
+    }
+  });
+
+  // Gerangschikte barchart sectoren
+  const d0 = buildScrChartData(scrYear);
+  const bctx = document.getElementById('chart-screening').getContext('2d');
+  scrBarChart = new Chart(bctx,{type:'bar',
+    data:{labels:d0.labels,datasets:[{data:d0.rates,
+      backgroundColor:d0.buurten.map(b=>BCOLOR[b]||'#999'),borderWidth:0}]},
+    options:{responsive:true,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw.toFixed(1)+'%'}}},
+      scales:{
+        x:{display:false},
+        y:{min:30,max:90,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'#f0f0f0'}}
+      }},
+    plugins:[{id:'rl',afterDraw(ch){
+      const ys=ch.scales.y,cx=ch.ctx;
+      const rd=ch._refData||d0;
+      [[rd.genk,'#2c7bb6',`Genk ${rd.genk!=null?+(rd.genk*100).toFixed(1)+'%':'—'}`],
+       [rd.limburg,'#d7191c',`Limb. ${rd.limburg!=null?+(rd.limburg*100).toFixed(1)+'%':'—'}`],
+       [rd.flanders,'#1a9641',`Vl. ${rd.flanders!=null?+(rd.flanders*100).toFixed(1)+'%':'—'}`]
+      ].forEach(([v,col,lbl])=>{
+        if(!v) return;
+        const y=ys.getPixelForValue(v*100);
+        cx.save(); cx.strokeStyle=col; cx.lineWidth=1.8; cx.setLineDash([4,3]);
+        cx.beginPath(); cx.moveTo(ch.chartArea.left,y); cx.lineTo(ch.chartArea.right,y); cx.stroke();
+        cx.fillStyle=col; cx.font="bold 9px 'Segoe UI', Arial, sans-serif";
+        cx.fillText(lbl,ch.chartArea.right-72,y-3); cx.restore();
+      });
+    }}]
+  });
+}
+
+function drawScrMap(m){
+  if(scrMapLayer) m.removeLayer(scrMapLayer);
+  if(scrCityMarker){ m.removeLayer(scrCityMarker); scrCityMarker=null; }
+
+  if(scrLayerMode==='stad'){
+    const rate = getRef('screening', scrYear, 'genk');
+    scrMapLayer = L.geoJSON(GEO.genk,{
+      style:{ fillColor:scrColor(rate), fillOpacity:.78, color:'#444', weight:2 },
+      onEachFeature:(f,layer)=>{
+        const rStr = rate!=null?(rate*100).toFixed(1)+'%':'Geen data';
+        const limb = getRef('screening', scrYear, 'limburg');
+        const vl   = getRef('screening', scrYear, 'vlaanderen');
+        layer.bindTooltip(makeTooltip(['Genk (stad)',
+          [`Dekkingsgraad ${scrYear}`,rStr],
+          [`Limburg ${scrYear}`, limb!=null?(limb*100).toFixed(1)+'%':'—'],
+          [`Vlaanderen ${scrYear}`, vl!=null?(vl*100).toFixed(1)+'%':'—']]),
+          {sticky:true,className:'leaflet-tooltip'});
+        if(rate!=null){
+          const c=layer.getBounds().getCenter();
+          scrCityMarker = L.marker(c,{icon:L.divIcon({
+            className:'',
+            html:`<div style="font-size:2rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);white-space:nowrap;transform:translateX(-50%)">${(rate*100).toFixed(1)}%</div>`,
+            iconSize:[0,0]
+          }),interactive:false}).addTo(m);
+        }
+      }
+    }).addTo(m);
+    document.getElementById('lvl-screening').textContent=`📍 Genk stad — ${scrYear}`;
+  } else {
+    scrMapLayer = L.geoJSON(GEO.sectorScr,{
+      style:f=>{
+        const p=f.properties;
+        if(p.hidden) return {fillColor:'#aaa',fillOpacity:.7,color:'white',weight:.8,dashArray:'3,3'};
+        const bev = getVal(p.code,'bevolking',2025);
+        if(bev!=null&&bev<50) return LOW_POP_STYLE;
+        const r = getVal(p.code,'screening',scrYear);
+        return {fillColor:scrColor(r),fillOpacity:.82,color:'white',weight:.8};
+      },
+      onEachFeature:(f,layer)=>{
+        const p=f.properties;
+        const r = getVal(p.code,'screening',scrYear);
+        const bev = getVal(p.code,'bevolking',2025);
+        const bl = p.Buurt&&p.Buurt!='/'?BLABEL[p.Buurt]||p.Buurt:'Overig';
+        const rStr = p.hidden?'Verborgen':r!=null?(r*100).toFixed(1)+'%':'Geen data';
+        if(!p.hidden&&bev!=null&&bev<50) layer._lowPop=true;
+        layer.bindTooltip(makeTooltip([p.naam,
+          [`Dekkingsgraad ${scrYear}`,rStr],
+          ['Bewoners',bev!=null?bev.toLocaleString('nl-BE'):'—'],
+          ['Buurt',bl],['Code',p.code]]),
+          {sticky:true,className:'leaflet-tooltip'});
+        layer.on('mouseover',()=>hl(layer,true));
+        layer.on('mouseout',()=>hl(layer,false));
+      }
+    }).addTo(m);
+    document.getElementById('lvl-screening').textContent=`📍 Statistisch sector (2025) — ${scrYear}`;
+  }
+}
+
+function updateScrBarChart(){
+  const d = buildScrChartData(scrYear);
+  if(scrBarChart){
+    scrBarChart.data.labels = d.labels;
+    scrBarChart.data.datasets[0].data = d.rates;
+    scrBarChart.data.datasets[0].backgroundColor = d.buurten.map(b=>BCOLOR[b]||'#999');
+    scrBarChart._refData = d;
+    scrBarChart.update();
+  }
+}
+
+function buildAgeScrData(){
+  const ages = ['25-29','30-34','35-39','40-44','45-49','50-54','55-59','60-64'];
+  return {
+    ages,
+    genk:    ages.map(a=>getRef('screening_leeftijd_'+a.replace('-','_'),2024,'genk')),
+    limburg: ages.map(a=>getRef('screening_leeftijd_'+a.replace('-','_'),2024,'limburg')),
+    vlaams:  ages.map(a=>getRef('screening_leeftijd_'+a.replace('-','_'),2024,'vlaanderen')),
+  };
+}
+
+// ══ DEMOGRAFIE ════════════════════════════════════════════════════════════════
+function initDemografie(){
+  const m = makeMap('map-demografie');
+  layerState['demografie'] = 'sector';
+
+  const allVals = GEO.sectorDemo.features.map(f=>getVal(f.properties.code,'demografie_65plus',2025)).filter(v=>v!=null)
+    .concat(BUURTEN.map(b=>getVal(b,'demografie_65plus',2025)).filter(v=>v!=null));
+  const mn=Math.min(...allVals)*0.85, mx=Math.max(...allVals)*1.1;
+
+  function style65(v){ return {fillColor:seqColor(v,mn,mx,220),fillOpacity:.84,color:'white',weight:.7}; }
+
+  const secLayer = L.geoJSON(GEO.sectorDemo,{
+    style:f=>{
+      const p=f.properties;
+      const bev=getVal(p.code,'bevolking',2025);
+      if(bev!=null&&bev<50) return LOW_POP_STYLE;
+      return style65(getVal(p.code,'demografie_65plus',2025));
+    },
+    onEachFeature:(f,layer)=>{
+      const p=f.properties;
+      const bev=getVal(p.code,'bevolking',2025);
+      const bl=p.Buurt&&p.Buurt!='/'?BLABEL[p.Buurt]||p.Buurt:'Overig';
+      if(bev!=null&&bev<50) layer._lowPop=true;
+      layer.bindTooltip(makeTooltip([p.naam,
+        ['% 65+ jaar',fmtPct(getVal(p.code,'demografie_65plus',2025))],
+        ['% 0–19 jaar',fmtPct(getVal(p.code,'demografie_0_19',2025))],
+        ['% 20–64 jaar',fmtPct(getVal(p.code,'demografie_20_64',2025))],
+        ['Bewoners',bev!=null?bev.toLocaleString('nl-BE'):'—'],['Buurt',bl],['Code',p.code]]),
+        {sticky:true,className:'leaflet-tooltip'});
+      layer.on('mouseover',()=>hl(layer,true));
+      layer.on('mouseout',()=>hl(layer,false));
+    }
+  });
+
+  const buurtLayer = L.geoJSON(GEO.buurt,{
+    style:f=>{
+      const v=getVal(f.properties.Buurt,'demografie_65plus',2025);
+      return {fillColor:seqColor(v,mn,mx,220),fillOpacity:.84,color:'#fff',weight:1.5};
+    },
+    onEachFeature:(f,layer)=>{
+      const b=f.properties.Buurt;
+      layer.bindTooltip(makeTooltip([BLABEL[b]||b,
+        ['% 65+ jaar',fmtPct(getVal(b,'demografie_65plus',2025))],
+        ['% 0–19 jaar',fmtPct(getVal(b,'demografie_0_19',2025))],
+        ['% 20–64 jaar',fmtPct(getVal(b,'demografie_20_64',2025))],
+        ['Vergrijzingsindex',(v=>v?v.toFixed(1):'—')(getVal(b,'vergrijzingsindex',2025))],
+        ['Bevolking',(v=>v?v.toLocaleString('nl-BE'):'—')(getVal(b,'bevolking',2025))]]),
+        {sticky:true,className:'leaflet-tooltip'});
+      layer.on('mouseover',()=>hlBuurt(layer,true));
+      layer.on('mouseout',()=>hlBuurt(layer,false));
+    }
+  });
+
+  layerGroups['demografie'] = {sector:secLayer, buurt:buurtLayer};
+  secLayer.addTo(m);
+  addBuurtBorder(m);
+
+  gradLegend('leg-dem',['hsl(220,62%,90%)','hsl(220,62%,58%)','hsl(220,62%,38%)'],
+    [`${mn.toFixed(0)}%`,'',`${mx.toFixed(0)}%`]);
+  appendHatchLegend('leg-dem');
+
+  const grid=document.getElementById('dem-kpi');
+  BUURTEN.forEach(b=>{
+    const v=getVal(b,'vergrijzingsindex',2025);
+    grid.innerHTML+=`<div class="kpi-card ${b}"><div class="kpi-val">${v?v.toFixed(1):'—'}</div><div class="kpi-lbl">${BLABEL[b]}</div></div>`;
+  });
+
+  const ageData = buildAgeData();
+  const ctx=document.getElementById('chart-demografie').getContext('2d');
+  new Chart(ctx,{type:'bar',data:{labels:ageData.labels,
+    datasets:ageData.datasets.map(ds=>{
+      const data = ds.data.map(v=>v!=null?v:0);
+      return {label:ds.label,data,backgroundColor:ds.color+'bb',borderColor:ds.color,borderWidth:1};
+    })},
+    options:{responsive:true,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}},
+               tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw.toFixed(1)+'%'}}},
+      scales:{
+        x:{ticks:{font:{size:9},maxRotation:50},grid:{display:false}},
+        y:{ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'#f0f0f0'}}
+      }
+    }});
+}
+
+function buildAgeData(){
+  const labels = ['0-9','10-19','20-29','30-39','40-49','50-59','60-69','70-79','80-89','90+'];
+  return {
+    labels,
+    datasets: BUURTEN.map(b=>{
+      const data = labels.map(lbl=>{
+        const ind='demografie_leeftijd_'+lbl.replace('-','_').replace('+','plus');
+        return getVal(b,ind,2025);
+      });
+      return {label:BLABEL[b],data,color:BCOLOR[b]};
+    }),
+  };
+}
+
+// ══ INKOMEN ═══════════════════════════════════════════════════════════════════
+function initInkomen(){
+  const m = makeMap('map-inkomen');
+  layerState['inkomen'] = 'sector';
+
+  const allVals = GEO.sectorInk.features.map(f=>getVal(f.properties.code,'inkomen_mediaan',2023)).filter(v=>v!=null)
+    .concat(BUURTEN.map(b=>getVal(b,'inkomen_mediaan',2023)).filter(v=>v!=null));
+  const mn=Math.min(...allVals)*0.88, mx=Math.max(...allVals)*1.05;
+
+  const secLayer = L.geoJSON(GEO.sectorInk,{
+    style:f=>{
+      const p=f.properties;
+      const v=getVal(p.code,'inkomen_mediaan',2023);
+      return {fillColor:seqColor(v,mn,mx,140),fillOpacity:.84,color:'white',weight:.7};
+    },
+    onEachFeature:(f,layer)=>{
+      const p=f.properties;
+      const bl=p.Buurt&&p.Buurt!='/'?BLABEL[p.Buurt]||p.Buurt:'Overig';
+      layer.bindTooltip(makeTooltip([p.naam,
+        ['Mediaan inkomen',fmtEuro(getVal(p.code,'inkomen_mediaan',2023))],
+        ['Gemiddeld inkomen',fmtEuro(getVal(p.code,'inkomen_gemiddeld',2023))],
+        ['Buurt',bl],['Code',p.code]]),
+        {sticky:true,className:'leaflet-tooltip'});
+      layer.on('mouseover',()=>hl(layer,true));
+      layer.on('mouseout',()=>hl(layer,false));
+    }
+  });
+
+  const buurtLayer = L.geoJSON(GEO.buurt,{
+    style:f=>{
+      const v=getVal(f.properties.Buurt,'inkomen_mediaan',2023);
+      return {fillColor:seqColor(v,mn,mx,140),fillOpacity:.84,color:'#fff',weight:1.5};
+    },
+    onEachFeature:(f,layer)=>{
+      const b=f.properties.Buurt;
+      layer.bindTooltip(makeTooltip([BLABEL[b]||b,
+        ['Mediaan inkomen',fmtEuro(getVal(b,'inkomen_mediaan',2023))],
+        ['Gemiddeld inkomen',fmtEuro(getVal(b,'inkomen_gemiddeld',2023))],
+        ['Bevolking',(v=>v?v.toLocaleString('nl-BE'):'—')(getVal(b,'bevolking',2025))]]),
+        {sticky:true,className:'leaflet-tooltip'});
+      layer.on('mouseover',()=>hlBuurt(layer,true));
+      layer.on('mouseout',()=>hlBuurt(layer,false));
+    }
+  });
+
+  layerGroups['inkomen'] = {sector:secLayer, buurt:buurtLayer};
+  secLayer.addTo(m);
+  addBuurtBorder(m);
+
+  gradLegend('leg-ink',['hsl(140,62%,90%)','hsl(140,62%,58%)','hsl(140,62%,38%)'],
+    [`€${Math.round(mn/1000)}k`,'',`€${Math.round(mx/1000)}k`]);
+  appendHatchLegend('leg-ink');
+
+  const grid=document.getElementById('ink-kpi');
+  BUURTEN.forEach(b=>{
+    const v=getVal(b,'inkomen_mediaan',2023);
+    grid.innerHTML+=`<div class="kpi-card ${b}"><div class="kpi-val" style="font-size:.95rem">${v?'€'+Math.round(v).toLocaleString('nl-BE'):'—'}</div><div class="kpi-lbl">${BLABEL[b]}</div></div>`;
+  });
+
+  const incData = buildIncData();
+  const ctx=document.getElementById('chart-inkomen').getContext('2d');
+  const ds=BUURTEN.map(b=>{
+    const data=incData.years.map(yr=>{const v=getVal(b,'inkomen_mediaan',yr);return v;});
+    return {label:BLABEL[b],data,borderColor:BCOLOR[b],backgroundColor:'transparent',
+             borderWidth:2.2,pointRadius:0,tension:0.3,spanGaps:true};
+  });
+  ds.push({label:'Genk',data:incData.genkData,borderColor:'#2E4057',backgroundColor:'transparent',
+    borderWidth:2,borderDash:[5,3],pointRadius:0,tension:0.3,spanGaps:true});
+  new Chart(ctx,{type:'line',data:{labels:incData.years,datasets:ds},
+    options:{responsive:true,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}},
+               tooltip:{callbacks:{label:c=>c.dataset.label+': €'+Math.round(c.raw).toLocaleString('nl-BE')}}},
+      scales:{
+        x:{ticks:{font:{size:9},maxTicksLimit:8},grid:{display:false}},
+        y:{ticks:{callback:v=>'€'+Math.round(v/1000)+'k',font:{size:10}},grid:{color:'#f0f0f0'}}
+      }
+    }});
+}
+
+function buildIncData(){
+  const jarenSet = new Set();
+  Object.values(SHDATA).forEach(inds=>{
+    Object.keys(inds['inkomen_mediaan']||{}).forEach(yr=>jarenSet.add(parseInt(yr)));
+  });
+  const years=[...jarenSet].filter(yr=>yr>=2005).sort();
+  const genkData=years.map(yr=>getVal('Genk','inkomen_mediaan',yr));
+  return {years, genkData};
+}
+
+// ══ ONDERWIJS ═════════════════════════════════════════════════════════════════
+function initOnderwijs(){
+  const m = makeMap('map-onderwijs');
+  layerState['onderwijs'] = 'sector';
+
+  const allVals = GEO.sectorEdu.features.map(f=>getVal(f.properties.code,'onderwijs_hoog',2021)).filter(v=>v!=null)
+    .concat(BUURTEN.map(b=>getVal(b,'onderwijs_hoog',2021)).filter(v=>v!=null));
+  const mn=Math.min(...allVals)*0.8, mx=Math.max(...allVals)*1.1;
+
+  const secLayer = L.geoJSON(GEO.sectorEdu,{
+    style:f=>{
+      const p=f.properties;
+      const v=getVal(p.code,'onderwijs_hoog',2021);
+      return {fillColor:seqColor(v,mn,mx,270),fillOpacity:.84,color:'white',weight:.7};
+    },
+    onEachFeature:(f,layer)=>{
+      const p=f.properties;
+      const bl=p.Buurt&&p.Buurt!='/'?BLABEL[p.Buurt]||p.Buurt:'Overig';
+      layer.bindTooltip(makeTooltip([p.naam,
+        ['% Hoog',fmtPct(getVal(p.code,'onderwijs_hoog',2021))],
+        ['% Middel',fmtPct(getVal(p.code,'onderwijs_middel',2021))],
+        ['% Laag',fmtPct(getVal(p.code,'onderwijs_laag',2021))],
+        ['Buurt',bl],['Code',p.code]]),
+        {sticky:true,className:'leaflet-tooltip'});
+      layer.on('mouseover',()=>hl(layer,true));
+      layer.on('mouseout',()=>hl(layer,false));
+    }
+  });
+
+  const buurtLayer = L.geoJSON(GEO.buurt,{
+    style:f=>{
+      const v=getVal(f.properties.Buurt,'onderwijs_hoog',2021);
+      return {fillColor:seqColor(v,mn,mx,270),fillOpacity:.84,color:'#fff',weight:1.5};
+    },
+    onEachFeature:(f,layer)=>{
+      const b=f.properties.Buurt;
+      layer.bindTooltip(makeTooltip([BLABEL[b]||b,
+        ['% Hooggeschoold',fmtPct(getVal(b,'onderwijs_hoog',2021))],
+        ['% Middengeschoold',fmtPct(getVal(b,'onderwijs_middel',2021))],
+        ['% Laaggeschoold',fmtPct(getVal(b,'onderwijs_laag',2021))]]),
+        {sticky:true,className:'leaflet-tooltip'});
+      layer.on('mouseover',()=>hlBuurt(layer,true));
+      layer.on('mouseout',()=>hlBuurt(layer,false));
+    }
+  });
+
+  layerGroups['onderwijs'] = {sector:secLayer, buurt:buurtLayer};
+  secLayer.addTo(m);
+  addBuurtBorder(m);
+
+  gradLegend('leg-edu',['hsl(270,62%,90%)','hsl(270,62%,58%)','hsl(270,62%,38%)'],
+    [`${mn.toFixed(0)}%`,'',`${mx.toFixed(0)}%`]);
+  appendHatchLegend('leg-edu');
+
+  const grid=document.getElementById('edu-kpi');
+  BUURTEN.forEach(b=>{
+    const v=getVal(b,'onderwijs_hoog',2021);
+    grid.innerHTML+=`<div class="kpi-card ${b}"><div class="kpi-val">${v?v.toFixed(1)+'%':'—'}</div><div class="kpi-lbl">${BLABEL[b]}<br>hooggeschoold</div></div>`;
+  });
+
+  const ctx=document.getElementById('chart-onderwijs').getContext('2d');
+  new Chart(ctx,{type:'bar',data:{labels:BUURTEN.map(b=>BLABEL[b]),
+    datasets:[
+      {label:'Laag',  data:BUURTEN.map(b=>getVal(b,'onderwijs_laag',2021)),  backgroundColor:'#c00000bb',borderWidth:0},
+      {label:'Middel',data:BUURTEN.map(b=>getVal(b,'onderwijs_middel',2021)),backgroundColor:'#ff7f00bb',borderWidth:0},
+      {label:'Hoog',  data:BUURTEN.map(b=>getVal(b,'onderwijs_hoog',2021)),  backgroundColor:'#70AD47bb',borderWidth:0},
+    ]},
+    options:{responsive:true,
+      plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}},
+               tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw.toFixed(1)+'%'}}},
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{font:{size:10}}},
+        y:{stacked:true,max:100,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'#f0f0f0'}}
+      }
+    }});
+}
+
+// ══ NATIONALITEIT ═════════════════════════════════════════════════════════════
+let natChart=null, activeBuurt='Noord';
+
+function initNationaliteit(){
+  const m = makeMap('map-nationaliteit');
+  layerState['nationaliteit'] = 'wijk';
+
+  const allVals = GEO.wijkNat.features.map(f=>getVal(f.properties.ggw7,'nationaliteit_niet_belg',2025)).filter(v=>v!=null)
+    .concat(BUURTEN.map(b=>getVal(b,'nationaliteit_niet_belg',2025)).filter(v=>v!=null));
+  const mn=0, mx=Math.max(...allVals)*1.05;
+
+  const wijkLayer = L.geoJSON(GEO.wijkNat,{
+    style:f=>{
+      const v=getVal(f.properties.ggw7,'nationaliteit_niet_belg',2025);
+      return {fillColor:seqColor(v,mn,mx,15),fillOpacity:.84,color:'white',weight:.7};
+    },
+    onEachFeature:(f,layer)=>{
+      const p=f.properties;
+      const bl=p.Buurt&&p.Buurt!='/'?BLABEL[p.Buurt]||p.Buurt:'Overig';
+      const totaal=getVal(p.ggw7,'nationaliteit_niet_belg',2025)!=null?
+        (getVal(p.ggw7,'nationaliteit_niet_belg',2025)*0.01+getVal(p.ggw7,'nationaliteit_belg',2025)*0.01):null;
+      layer.bindTooltip(makeTooltip([p.wijk_naam,
+        ['% Niet-Belgisch',fmtPct(getVal(p.ggw7,'nationaliteit_niet_belg',2025))],
+        ['% Belgisch',fmtPct(getVal(p.ggw7,'nationaliteit_belg',2025))],
+        ['Buurt',bl]]),{sticky:true,className:'leaflet-tooltip'});
+      layer.on('mouseover',()=>hl(layer,true));
+      layer.on('mouseout',()=>hl(layer,false));
+      layer.on('click',()=>{
+        const b=p.Buurt;
+        if(BUURTEN.includes(b)){
+          activeBuurt=b;
+          document.querySelectorAll('.b-btn').forEach(x=>x.classList.remove('active'));
+          const sel=document.querySelector(`.b-btn.${b}`);
+          if(sel) sel.classList.add('active');
+          drawNatChart(b);
+        }
+      });
+    }
+  });
+
+  const buurtLayer = L.geoJSON(GEO.buurt,{
+    style:f=>{
+      const v=getVal(f.properties.Buurt,'nationaliteit_niet_belg',2025);
+      return {fillColor:seqColor(v,mn,mx,15),fillOpacity:.84,color:'#fff',weight:1.5};
+    },
+    onEachFeature:(f,layer)=>{
+      const b=f.properties.Buurt;
+      layer.bindTooltip(makeTooltip([BLABEL[b]||b,
+        ['% Niet-Belgisch',fmtPct(getVal(b,'nationaliteit_niet_belg',2025))],
+        ['% Belgisch',fmtPct(getVal(b,'nationaliteit_belg',2025))],
+        ['Bevolking',(v=>v?v.toLocaleString('nl-BE'):'—')(getVal(b,'bevolking',2025))]]),
+        {sticky:true,className:'leaflet-tooltip'});
+      layer.on('mouseover',()=>hlBuurt(layer,true));
+      layer.on('mouseout',()=>hlBuurt(layer,false));
+      layer.on('click',()=>{
+        activeBuurt=b;
+        document.querySelectorAll('.b-btn').forEach(x=>x.classList.remove('active'));
+        const sel=document.querySelector(`.b-btn.${b}`);
+        if(sel) sel.classList.add('active');
+        drawNatChart(b);
+      });
+    }
+  });
+
+  layerGroups['nationaliteit'] = {wijk:wijkLayer, buurt:buurtLayer};
+  wijkLayer.addTo(m);
+  addBuurtBorder(m);
+
+  gradLegend('leg-nat',['hsl(15,62%,90%)','hsl(15,62%,58%)','hsl(15,62%,38%)'],
+    [`${mn.toFixed(0)}%`,'',`${Math.round(mx)}%`]);
+
+  const grid=document.getElementById('nat-kpi');
+  BUURTEN.forEach(b=>{
+    const v=getVal(b,'nationaliteit_niet_belg',2025);
+    grid.innerHTML+=`<div class="kpi-card ${b}"><div class="kpi-val">${v?v.toFixed(1)+'%':'—'}</div><div class="kpi-lbl">${BLABEL[b]}<br>niet-Belgisch</div></div>`;
+  });
+
+  const sel=document.getElementById('nat-sel');
+  BUURTEN.forEach(b=>{
+    const btn=document.createElement('button');
+    btn.className='b-btn '+b+(b===activeBuurt?' active':'');
+    btn.textContent=BLABEL[b];
+    btn.onclick=()=>{
+      document.querySelectorAll('.b-btn').forEach(x=>x.classList.remove('active'));
+      btn.classList.add('active'); activeBuurt=b; drawNatChart(b);
+    };
+    sel.appendChild(btn);
+  });
+
+  drawNatChart('Noord');
+}
+
+function drawNatChart(buurt){
+  const data=TOP10[buurt]||[];
+  const ctx=document.getElementById('chart-nationaliteit').getContext('2d');
+  if(natChart) natChart.destroy();
+  natChart=new Chart(ctx,{type:'bar',
+    data:{labels:data.map(d=>d.land).reverse(),
+           datasets:[{data:data.map(d=>d.pct).reverse(),
+             backgroundColor:BCOLOR[buurt]+'bb',borderWidth:0}]},
+    options:{indexAxis:'y',responsive:true,
+      plugins:{legend:{display:false},
+               title:{display:true,text:BLABEL[buurt]+' — top 10',font:{size:11,weight:'600'},color:'#444'},
+               tooltip:{callbacks:{label:c=>c.raw.toFixed(1)+'% van bevolking buurt'}}},
+      scales:{
+        x:{ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'#f0f0f0'}},
+        y:{ticks:{font:{size:10}},grid:{display:false}}
+      }
+    }});
+}
+
+// ══ NIVEAUS ═══════════════════════════════════════════════════════════════════
+let nivLayers = {};
+
+function buildWijkTable(highlightCamp){
+  const rows=WIJK_TABLE.map(r=>{
+    const isCamp = r.buurt8 in CAMP_COLORS;
+    const fade = highlightCamp&&!isCamp ? 'opacity:.4' : '';
+    const star = highlightCamp&&isCamp ? '<span class="niv-camp-star"> ★</span>' : '';
+    const c = BCOLOR8[r.buurt8]||'#ccc';
+    return `<tr style="${fade}"><td>${r.wijk}</td><td><span class="niv-badge" style="background:${c}"></span>${r.buurt8}${star}</td></tr>`;
+  }).join('');
+  return `<table class="niv-table"><thead><tr><th>Wijk</th><th>Buurt</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+
+function updateNivLegend(step){
+  const el=document.getElementById('niv-legend'); if(!el) return;
+  if(step===1){
+    el.innerHTML='<h5>Statistisch sector</h5><div class="leg-row"><div class="leg-swatch" style="background:#B0C4DE"></div><span>'+GEO.sectorDemo.features.length+' sectoren (2025)</span></div>';
+  }else if(step===2){
+    let rows=WIJK_TABLE.map(r=>`<div class="leg-row"><div class="leg-swatch" style="background:${WIJK_COLORS[r.wijk]||'#ccc'}"></div><span>${r.wijk}</span></div>`).join('');
+    el.innerHTML='<h5>Wijken (31)</h5>'+rows;
+  }else if(step===3){
+    let rows=Object.entries(BCOLOR8).map(([b,c])=>`<div class="leg-row"><div class="leg-swatch" style="background:${c}"></div><span>${b}</span></div>`).join('');
+    el.innerHTML='<h5>Buurten (8)</h5>'+rows;
+  }else{
+    let rows=Object.entries(CAMP_COLORS).map(([b,c])=>`<div class="leg-row"><div class="leg-swatch" style="background:${c}"></div><span>${b} ★</span></div>`).join('');
+    rows+='<div class="leg-row"><div class="leg-swatch" style="background:#d0d0d0;border:1px dashed #aaa"></div><span>Niet geselecteerd</span></div>';
+    el.innerHTML='<h5>Campagnebuurten (4)</h5>'+rows;
+  }
+}
+
+function setNiveauStep(step){
+  [1,2,3,4].forEach(s=>{
+    const e=document.getElementById('nstep-'+s);
+    if(e) e.classList.toggle('active',s===step);
+  });
+  const m=maps['map-niveaus'];
+  if(m){
+    [1,2,3,4].forEach(s=>{ if(nivLayers[s]) m.removeLayer(nivLayers[s]); });
+    if(nivLayers[step]) nivLayers[step].addTo(m);
+  }
+  const info=NIV_INFO[step];
+  let html=`<div class="niv-block"><h3 style="border-color:${info.color}">${info.title}</h3>${info.body}`;
+  if(info.showTable) html+=buildWijkTable(info.tableHighlight);
+  html+='</div>';
+  document.getElementById('niv-info').innerHTML=html;
+  updateNivLegend(step);
+}
+
+function initNiveaus(){
+  const m=makeMap('map-niveaus');
+
+  nivLayers[1]=L.geoJSON(GEO.sectorDemo,{
+    style:{fillColor:'#B0C4DE',fillOpacity:.75,color:'white',weight:.6},
+    onEachFeature:(f,layer)=>{
+      layer.bindTooltip(makeTooltip([f.properties.naam||f.properties.code,['Code',f.properties.code]]),
+        {sticky:true,className:'leaflet-tooltip'});
+    }
+  });
+
+  nivLayers[2]=L.geoJSON(GEO.wijkNiv,{
+    style:f=>{const c=WIJK_COLORS[f.properties.wijk_naam]||'#ccc';return {fillColor:c,fillOpacity:.82,color:'white',weight:1};},
+    onEachFeature:(f,layer)=>{
+      layer.bindTooltip(makeTooltip([f.properties.wijk_naam,['Buurt',f.properties.buurt8]]),
+        {sticky:true,className:'leaflet-tooltip'});
+      layer.on('mouseover',()=>layer.setStyle({weight:2.5,color:'#333'}));
+      layer.on('mouseout',()=>layer.setStyle({weight:1,color:'white'}));
+    }
+  });
+
+  nivLayers[3]=L.geoJSON(GEO.achtBuurt,{
+    style:f=>{const c=BCOLOR8[f.properties.buurt8]||'#ccc';return {fillColor:c,fillOpacity:.82,color:'white',weight:1.5};},
+    onEachFeature:(f,layer)=>{
+      layer.bindTooltip(f.properties.buurt8,{sticky:true,className:'leaflet-tooltip'});
+      layer.on('mouseover',()=>layer.setStyle({weight:3,color:'#333'}));
+      layer.on('mouseout',()=>layer.setStyle({weight:1.5,color:'white'}));
+    }
+  });
+
+  nivLayers[4]=L.geoJSON(GEO.achtBuurt,{
+    style:f=>{
+      const c=CAMP_COLORS[f.properties.buurt8];
+      return c?{fillColor:c,fillOpacity:.88,color:'white',weight:2}
+              :{fillColor:'#d0d0d0',fillOpacity:.45,color:'#bbb',weight:1,dashArray:'4,3'};
+    },
+    onEachFeature:(f,layer)=>{
+      const isCamp=f.properties.buurt8 in CAMP_COLORS;
+      layer.bindTooltip(f.properties.buurt8+(isCamp?' ✓ Campagnebuurt':' — niet geselecteerd'),
+        {sticky:true,className:'leaflet-tooltip'});
+    }
+  });
+
+  setNiveauStep(1);
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+window.addEventListener('load', async ()=>{
+  try {
+    await laadAlleData();
+    document.getElementById('loading-overlay').style.display = 'none';
+    inited['screening'] = true;
+    initScreening();
+  } catch(err) {
+    const errEl = document.getElementById('loading-error');
+    const statusEl = document.getElementById('loading-status');
+    if(errEl) { errEl.textContent = 'Fout bij laden: ' + err.message + ' — Start een lokale server met: python3 -m http.server 8000'; errEl.style.display='block'; }
+    if(statusEl) statusEl.style.display='none';
+    console.error(err);
+  }
+});
+</script>
+</body>
+</html>
