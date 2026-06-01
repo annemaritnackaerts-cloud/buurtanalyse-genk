@@ -1720,6 +1720,7 @@ function initVaccinatie(){
     Object.values(SHDATA).flatMap(inds=>Object.keys(inds[VAC_IND]||{}))
   )].map(Number).sort();
   const VAC_JAAR = vacJarenAll.length ? Math.max(...vacJarenAll) : 2024;
+  tabJaar.vaccinatie = VAC_JAAR;
 
   const allVals = Object.values(SHDATA).flatMap(inds=>Object.values(inds[VAC_IND]||{})).filter(v=>v!=null);
   const mn = allVals.length ? Math.min(...allVals)*0.9 : 0;
