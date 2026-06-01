@@ -237,11 +237,11 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
 <nav>
   <button class="tab-btn active" onclick="switchTab('project',this)"><span></span> Over het project</button>
   <button class="tab-btn" onclick="switchTab('screening',this)"><span></span> Screening BHK</button>
+  <button class="tab-btn" onclick="switchTab('vaccinatie',this)"><span></span> HPV-vaccinatie</button>
   <button class="tab-btn" onclick="switchTab('demografie',this)"><span></span> Demografie</button>
   <button class="tab-btn" onclick="switchTab('inkomen',this)"><span></span> Inkomen</button>
   <button class="tab-btn" onclick="switchTab('onderwijs',this)"><span></span> Onderwijs</button>
   <button class="tab-btn" onclick="switchTab('nationaliteit',this)"><span></span> Nationaliteit</button>
-  <button class="tab-btn" onclick="switchTab('vaccinatie',this)"><span></span> HPV-vaccinatie</button>
   <button class="tab-btn" onclick="switchTab('niveaus',this)"><span></span> Niveaus &amp; Bronnen</button>
 </nav>
 
@@ -384,6 +384,39 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
   </div>
 </div>
 
+<!-- ══ HPV-VACCINATIE ════════════════════════════════════════════════════ -->
+<div id="pane-vaccinatie" class="tab-pane">
+  <div class="map-wrap">
+    <div id="map-vaccinatie" class="leaflet-map"></div>
+    <div class="layer-ctrl">
+      <span class="level-badge" id="lvl-vaccinatie">📍 Statistisch sector</span>
+      <div class="tgl-pill">
+        <span class="tgl-opt active" onclick="setLayer('vaccinatie','sector',this)">Sector</span>
+        <span class="tgl-opt" onclick="setLayer('vaccinatie','buurt8',this)">8 Buurten</span>
+        <span class="tgl-opt" onclick="setLayer('vaccinatie','campagne',this)">Campagne</span>
+        <span class="tgl-opt" onclick="setLayer('vaccinatie','stad',this)">Stad</span>
+      </div>
+    </div>
+    <div class="year-bar" id="vac-years"></div>
+    <div class="map-legend">
+      <h5>% Gevaccineerd</h5>
+      <div id="leg-vac"></div>
+    </div>
+    <div class="datasource-badge"><strong>Gezondheidszorg</strong>HPV-vaccinatiegraad</div>
+  </div>
+  <div class="side-panel">
+    <div class="panel-header">💉 HPV-vaccinatie</div>
+    <div class="panel-section">
+      <h4>Vaccinatiegraad per buurt</h4>
+      <div class="kpi-grid" id="vac-kpi"></div>
+    </div>
+    <div class="chart-wrap">
+      <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:8px;font-weight:700;">Evolutie vaccinatiegraad (%)</h4>
+      <canvas id="chart-vaccinatie"></canvas>
+    </div>
+  </div>
+</div>
+
 <!-- ══ DEMOGRAFIE ══════════════════════════════════════════════════════════ -->
 <div id="pane-demografie" class="tab-pane">
   <div class="map-wrap">
@@ -397,6 +430,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
         <span class="tgl-opt" onclick="setLayer('demografie','stad',this)">Stad</span>
       </div>
     </div>
+    <div class="year-bar" id="dem-years"></div>
     <div class="map-legend">
       <h5 id="dem-leg-title">% 65+ jaar</h5>
       <div id="leg-dem"></div>
@@ -429,6 +463,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
         <span class="tgl-opt" onclick="setLayer('inkomen','stad',this)">Stad</span>
       </div>
     </div>
+    <div class="year-bar" id="ink-years"></div>
     <div class="map-legend">
       <h5>Mediaan inkomen 2023</h5>
       <div id="leg-ink"></div>
@@ -461,6 +496,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
         <span class="tgl-opt" onclick="setLayer('onderwijs','stad',this)">Stad</span>
       </div>
     </div>
+    <div class="year-bar" id="edu-years"></div>
     <div class="map-legend">
       <h5>% Hooggeschoold</h5>
       <div id="leg-edu"></div>
@@ -493,6 +529,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
         <span class="tgl-opt" onclick="setLayer('nationaliteit','stad',this)">Stad</span>
       </div>
     </div>
+    <div class="year-bar" id="nat-years"></div>
     <div class="map-legend">
       <h5>% Niet-Belgisch</h5>
       <div id="leg-nat"></div>
@@ -543,36 +580,6 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
 </div>
 
 <!-- ══ HPV-VACCINATIE ════════════════════════════════════════════════════ -->
-<div id="pane-vaccinatie" class="tab-pane">
-  <div class="map-wrap">
-    <div id="map-vaccinatie" class="leaflet-map"></div>
-    <div class="layer-ctrl">
-      <span class="level-badge" id="lvl-vaccinatie">📍 Statistisch sector</span>
-      <div class="tgl-pill">
-        <span class="tgl-opt active" onclick="setLayer('vaccinatie','sector',this)">Sector</span>
-        <span class="tgl-opt" onclick="setLayer('vaccinatie','buurt8',this)">8 Buurten</span>
-        <span class="tgl-opt" onclick="setLayer('vaccinatie','campagne',this)">Campagne</span>
-        <span class="tgl-opt" onclick="setLayer('vaccinatie','stad',this)">Stad</span>
-      </div>
-    </div>
-    <div class="map-legend">
-      <h5>% Gevaccineerd</h5>
-      <div id="leg-vac"></div>
-    </div>
-    <div class="datasource-badge"><strong>Gezondheidszorg</strong>HPV-vaccinatiegraad</div>
-  </div>
-  <div class="side-panel">
-    <div class="panel-header">💉 HPV-vaccinatie</div>
-    <div class="panel-section">
-      <h4>Vaccinatiegraad per buurt</h4>
-      <div class="kpi-grid" id="vac-kpi"></div>
-    </div>
-    <div class="chart-wrap">
-      <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:8px;font-weight:700;">Evolutie vaccinatiegraad (%)</h4>
-      <canvas id="chart-vaccinatie"></canvas>
-    </div>
-  </div>
-</div>
 
 </div><!-- /workspace -->
 
@@ -862,6 +869,55 @@ function initTab(name){
 
 // ── LAYER TOGGLE ──────────────────────────────────────────────────────────────
 const layerGroups = {};
+const tabJaar = {demografie:2025, inkomen:2023, onderwijs:2021, nationaliteit:2025, vaccinatie:2024};
+
+// Bouw jaar-knoppen dynamisch op basis van beschikbare data
+function buildYearBar(barId, tabName, indicator, onYearChange){
+  const bar = document.getElementById(barId);
+  if(!bar) return;
+  const jaren = [...new Set(
+    Object.values(SHDATA).flatMap(inds=>Object.keys(inds[indicator]||{}))
+  )].map(Number).sort();
+  if(jaren.length < 2) return; // geen balk tonen als er maar 1 jaar is
+  const cur = tabJaar[tabName];
+  const active = jaren.includes(cur) ? cur : Math.max(...jaren);
+  tabJaar[tabName] = active;
+  jaren.forEach(yr=>{
+    const b = document.createElement('button');
+    b.className = 'yr-btn'+(yr===active?' active':'');
+    b.textContent = yr;
+    b.onclick = ()=>{
+      bar.querySelectorAll('.yr-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      tabJaar[tabName] = yr;
+      onYearChange(yr);
+    };
+    bar.appendChild(b);
+  });
+}
+
+// Herteken alle lagen van een seq-color tab na jaarswissel
+function refreshSeqLayers(tab, indicator, mn, mx, hue, codeProps){
+  const grps = layerGroups[tab];
+  if(!grps) return;
+  const jaar = tabJaar[tab];
+  if(grps.sector) grps.sector.eachLayer(l=>{
+    const v = getVal(l.feature.properties[codeProps.sector||'code'], indicator, jaar);
+    l.setStyle({fillColor:seqColor(v,mn,mx,hue)});
+  });
+  if(grps.buurt8) grps.buurt8.eachLayer(l=>{
+    const v = getVal(l.feature.properties.buurt8, indicator, jaar);
+    l.setStyle({fillColor:seqColor(v,mn,mx,hue)});
+  });
+  if(grps.campagne) grps.campagne.eachLayer(l=>{
+    const v = getVal(l.feature.properties.Buurt, indicator, jaar);
+    l.setStyle({fillColor:seqColor(v,mn,mx,hue)});
+  });
+  if(grps.stad) grps.stad.eachLayer(l=>{
+    const v = getVal(STAD_CODE, indicator, jaar);
+    l.setStyle({fillColor:seqColor(v,mn,mx,hue)});
+  });
+}
 
 function setLayer(tab, level, btn){
   btn.closest('.tgl-pill').querySelectorAll('.tgl-opt').forEach(b=>b.classList.remove('active'));
@@ -1121,9 +1177,8 @@ function initDemografie(){
   const m = makeMap('map-demografie');
   layerState['demografie'] = 'sector';
 
-  const allVals = GEO.sectorDemo.features.map(f=>getVal(f.properties.code,'demografie_65plus',2025)).filter(v=>v!=null)
-    .concat([...BUURT8,STAD_CODE].map(b=>getVal(b,'demografie_65plus',2025)).filter(v=>v!=null));
-  const mn=Math.min(...allVals)*0.85, mx=Math.max(...allVals)*1.1;
+  const allVals = Object.values(SHDATA).flatMap(inds=>Object.values(inds['demografie_65plus']||{})).filter(v=>v!=null);
+  const mn=allVals.length?Math.min(...allVals)*0.85:0, mx=allVals.length?Math.max(...allVals)*1.1:50;
 
   function style65(v){ return {fillColor:seqColor(v,mn,mx,220),fillOpacity:.84,color:'white',weight:.7}; }
 
@@ -1195,7 +1250,11 @@ function initDemografie(){
     [`${mn.toFixed(0)}%`,'',`${mx.toFixed(0)}%`]);
   appendHatchLegend('leg-dem');
 
-  buildKpiGrid('dem-kpi','demografie_65plus',2025,v=>v.toFixed(1)+'%','');
+  buildKpiGrid('dem-kpi','demografie_65plus',tabJaar.demografie,v=>v.toFixed(1)+'%','');
+  buildYearBar('dem-years','demografie','demografie_65plus', yr=>{
+    refreshSeqLayers('demografie','demografie_65plus',mn,mx,220,{});
+    buildKpiGrid('dem-kpi','demografie_65plus',yr,v=>v.toFixed(1)+'%','');
+  });
 
   const ageData = buildAgeData();
   const ctx=document.getElementById('chart-demografie').getContext('2d');
@@ -1234,9 +1293,8 @@ function initInkomen(){
   const m = makeMap('map-inkomen');
   layerState['inkomen'] = 'sector';
 
-  const allVals = GEO.sectorInk.features.map(f=>getVal(f.properties.code,'inkomen_mediaan',2023)).filter(v=>v!=null)
-    .concat([...BUURT8,STAD_CODE].map(b=>getVal(b,'inkomen_mediaan',2023)).filter(v=>v!=null));
-  const mn=Math.min(...allVals)*0.88, mx=Math.max(...allVals)*1.05;
+  const allVals = Object.values(SHDATA).flatMap(inds=>Object.values(inds['inkomen_mediaan']||{})).filter(v=>v!=null);
+  const mn=allVals.length?Math.min(...allVals)*0.88:15000, mx=allVals.length?Math.max(...allVals)*1.05:50000;
 
   const secLayer = L.geoJSON(GEO.sectorInk,{
     style:f=>{
@@ -1299,7 +1357,11 @@ function initInkomen(){
     [`€${Math.round(mn/1000)}k`,'',`€${Math.round(mx/1000)}k`]);
   appendHatchLegend('leg-ink');
 
-  buildKpiGrid('ink-kpi','inkomen_mediaan',2023,fmtEuro,'');
+  buildKpiGrid('ink-kpi','inkomen_mediaan',tabJaar.inkomen,fmtEuro,'');
+  buildYearBar('ink-years','inkomen','inkomen_mediaan', yr=>{
+    refreshSeqLayers('inkomen','inkomen_mediaan',mn,mx,140,{});
+    buildKpiGrid('ink-kpi','inkomen_mediaan',yr,fmtEuro,'');
+  });
 
   const incData = buildIncData();
   const ctx=document.getElementById('chart-inkomen').getContext('2d');
@@ -1336,9 +1398,8 @@ function initOnderwijs(){
   const m = makeMap('map-onderwijs');
   layerState['onderwijs'] = 'sector';
 
-  const allVals = GEO.sectorEdu.features.map(f=>getVal(f.properties.code,'onderwijs_hoog',2021)).filter(v=>v!=null)
-    .concat([...BUURT8,STAD_CODE].map(b=>getVal(b,'onderwijs_hoog',2021)).filter(v=>v!=null));
-  const mn=Math.min(...allVals)*0.8, mx=Math.max(...allVals)*1.1;
+  const allVals = Object.values(SHDATA).flatMap(inds=>Object.values(inds['onderwijs_hoog']||{})).filter(v=>v!=null);
+  const mn=allVals.length?Math.min(...allVals)*0.8:0, mx=allVals.length?Math.max(...allVals)*1.1:80;
 
   const secLayer = L.geoJSON(GEO.sectorEdu,{
     style:f=>{
@@ -1403,7 +1464,11 @@ function initOnderwijs(){
     [`${mn.toFixed(0)}%`,'',`${mx.toFixed(0)}%`]);
   appendHatchLegend('leg-edu');
 
-  buildKpiGrid('edu-kpi','onderwijs_hoog',2021,v=>v.toFixed(1)+'%','hooggeschoold');
+  buildKpiGrid('edu-kpi','onderwijs_hoog',tabJaar.onderwijs,v=>v.toFixed(1)+'%','hooggeschoold');
+  buildYearBar('edu-years','onderwijs','onderwijs_hoog', yr=>{
+    refreshSeqLayers('onderwijs','onderwijs_hoog',mn,mx,270,{});
+    buildKpiGrid('edu-kpi','onderwijs_hoog',yr,v=>v.toFixed(1)+'%','hooggeschoold');
+  });
 
   const eduCodes = [...BUURT8,STAD_CODE].filter(b=>getVal(b,'onderwijs_hoog',2021)!=null);
   const ctx=document.getElementById('chart-onderwijs').getContext('2d');
@@ -1430,9 +1495,8 @@ function initNationaliteit(){
   const m = makeMap('map-nationaliteit');
   layerState['nationaliteit'] = 'wijk';
 
-  const allVals = GEO.wijkNat.features.map(f=>getVal(f.properties.ggw7,'nationaliteit_niet_belg',2025)).filter(v=>v!=null)
-    .concat([...BUURT8,STAD_CODE].map(b=>getVal(b,'nationaliteit_niet_belg',2025)).filter(v=>v!=null));
-  const mn=0, mx=Math.max(...allVals)*1.05;
+  const allVals = Object.values(SHDATA).flatMap(inds=>Object.values(inds['nationaliteit_niet_belg']||{})).filter(v=>v!=null);
+  const mn=0, mx=allVals.length?Math.max(...allVals)*1.05:50;
 
   const wijkLayer = L.geoJSON(GEO.wijkNat,{
     style:f=>{
@@ -1511,7 +1575,11 @@ function initNationaliteit(){
   gradLegend('leg-nat',['hsl(15,62%,90%)','hsl(15,62%,58%)','hsl(15,62%,38%)'],
     [`${mn.toFixed(0)}%`,'',`${Math.round(mx)}%`]);
 
-  buildKpiGrid('nat-kpi','nationaliteit_niet_belg',2025,v=>v.toFixed(1)+'%','niet-Belgisch');
+  buildKpiGrid('nat-kpi','nationaliteit_niet_belg',tabJaar.nationaliteit,v=>v.toFixed(1)+'%','niet-Belgisch');
+  buildYearBar('nat-years','nationaliteit','nationaliteit_niet_belg', yr=>{
+    refreshSeqLayers('nationaliteit','nationaliteit_niet_belg',mn,mx,15,{sector:'ggw7'});
+    buildKpiGrid('nat-kpi','nationaliteit_niet_belg',yr,v=>v.toFixed(1)+'%','niet-Belgisch');
+  });
 
   const sel=document.getElementById('nat-sel');
   CAMP_BUURTEN.forEach(b=>{
@@ -1653,12 +1721,7 @@ function initVaccinatie(){
   )].map(Number).sort();
   const VAC_JAAR = vacJarenAll.length ? Math.max(...vacJarenAll) : 2024;
 
-  const allVals = [
-    ...GEO.sectorScr.features.map(f=>getVal(f.properties.code,VAC_IND,VAC_JAAR)),
-    ...BUURT8.map(b=>getVal(b,VAC_IND,VAC_JAAR)),
-    getVal(STAD_CODE,VAC_IND,VAC_JAAR)
-  ].filter(v=>v!=null);
-
+  const allVals = Object.values(SHDATA).flatMap(inds=>Object.values(inds[VAC_IND]||{})).filter(v=>v!=null);
   const mn = allVals.length ? Math.min(...allVals)*0.9 : 0;
   const mx = allVals.length ? Math.max(...allVals)*1.05 : 100;
 
@@ -1708,7 +1771,11 @@ function initVaccinatie(){
   gradLegend('leg-vac',['hsl(150,62%,90%)','hsl(150,62%,64%)','hsl(150,62%,38%)'],
     [allVals.length?`${Math.round(mn)}%`:'0%','',allVals.length?`${Math.round(mx)}%`:'100%']);
   appendHatchLegend('leg-vac');
-  buildKpiGrid('vac-kpi',VAC_IND,VAC_JAAR,v=>v.toFixed(1)+'%','');
+  buildKpiGrid('vac-kpi',VAC_IND,tabJaar.vaccinatie,v=>v.toFixed(1)+'%','');
+  buildYearBar('vac-years','vaccinatie',VAC_IND, yr=>{
+    refreshSeqLayers('vaccinatie',VAC_IND,mn,mx,150,{});
+    buildKpiGrid('vac-kpi',VAC_IND,yr,v=>v.toFixed(1)+'%','');
+  });
 
   if(vacJarenAll.length > 0){
     const vacDs = [...BUURT8, STAD_CODE]
