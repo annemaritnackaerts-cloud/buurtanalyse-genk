@@ -145,7 +145,8 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
 .niv-camp-star { color:#FFC000; font-size:.8rem; }
 
 /* ── LANDINGSPAGINA ────────────────────────────────────────────────── */
-#pane-project.active { display:block; overflow-y:auto; }
+#pane-project.active  { display:block; overflow-y:auto; }
+#pane-apotheken.active{ display:block; overflow-y:auto; }
 .proj-page { max-width:980px; margin:0 auto; padding:28px 24px 48px; }
 
 .proj-hero {
@@ -242,6 +243,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
   <button class="tab-btn" onclick="switchTab('inkomen',this)"><span></span> Inkomen</button>
   <button class="tab-btn" onclick="switchTab('onderwijs',this)"><span></span> Onderwijs</button>
   <button class="tab-btn" onclick="switchTab('nationaliteit',this)"><span></span> Nationaliteit</button>
+  <button class="tab-btn" onclick="switchTab('apotheken',this)"><span></span> Apotheken</button>
   <button class="tab-btn" onclick="switchTab('niveaus',this)"><span></span> Niveaus &amp; Bronnen</button>
 </nav>
 
@@ -581,6 +583,60 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
 
 <!-- ══ HPV-VACCINATIE ════════════════════════════════════════════════════ -->
 
+<!-- ══ APOTHEKEN ══════════════════════════════════════════════════════════ -->
+<div id="pane-apotheken" class="tab-pane" style="overflow-y:auto;flex-direction:column;background:#f0f2f5;">
+  <div style="max-width:900px;margin:0 auto;padding:22px 20px 40px;width:100%">
+    <div style="margin-bottom:18px">
+      <h2 style="font-size:1.05rem;font-weight:700;color:#2E4057;margin-bottom:4px">💊 FarmaFlux — Apothekersregistraties</h2>
+      <p style="font-size:.8rem;color:#888;line-height:1.6">Geaggregeerde registraties van sensibiliserings- en doorverwijzingsgesprekken via deelnemende apotheken (postcode 3600). Data per 2-maandse periode. <em>Pilootfase — dummy data ter illustratie.</em></p>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px">
+      <div class="kpi-card" style="border-left-color:#7B3FBE;padding:14px 16px">
+        <div class="kpi-val" id="apo-kpi-sensib" style="font-size:1.4rem;color:#7B3FBE">—</div>
+        <div class="kpi-lbl" style="font-size:.78rem">Totaal sensibiliseringen</div>
+      </div>
+      <div class="kpi-card" style="border-left-color:#4472C4;padding:14px 16px">
+        <div class="kpi-val" id="apo-kpi-doorverw" style="font-size:1.4rem;color:#4472C4">—</div>
+        <div class="kpi-lbl" style="font-size:.78rem">Doorverwijzingen arts/gynaecoloog</div>
+      </div>
+      <div class="kpi-card" style="border-left-color:#70AD47;padding:14px 16px">
+        <div class="kpi-val" id="apo-kpi-vac" style="font-size:1.4rem;color:#70AD47">—</div>
+        <div class="kpi-lbl" style="font-size:.78rem">Vaccinaties uitgeleverd</div>
+      </div>
+    </div>
+
+    <!-- CHARTS ROW -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div style="background:#fff;border-radius:8px;padding:16px 18px;box-shadow:0 1px 6px rgba(0,0,0,.07)">
+        <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:12px;font-weight:700">Totaal per type registratie</h4>
+        <canvas id="chart-apo-bar" height="200"></canvas>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:16px 18px;box-shadow:0 1px 6px rgba(0,0,0,.07)">
+        <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:12px;font-weight:700">Evolutie per periode</h4>
+        <canvas id="chart-apo-trend" height="200"></canvas>
+      </div>
+    </div>
+
+    <!-- DETAIL TABLE -->
+    <div style="background:#fff;border-radius:8px;padding:16px 18px;box-shadow:0 1px 6px rgba(0,0,0,.07);margin-bottom:16px">
+      <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:10px;font-weight:700">Detail per periode &amp; type</h4>
+      <div style="overflow-x:auto">
+        <table class="niv-table" id="apo-table">
+          <thead><tr><th>Periode</th><th>Product</th><th>Registraties</th></tr></thead>
+          <tbody id="apo-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- DISCLAIMER -->
+    <div style="background:#fff8e6;border-radius:8px;padding:12px 16px;border-left:4px solid #FFC000;font-size:.78rem;color:#664d00;line-height:1.65">
+      <strong>ℹ️ Nota:</strong> Gegevens zijn geaggregeerd per 2-maandse FarmaFlux-periode voor postcode 3600. Individuele patiënten zijn niet herleidbaar. Aantallen &lt; 5 worden niet gerapporteerd. Data betreft een pilootfase — resultaten zijn ter illustratie.
+    </div>
+  </div>
+</div>
+
 </div><!-- /workspace -->
 
 <!-- Laadoverlay -->
@@ -624,6 +680,7 @@ let SHDATA   = {};  // code → indicator → jaar → waarde
 let REFDATA  = {};  // indicator → jaar → {genk, limburg, vlaanderen}
 let GEO      = {};  // geladen GeoJSON-bestanden
 let SCR_JAREN = [];   // beschikbare screeningsjaren (gesorteerd)
+let FARMAFLUX = []; // [{periode, cnk_code, product, registraties}]
 
 // ── CSV HELPERS ───────────────────────────────────────────────────────────────
 function csvNaarObjecten(text) {
@@ -714,20 +771,23 @@ async function laadAlleData() {
     ['genk',       LOCAL_GEO + 'genk_stad.geojson'],
   ];
 
-  const dataUrl = useSheets ? sheetUrl('data')      : LOCAL_CSV + 'data.csv';
-  const refUrl  = useSheets ? sheetUrl('referentie'): LOCAL_CSV + 'referentie.csv';
+  const dataUrl     = useSheets ? sheetUrl('data')       : LOCAL_CSV + 'data.csv';
+  const refUrl      = useSheets ? sheetUrl('referentie')  : LOCAL_CSV + 'referentie.csv';
+  const farmaUrl    = useSheets ? sheetUrl('farmaflux')   : LOCAL_CSV + 'farmaflux.csv';
 
-  const [geoResults, dataText, refText] = await Promise.all([
+  const [geoResults, dataText, refText, farmaText] = await Promise.all([
     Promise.all(geoFiles.map(([, url]) => fetch(url).then(r => { if(!r.ok) throw new Error(`Kan ${url} niet laden`); return r.json(); })))
       .then(res => { setProgress(50, 'Statistieken ophalen…'); return res; }),
     fetch(dataUrl).then(r => { if(!r.ok) throw new Error(`Kan data.csv niet laden`); return r.text(); }),
     fetch(refUrl).then(r  => { if(!r.ok) throw new Error(`Kan referentie.csv niet laden`); return r.text(); }),
+    fetch(farmaUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
   ]);
 
   setProgress(80, 'Data verwerken…');
   geoFiles.forEach(([key], i) => GEO[key] = geoResults[i]);
   SHDATA  = buildLookup(csvNaarObjecten(dataText));
   REFDATA = buildRefLookup(csvNaarObjecten(refText));
+  if(farmaText) FARMAFLUX = csvNaarObjecten(farmaText);
 
   SCR_JAREN = [...new Set(
     Object.values(SHDATA).flatMap(inds => Object.keys(inds['screening'] || {}))
@@ -868,6 +928,7 @@ function initTab(name){
   if(name==='onderwijs')   initOnderwijs();
   if(name==='nationaliteit') initNationaliteit();
   if(name==='vaccinatie')   initVaccinatie();
+  if(name==='apotheken')   initApotheken();
   if(name==='niveaus')     initNiveaus();
 }
 
@@ -1799,6 +1860,101 @@ function initVaccinatie(){
           scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}}}});
     }
   }
+}
+
+// ── APOTHEKEN ─────────────────────────────────────────────────────────────────
+const APO_PRODUCTS = {
+  5522289: 'Sensibilisering HPV',
+  5846761: 'Sensibilisering HPV (NL)',
+  5510185: 'Doorverwijzing arts',
+  5521695: 'Doorverwijzing gynaecoloog',
+  3402799: 'Gardasil 9 (vaccin)',
+};
+const APO_TYPE = {
+  5522289: 'sensib',
+  5846761: 'sensib',
+  5510185: 'doorverw',
+  5521695: 'doorverw',
+  3402799: 'vac',
+};
+
+function initApotheken(){
+  const rows = FARMAFLUX.length ? FARMAFLUX : [
+    {periode:'sep-okt 2025', cnk_code:'5522289', product:'Sensibilisering HPV',       registraties:'8'},
+    {periode:'sep-okt 2025', cnk_code:'5846761', product:'Sensibilisering HPV (NL)',   registraties:'5'},
+    {periode:'sep-okt 2025', cnk_code:'5510185', product:'Doorverwijzing arts',        registraties:'6'},
+    {periode:'sep-okt 2025', cnk_code:'5521695', product:'Doorverwijzing gynaecoloog', registraties:'3'},
+    {periode:'sep-okt 2025', cnk_code:'3402799', product:'Gardasil 9 (vaccin)',        registraties:'4'},
+    {periode:'nov-dec 2025', cnk_code:'5522289', product:'Sensibilisering HPV',        registraties:'12'},
+    {periode:'nov-dec 2025', cnk_code:'5846761', product:'Sensibilisering HPV (NL)',   registraties:'7'},
+    {periode:'nov-dec 2025', cnk_code:'5510185', product:'Doorverwijzing arts',        registraties:'9'},
+    {periode:'nov-dec 2025', cnk_code:'5521695', product:'Doorverwijzing gynaecoloog', registraties:'5'},
+    {periode:'nov-dec 2025', cnk_code:'3402799', product:'Gardasil 9 (vaccin)',        registraties:'7'},
+    {periode:'jan-feb 2026', cnk_code:'5522289', product:'Sensibilisering HPV',        registraties:'18'},
+    {periode:'jan-feb 2026', cnk_code:'5846761', product:'Sensibilisering HPV (NL)',   registraties:'10'},
+    {periode:'jan-feb 2026', cnk_code:'5510185', product:'Doorverwijzing arts',        registraties:'13'},
+    {periode:'jan-feb 2026', cnk_code:'5521695', product:'Doorverwijzing gynaecoloog', registraties:'8'},
+    {periode:'jan-feb 2026', cnk_code:'3402799', product:'Gardasil 9 (vaccin)',        registraties:'11'},
+    {periode:'mrt-apr 2026', cnk_code:'5522289', product:'Sensibilisering HPV',        registraties:'22'},
+    {periode:'mrt-apr 2026', cnk_code:'5846761', product:'Sensibilisering HPV (NL)',   registraties:'13'},
+    {periode:'mrt-apr 2026', cnk_code:'5510185', product:'Doorverwijzing arts',        registraties:'16'},
+    {periode:'mrt-apr 2026', cnk_code:'5521695', product:'Doorverwijzing gynaecoloog', registraties:'10'},
+    {periode:'mrt-apr 2026', cnk_code:'3402799', product:'Gardasil 9 (vaccin)',        registraties:'14'},
+  ];
+
+  // Totals per type
+  let totSensib=0, totDoorverw=0, totVac=0;
+  rows.forEach(r=>{
+    const n = parseInt(r.registraties)||0;
+    const prod = (r.product||'').toLowerCase();
+    const t = APO_TYPE[r.cnk_code]
+           || (prod.includes('vaccin') ? 'vac' : prod.includes('doorverw') ? 'doorverw' : 'sensib');
+    if(t==='sensib')   totSensib   += n;
+    if(t==='doorverw') totDoorverw += n;
+    if(t==='vac')      totVac      += n;
+  });
+  document.getElementById('apo-kpi-sensib').textContent  = totSensib;
+  document.getElementById('apo-kpi-doorverw').textContent = totDoorverw;
+  document.getElementById('apo-kpi-vac').textContent      = totVac;
+
+  // Bar chart: totals per product
+  const prodTotals = {};
+  rows.forEach(r=>{ const p=r.product||r.cnk_code; prodTotals[p]=(prodTotals[p]||0)+(parseInt(r.registraties)||0); });
+  const barColors = ['#7B3FBE','#9B6DD6','#4472C4','#5B8DD9','#70AD47'];
+  const ctxBar = document.getElementById('chart-apo-bar').getContext('2d');
+  new Chart(ctxBar,{type:'bar',
+    data:{labels:Object.keys(prodTotals),datasets:[{
+      data:Object.values(prodTotals),
+      backgroundColor:barColors.slice(0,Object.keys(prodTotals).length),
+      borderRadius:4, borderSkipped:false
+    }]},
+    options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false}},
+      scales:{x:{ticks:{stepSize:5}}}}
+  });
+
+  // Line chart: trend per periode
+  const periodes = [...new Set(rows.map(r=>r.periode))];
+  const trendSensib  = periodes.map(p=>rows.filter(r=>r.periode===p&&(APO_TYPE[r.cnk_code]==='sensib')).reduce((s,r)=>s+(parseInt(r.registraties)||0),0));
+  const trendDoorverw= periodes.map(p=>rows.filter(r=>r.periode===p&&(APO_TYPE[r.cnk_code]==='doorverw')).reduce((s,r)=>s+(parseInt(r.registraties)||0),0));
+  const trendVac     = periodes.map(p=>rows.filter(r=>r.periode===p&&(APO_TYPE[r.cnk_code]==='vac')).reduce((s,r)=>s+(parseInt(r.registraties)||0),0));
+  const ctxTrend = document.getElementById('chart-apo-trend').getContext('2d');
+  new Chart(ctxTrend,{type:'line',
+    data:{labels:periodes,datasets:[
+      {label:'Sensibilisering',data:trendSensib, borderColor:'#7B3FBE',backgroundColor:'rgba(123,63,190,.12)',fill:true,tension:.3,borderWidth:2,pointRadius:3},
+      {label:'Doorverwijzing', data:trendDoorverw,borderColor:'#4472C4',backgroundColor:'rgba(68,114,196,.10)',fill:true,tension:.3,borderWidth:2,pointRadius:3},
+      {label:'Vaccinatie',     data:trendVac,    borderColor:'#70AD47',backgroundColor:'rgba(112,173,71,.10)',fill:true,tension:.3,borderWidth:2,pointRadius:3},
+    ]},
+    options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},
+      scales:{y:{beginAtZero:true,ticks:{stepSize:5}}}}
+  });
+
+  // Detail table
+  const tbody = document.getElementById('apo-tbody');
+  rows.forEach(r=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${r.periode}</td><td>${r.product||r.cnk_code}</td><td style="text-align:right;font-weight:600">${r.registraties}</td>`;
+    tbody.appendChild(tr);
+  });
 }
 
 // ── BOOT ──────────────────────────────────────────────────────────────────────
