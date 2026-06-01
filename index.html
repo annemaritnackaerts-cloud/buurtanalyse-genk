@@ -606,6 +606,7 @@ const LOCAL_GEO = 'data/geojson/';
 // ── STATISCHE CONFIGURATIE ────────────────────────────────────────────────────
 const CAMP_BUURTEN  = ['Noord','Oost','West','Centrum'];
 const BLABEL   = {Noord:'Genk-Noord',Oost:'Genk-Oost',West:'Genk-West',Centrum:'Genk-Centrum'};
+const BUURT8_TO_CAMP = {'Genk-Noord':'Noord','Genk-Oost':'Oost','Genk-West':'West','Genk-Centrum':'Centrum'};
 const BCOLOR   = {Noord:'#70AD47',Oost:'#4472C4',West:'#ED7D31',Centrum:'#FFC000'};
 const BCOLOR8  = {"Genk-Centrum": "#FFC000", "Genk-Noord": "#70AD47", "Genk-Oost": "#4472C4", "Genk-West": "#ED7D31", "Genk-Midden": "#9B59B6", "Genk-Zuid": "#E74C3C", "Bret-Gelieren-Kattevenne": "#2ECC71", "Kolderbos-Langerlo": "#7F8C8D"};
 const BUURT8   = ['Genk-Noord','Genk-Oost','Genk-West','Genk-Centrum','Genk-Midden','Genk-Zuid','Bret-Gelieren-Kattevenne','Kolderbos-Langerlo'];
@@ -675,7 +676,10 @@ function buildRefLookup(rows) {
 }
 
 function getVal(code, ind, jaar) {
-  return SHDATA[code]?.[ind]?.[jaar] ?? null;
+  const v = SHDATA[code]?.[ind]?.[jaar] ?? null;
+  if(v !== null) return v;
+  const camp = BUURT8_TO_CAMP[code];
+  return camp ? (SHDATA[camp]?.[ind]?.[jaar] ?? null) : null;
 }
 
 function getRef(ind, jaar, col) {
