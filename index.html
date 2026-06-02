@@ -727,6 +727,9 @@ const SHEET_ID = '14juUOmxxH02gDJU4XUU89fffOJm-aZBd';
 const LOCAL_CSV = 'data/csv/';
 const LOCAL_GEO = 'data/geojson/';
 
+// Bevolkingsdata per statistische sector — Statbel 2025 (statisch, ingebakken)
+const BEV_STATIC = [{"c":"71016A001","n":"GENK-CENTRUM","b":"Genk-Centrum","t":3908,"a":[249,193,450,397,351,435,608,687,458,80]},{"c":"71016A03-","n":"GENK-CENTRUM - NOORD","b":"Genk-Centrum","t":7211,"a":[519,572,823,923,776,881,1066,845,598,208]},{"c":"71016A010","n":"MOLENBLOOK","b":"Genk-Centrum","t":896,"a":[76,96,82,106,103,121,156,77,67,12]},{"c":"71016B22K","n":"HEIDEBLOOK","b":"Genk-Noord","t":1584,"a":[142,157,159,173,180,225,419,106,23,0]},{"c":"71016B22L","n":"HOEVENZAVELLAAN","b":"Genk-Noord","t":323,"a":[30,50,59,51,60,42,25,6,0,0]},{"c":"71016B2BA","n":"NIEUW-DRIEHOEVEN","b":"Genk-Noord","t":526,"a":[44,57,61,42,50,78,100,65,24,5]},{"c":"71016B242","n":"NIEUWE KEMPEN","b":"Genk-Noord","t":1841,"a":[173,198,197,246,260,195,241,271,51,9]},{"c":"71016B23K","n":"OUD-DRIEHOEVEN","b":"Genk-Noord","t":1029,"a":[113,124,129,121,143,176,119,70,27,7]},{"c":"71016B27K","n":"WOLFSBERG INDUSTRIE","b":"Genk-Noord","t":6,"a":[0,0,6,0,0,0,0,0,0,0]},{"c":"71016A391","n":"ZONHOVERHEIDE","b":"Genk-Noord","t":0,"a":[0,0,0,0,0,0,0,0,0,0]},{"c":"71016B29L","n":"ZWARTBERG INDUSTRIE","b":"Genk-Noord","t":47,"a":[5,6,8,0,12,11,5,0,0,0]},{"c":"71016B29K","n":"ZWARTBERG PARK","b":"Genk-Noord","t":0,"a":[0,0,0,0,0,0,0,0,0,0]},{"c":"71016B29M","n":"ZWARTBERG VLIEGVELD","b":"Genk-Noord","t":0,"a":[0,0,0,0,0,0,0,0,0,0]},{"c":"71016B20L","n":"ZWARTBERG-TUINWIJK-NOORD-OOST","b":"Genk-Noord","t":1300,"a":[142,186,140,157,166,187,148,117,42,15]},{"c":"71016B20K","n":"ZWARTBERG-TUINWIJK-NOORD-WEST","b":"Genk-Noord","t":622,"a":[70,79,61,78,85,64,63,56,48,18]},{"c":"71016B20M","n":"ZWARTBERG-TUINWIJK-ZUID-OOST","b":"Genk-Noord","t":0,"a":[0,0,0,0,0,0,0,0,0,0]},{"c":"71016B2AA","n":"ZWARTBERG-ZUID","b":"Genk-Noord","t":1819,"a":[168,256,234,186,249,242,265,136,67,16]},{"c":"71016A4OK","n":"BOXBERG","b":"Genk-West","t":3965,"a":[456,541,360,490,600,434,456,424,173,31]},{"c":"71016A31K","n":"OUD-WINTERSLAG C-MINE","b":"Genk-West","t":1943,"a":[169,225,230,231,277,314,292,142,56,7]},{"c":"71016A432","n":"SCHEMMERSBERG","b":"Genk-West","t":1026,"a":[123,116,102,175,136,172,126,58,18,0]},{"c":"71016A300","n":"WINTERSLAG - TUINWIJK I","b":"Genk-West","t":3152,"a":[271,364,365,426,415,462,420,237,138,54]},{"c":"71016A42-","n":"WINTERSLAG - TUINWIJK II & IV","b":"Genk-West","t":2628,"a":[264,388,368,246,337,354,298,209,141,23]},{"c":"71016A37K","n":"WINTERSLAG TERRIL","b":"Genk-West","t":7,"a":[0,0,0,0,0,0,0,7,0,0]},{"c":"71016B191","n":"BODEM - NOORD","b":"Genk-Oost","t":0,"a":[0,0,0,0,0,0,0,0,0,0]},{"c":"71016A882","n":"BODEM - ZUID","b":"Genk-Oost","t":0,"a":[0,0,0,0,0,0,0,0,0,0]},{"c":"71016B17-","n":"KOLENMIJN ANDRE DUMONT","b":"Genk-Oost","t":0,"a":[0,0,0,0,0,0,0,0,0,0]},{"c":"71016B1BK","n":"NOORD WATERSCHEI","b":"Genk-Oost","t":3648,"a":[304,475,441,424,495,503,495,328,151,32]},{"c":"71016B11-","n":"OUD-WATERSCHEI","b":"Genk-Oost","t":3977,"a":[412,551,507,510,565,511,501,286,120,14]},{"c":"71016B083","n":"STALEN","b":"Genk-Oost","t":5,"a":[0,0,0,0,0,0,0,5,0,0]},{"c":"71016B1CK","n":"WATERSCHEI TEXAS","b":"Genk-Oost","t":379,"a":[38,66,60,38,51,54,49,15,8,0]},{"c":"71016B1AB","n":"WATERSCHEI-ZUID","b":"Genk-Oost","t":3152,"a":[335,413,374,410,438,385,413,256,111,17]},{"c":"71016A490","n":"BOKRIJK-NOORD","b":"Genk-Midden","t":429,"a":[40,61,44,54,64,68,59,30,9,0]},{"c":"71016A600","n":"BOKRIJK-ZUID","b":"Genk-Midden","t":883,"a":[92,85,86,124,95,98,146,91,43,23]},{"c":"71016A04-","n":"BRETHEI","b":"Bret-Gelieren-Kattevenne","t":3276,"a":[340,365,444,418,381,535,435,223,108,27]},{"c":"71016A912","n":"CAETSBEEK","b":"Genk-Zuid","t":625,"a":[72,90,76,81,102,95,61,32,16,0]},{"c":"71016A02K","n":"D' IERD-ZONNEWEELDE","b":"Genk-Midden","t":1118,"a":[95,120,112,115,94,109,136,172,107,58]},{"c":"71016A59K","n":"DE MATEN-NATUUR","b":"Genk-Midden","t":182,"a":[15,19,18,28,16,26,30,24,6,0]},{"c":"71016A292","n":"FLETERSDEL","b":"Kolderbos-Langerlo","t":527,"a":[40,79,63,47,90,76,69,42,21,0]},{"c":"71016A800","n":"GELIEREN - HOOGZIJ","b":"Bret-Gelieren-Kattevenne","t":717,"a":[56,66,68,77,61,125,148,72,37,7]},{"c":"71016A41K","n":"HASSELTWEG KNEIPPWIEK","b":"Genk-Midden","t":1957,"a":[187,223,196,244,266,252,250,194,125,20]},{"c":"71016A579","n":"INDUSTRIE-ZUID","b":"Genk-Zuid","t":86,"a":[5,0,7,17,11,22,14,10,0,0]},{"c":"71016A890","n":"KATTEVENNE","b":"Bret-Gelieren-Kattevenne","t":41,"a":[0,0,9,6,0,7,11,8,0,0]},{"c":"71016A775","n":"KLEIN LANGERLO","b":"Genk-Zuid","t":34,"a":[5,0,6,5,6,5,7,0,0,0]},{"c":"71016A72K","n":"KOEBAAN-NOORD","b":"Genk-Zuid","t":571,"a":[35,75,117,55,82,107,67,33,0,0]},{"c":"71016A20-","n":"KOLDERBOS","b":"Kolderbos-Langerlo","t":2596,"a":[338,337,315,339,364,317,280,165,118,23]},{"c":"71016A210","n":"LANGERLO","b":"Kolderbos-Langerlo","t":557,"a":[52,74,94,66,73,80,56,42,20,0]},{"c":"71016A791","n":"MEIBOS","b":"Genk-Zuid","t":75,"a":[5,6,8,12,6,12,19,7,0,0]},{"c":"71016A0MA","n":"MELBERG","b":"Genk-Midden","t":31,"a":[6,0,5,7,0,13,0,0,0,0]},{"c":"71016A0PA","n":"MELBERG-NATUUR","b":"Genk-Midden","t":79,"a":[11,7,13,11,9,12,9,7,0,0]},{"c":"71016A734","n":"NIEUW SLEDDERLO","b":"Genk-Zuid","t":1759,"a":[197,368,233,156,273,215,161,117,39,0]},{"c":"71016A70K","n":"SLEDDERLO OUD","b":"Genk-Zuid","t":989,"a":[141,145,136,159,125,140,90,37,16,0]},{"c":"71016A08K","n":"STIEMER","b":"Bret-Gelieren-Kattevenne","t":0,"a":[0,0,0,0,0,0,0,0,0,0]},{"c":"71016A71-","n":"TERBOEKT","b":"Genk-Zuid","t":477,"a":[54,56,50,75,51,59,101,13,18,0]},{"c":"71016A50K","n":"TERMIEN","b":"Genk-Midden","t":2253,"a":[225,310,231,300,304,329,273,179,86,16]},{"c":"71016A512","n":"TERMIEN - KLOOSTER","b":"Genk-Midden","t":624,"a":[52,47,94,72,73,78,115,71,17,5]},{"c":"71016A51-","n":"TERMIEN - TUINWIJK","b":"Genk-Midden","t":1845,"a":[222,227,218,217,231,232,235,179,76,8]},{"c":"71016A02M","n":"VLAKVELD OP STROEP","b":"Genk-Midden","t":62,"a":[10,7,6,19,0,11,9,0,0,0]},{"c":"71016A02L","n":"VLAKVELD TUINWIJK","b":"Genk-Midden","t":908,"a":[96,156,116,80,137,104,138,48,20,13]},{"c":"71016A4AB","n":"WENNEL","b":"Genk-Midden","t":324,"a":[22,17,17,25,29,28,145,41,0,0]}];
+
 // ── STATISCHE CONFIGURATIE ────────────────────────────────────────────────────
 const CAMP_BUURTEN  = ['Noord','Oost','West','Centrum'];
 const BLABEL   = {Noord:'Genk-Noord',Oost:'Genk-Oost',West:'Genk-West',Centrum:'Genk-Centrum'};
@@ -845,16 +848,14 @@ async function laadAlleData() {
   const refUrl       = useSheets ? sheetUrl('referentie')          : LOCAL_CSV + 'referentie.csv';
   const farmaUrl     = useSheets ? sheetUrl('farmaflux')           : LOCAL_CSV + 'farmaflux.csv';
   const vacDetailUrl = useSheets ? sheetUrl('vaccinaties_detail')  : LOCAL_CSV + 'vaccinaties_detail.csv';
-  const bevUrl       = LOCAL_CSV + 'bevolking_sectoren.csv'; // statisch — altijd lokaal geladen
 
-  const [geoResults, dataText, refText, farmaText, vacDetailText, bevText] = await Promise.all([
+  const [geoResults, dataText, refText, farmaText, vacDetailText] = await Promise.all([
     Promise.all(geoFiles.map(([, url]) => fetch(url).then(r => { if(!r.ok) throw new Error(`Kan ${url} niet laden`); return r.json(); })))
       .then(res => { setProgress(50, 'Statistieken ophalen…'); return res; }),
     fetch(dataUrl).then(r => { if(!r.ok) throw new Error(`Kan data.csv niet laden`); return r.text(); }),
     fetch(refUrl).then(r  => { if(!r.ok) throw new Error(`Kan referentie.csv niet laden`); return r.text(); }),
     fetch(farmaUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
     fetch(vacDetailUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
-    fetch(bevUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
   ]);
 
   setProgress(80, 'Data verwerken…');
@@ -863,15 +864,12 @@ async function laadAlleData() {
   REFDATA = buildRefLookup(csvNaarObjecten(refText));
   if(farmaText) FARMAFLUX = csvNaarObjecten(farmaText);
   if(vacDetailText) VAC_DETAIL = parseVacDetail(csvNaarObjecten(vacDetailText));
-  if(bevText) {
-    BEV_DATA = buildBevLookup(csvNaarObjecten(bevText));
-    // Injecteer sectortotalen in SHDATA zodat bestaande tooltips bevolkingscijfers tonen
-    Object.entries(BEV_DATA).forEach(([code, d]) => {
-      if(!SHDATA[code]) SHDATA[code] = {};
-      if(!SHDATA[code]['bevolking']) SHDATA[code]['bevolking'] = {};
-      SHDATA[code]['bevolking'][2025] = d.totaal;
-    });
-  }
+  BEV_DATA = buildBevLookup(BEV_STATIC);
+  Object.entries(BEV_DATA).forEach(([code, d]) => {
+    if(!SHDATA[code]) SHDATA[code] = {};
+    if(!SHDATA[code]['bevolking']) SHDATA[code]['bevolking'] = {};
+    SHDATA[code]['bevolking'][2025] = d.totaal;
+  });
 
   SCR_JAREN = [...new Set(
     Object.values(SHDATA).flatMap(inds => Object.keys(inds['screening'] || {}))
@@ -1339,15 +1337,10 @@ function buildAgeScrData(){
 function buildBevLookup(rows) {
   const out = {};
   rows.forEach(r => {
-    if(!r.code || r.code === '71016ZZZZ') return;
-    out[r.code] = {
-      naam: r.naam, buurt8: r.buurt8,
-      totaal: Number(r.totaal)||0,
-      a0_9:   Number(r.bev_0_9)||0,   a10_19: Number(r.bev_10_19)||0,
-      a20_29: Number(r.bev_20_29)||0, a30_39: Number(r.bev_30_39)||0,
-      a40_49: Number(r.bev_40_49)||0, a50_59: Number(r.bev_50_59)||0,
-      a60_69: Number(r.bev_60_69)||0, a70_79: Number(r.bev_70_79)||0,
-      a80_89: Number(r.bev_80_89)||0, a90p:   Number(r.bev_90plus)||0,
+    out[r.c] = {
+      naam: r.n, buurt8: r.b, totaal: r.t,
+      a0_9:r.a[0], a10_19:r.a[1], a20_29:r.a[2], a30_39:r.a[3], a40_49:r.a[4],
+      a50_59:r.a[5], a60_69:r.a[6], a70_79:r.a[7], a80_89:r.a[8], a90p:r.a[9],
     };
   });
   return out;
