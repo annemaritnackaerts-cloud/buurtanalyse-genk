@@ -460,7 +460,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       <span class="level-badge" id="lvl-bevolking">📍 Statistisch sector (2025)</span>
       <div class="tgl-pill">
         <span class="tgl-opt active" onclick="setLayer('bevolking','sector',this)">Sector</span>
-        <span class="tgl-opt" onclick="setLayer('bevolking','campagne',this)">Campagne</span>
+        <span class="tgl-opt" onclick="setLayer('bevolking','buurt8',this)">8 Buurten</span>
         <span class="tgl-opt" onclick="setLayer('bevolking','stad',this)">Stad</span>
       </div>
     </div>
@@ -477,7 +477,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       <div id="bev-stad-kpi" style="font-size:2rem;font-weight:800;color:#2E4057;padding:4px 0 8px"></div>
     </div>
     <div class="panel-section">
-      <h4>Campagnebuurten</h4>
+      <h4>8 buurten</h4>
       <div class="kpi-grid" id="bev-buurt-kpi"></div>
     </div>
     <div class="chart-wrap">
@@ -1087,7 +1087,7 @@ function setLayer(tab, level, btn){
     inkomen:      {sector:'📍 Statistisch sector (2024)', buurt8:'📍 8 buurten', campagne:'📍 Campagnebuurten', stad:'📍 Genk stad'},
     onderwijs:    {sector:'📍 Statistisch sector (2024)', buurt8:'📍 8 buurten', campagne:'📍 Campagnebuurten', stad:'📍 Genk stad'},
     nationaliteit:{wijk:'📍 Wijkniveau (31 wijken)', buurt8:'📍 8 buurten', campagne:'📍 Campagnebuurten', stad:'📍 Genk stad'},
-    bevolking:    {sector:'📍 Statistisch sector (2025)', campagne:'📍 Campagnebuurten', stad:'📍 Genk stad'},
+    bevolking:    {sector:'📍 Statistisch sector (2025)', buurt8:'📍 8 buurten', stad:'📍 Genk stad'},
     vaccinatie:   {sector:'📍 Statistisch sector', buurt8:'📍 8 buurten', campagne:'📍 Campagnebuurten', stad:'📍 Genk stad'},
   };
   const el = document.getElementById('lvl-'+tab);
@@ -1341,7 +1341,7 @@ function buildBevLookup(rows) {
   rows.forEach(r => {
     if(!r.code || r.code === '71016ZZZZ') return;
     out[r.code] = {
-      naam: r.naam, buurt: r.buurt,
+      naam: r.naam, buurt8: r.buurt8,
       totaal: Number(r.totaal)||0,
       a0_9:   Number(r.bev_0_9)||0,   a10_19: Number(r.bev_10_19)||0,
       a20_29: Number(r.bev_20_29)||0, a30_39: Number(r.bev_30_39)||0,
@@ -1370,9 +1370,9 @@ function initBevolking() {
   function bevTooltip(code, naam) {
     const d = BEV_DATA[code];
     if(!d) return makeTooltip([naam, ['Inwoners', '—']]);
-    const jong  = d.a0_9 + d.a10_19;
+    const jong   = d.a0_9 + d.a10_19;
     const midden = d.a20_29 + d.a30_39 + d.a40_49 + d.a50_59 + d.a60_69;
-    const oud   = d.a70_79 + d.a80_89 + d.a90p;
+    const oud    = d.a70_79 + d.a80_89 + d.a90p;
     return makeTooltip([naam,
       ['Inwoners', d.totaal.toLocaleString('nl-BE')],
       ['0–19 jaar', jong.toLocaleString('nl-BE')],
@@ -1394,28 +1394,28 @@ function initBevolking() {
     }
   });
 
-  // Campagne-buurt aggregaten
-  const BEV_CAMP = {Noord:0, Oost:0, West:0, Centrum:0};
-  Object.values(BEV_DATA).forEach(d => { if(BEV_CAMP[d.buurt] !== undefined) BEV_CAMP[d.buurt] += d.totaal; });
+  // 8-buurt aggregaten
+  const BEV_BUURT8 = {};
+  BUURT8.forEach(b => { BEV_BUURT8[b] = 0; });
+  Object.values(BEV_DATA).forEach(d => { if(BEV_BUURT8[d.buurt8] !== undefined) BEV_BUURT8[d.buurt8] += d.totaal; });
   const BEV_STAD = Object.values(BEV_DATA).reduce((s, d) => s + d.totaal, 0);
-  const campMn = Math.min(...Object.values(BEV_CAMP));
-  const campMx = Math.max(...Object.values(BEV_CAMP));
+  const b8Vals = Object.values(BEV_BUURT8).filter(v => v > 0);
+  const b8Mn = b8Vals.length ? Math.min(...b8Vals) : 0;
+  const b8Mx = b8Vals.length ? Math.max(...b8Vals) : 15000;
 
-  const campLayer = L.geoJSON(GEO.buurt, {
+  const buurt8Layer = L.geoJSON(GEO.achtBuurt, {
     style: f => {
-      const b = f.properties.Buurt;
-      const v = BEV_CAMP[b];
-      return v != null
-        ? {fillColor: seqColor(v, campMn, campMx, BEV_HUE), fillOpacity:.84, color:'#fff', weight:1.5}
-        : {fillColor:'#d0d0d0', fillOpacity:.4, color:'#bbb', weight:1, dashArray:'4,3'};
+      const b = f.properties.buurt8;
+      const v = BEV_BUURT8[b];
+      return {fillColor: seqColor(v||null, b8Mn, b8Mx, BEV_HUE), fillOpacity:.84, color:'#fff', weight:1.5};
     },
     onEachFeature: (f, layer) => {
-      const b = f.properties.Buurt;
-      const v = BEV_CAMP[b];
-      layer.bindTooltip(makeTooltip([BLABEL[b]||b, ['Inwoners', v != null ? v.toLocaleString('nl-BE') : '—']]),
+      const b = f.properties.buurt8;
+      const v = BEV_BUURT8[b];
+      layer.bindTooltip(makeTooltip([BLABEL8[b]||b, ['Inwoners', v != null ? v.toLocaleString('nl-BE') : '—']]),
         {sticky:true, className:'leaflet-tooltip'});
-      layer.on('mouseover', () => hlBuurt(layer, true));
-      layer.on('mouseout',  () => hlBuurt(layer, false));
+      layer.on('mouseover', () => layer.setStyle({weight:3, color:'#333'}));
+      layer.on('mouseout',  () => layer.setStyle({weight:1.5, color:'#fff'}));
     }
   });
 
@@ -1432,7 +1432,7 @@ function initBevolking() {
     }
   });
 
-  layerGroups['bevolking'] = {sector: secLayer, campagne: campLayer, stad: stadLayer};
+  layerGroups['bevolking'] = {sector: secLayer, buurt8: buurt8Layer, stad: stadLayer};
   secLayer.addTo(m);
   addBuurtBorder(m);
 
@@ -1443,10 +1443,10 @@ function initBevolking() {
   // Side panel KPI's
   document.getElementById('bev-stad-kpi').textContent = BEV_STAD.toLocaleString('nl-BE') + ' inwoners';
   const kpiGrid = document.getElementById('bev-buurt-kpi');
-  ['Noord','Oost','West','Centrum'].forEach(b => {
+  BUURT8.forEach(b => {
     const el = document.createElement('div');
     el.className = 'kpi-cell';
-    el.innerHTML = `<div class="kpi-val">${(BEV_CAMP[b]||0).toLocaleString('nl-BE')}</div><div class="kpi-lbl">Genk-${b}</div>`;
+    el.innerHTML = `<div class="kpi-val" style="font-size:.95rem">${(BEV_BUURT8[b]||0).toLocaleString('nl-BE')}</div><div class="kpi-lbl">${BLABEL8[b]||b}</div>`;
     kpiGrid.appendChild(el);
   });
 
@@ -1462,7 +1462,7 @@ function initBevolking() {
       datasets:[{
         data: topSec.map(([,d]) => d.totaal),
         backgroundColor: topSec.map(([,d]) => {
-          const col = {Noord:'#70AD47',Oost:'#4472C4',West:'#ED7D31',Centrum:'#FFC000'}[d.buurt];
+          const col = BCOLOR8[d.buurt8];
           return col ? col+'cc' : '#aaaaaa88';
         }),
         borderWidth:0
