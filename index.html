@@ -984,6 +984,8 @@ function refreshSeqLayers(tab, indicator, mn, mx, hue, codeProps){
   });
 }
 
+const layerSwitchCb = {};
+
 function setLayer(tab, level, btn){
   btn.closest('.tgl-pill').querySelectorAll('.tgl-opt').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
@@ -1004,6 +1006,7 @@ function setLayer(tab, level, btn){
   };
   const el = document.getElementById('lvl-'+tab);
   if(el && badges[tab]) el.textContent = badges[tab][level]||'';
+  if(layerSwitchCb[tab]) layerSwitchCb[tab](level);
 }
 
 // ══ SCREENING ═════════════════════════════════════════════════════════════════
@@ -1212,6 +1215,15 @@ function drawScrMap(m){
         layer.on('mouseout',()=>hl(layer,false));
       }
     }).addTo(m);
+    const genkRate = getRef('screening', scrYear, 'genk');
+    if(genkRate != null){
+      const c = L.geoJSON(GEO.genk).getBounds().getCenter();
+      scrCityMarker = L.marker(c,{icon:L.divIcon({
+        className:'',
+        html:`<div style="font-size:1.4rem;font-weight:800;color:#2E4057;background:rgba(255,255,255,.82);padding:2px 8px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.25);white-space:nowrap;transform:translateX(-50%)">${(genkRate*100).toFixed(1)}%<span style="font-size:.7rem;font-weight:500;margin-left:4px">Genk</span></div>`,
+        iconSize:[0,0]
+      }),interactive:false}).addTo(m);
+    }
     document.getElementById('lvl-screening').textContent=`📍 Statistisch sector (2025) — ${scrYear}`;
   }
 }
@@ -1834,6 +1846,19 @@ function initVaccinatie(){
   secLayer.addTo(m);
   addBuurtBorder(m);
 
+  let vacCityMarker = null;
+  const refreshVacCityMarker = yr => {
+    if(vacCityMarker){ m.removeLayer(vacCityMarker); vacCityMarker=null; }
+    if(layerState.vaccinatie !== 'stad') return;
+    const rate = getVal(STAD_CODE, VAC_IND, yr);
+    if(rate == null) return;
+    vacCityMarker = L.marker(vacStadLayer.getBounds().getCenter(), {
+      icon:L.divIcon({className:'',
+        html:`<div style="font-size:2rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);white-space:nowrap;transform:translateX(-50%)">${rate.toFixed(1)}%</div>`,
+        iconSize:[0,0]}),interactive:false}).addTo(m);
+  };
+  layerSwitchCb['vaccinatie'] = () => refreshVacCityMarker(tabJaar.vaccinatie);
+
   gradLegend('leg-vac',['hsl(150,62%,90%)','hsl(150,62%,64%)','hsl(150,62%,38%)'],
     [allVals.length?`${Math.round(mn)}%`:'0%','',allVals.length?`${Math.round(mx)}%`:'100%']);
   appendHatchLegend('leg-vac');
@@ -1841,6 +1866,12 @@ function initVaccinatie(){
   buildYearBar('vac-years','vaccinatie',VAC_IND, yr=>{
     refreshSeqLayers('vaccinatie',VAC_IND,mn,mx,150,{});
     buildKpiGrid('vac-kpi',VAC_IND,yr,v=>v.toFixed(1)+'%','');
+    const grps=layerGroups['vaccinatie'];
+    grps.sector.eachLayer(l=>{const p=l.feature.properties;l.setTooltipContent(makeTooltip([p.naam||p.code,['% Gevaccineerd',fmtPct(getVal(p.code,VAC_IND,yr))],['Code',p.code]]));});
+    grps.buurt8.eachLayer(l=>{const b=l.feature.properties.buurt8;l.setTooltipContent(makeTooltip([b,['% Gevaccineerd',fmtPct(getVal(b,VAC_IND,yr))]]));});
+    grps.campagne.eachLayer(l=>{const b=l.feature.properties.Buurt;l.setTooltipContent(makeTooltip([BLABEL[b]||b,['% Gevaccineerd',fmtPct(getVal(b,VAC_IND,yr))]]));});
+    grps.stad.eachLayer(l=>{l.setTooltipContent(makeTooltip(['Genk (stad)',['% Gevaccineerd',fmtPct(getVal(STAD_CODE,VAC_IND,yr))]]));});
+    refreshVacCityMarker(yr);
   });
 
   if(vacJarenAll.length > 0){
