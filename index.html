@@ -102,6 +102,16 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
 .b-btn.Centrum{ border-color:#FFC000; color:#888; }
 .side-panel::-webkit-scrollbar { width:4px; }
 .side-panel::-webkit-scrollbar-thumb { background:#ddd; border-radius:3px; }
+.expand-btn { border:none; background:none; cursor:pointer; font-size:.9rem; color:#aaa; padding:2px 4px; border-radius:4px; line-height:1; }
+.expand-btn:hover { background:#f0f2f5; color:#555; }
+.chart-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9999; align-items:center; justify-content:center; }
+.chart-modal-overlay.open { display:flex; }
+.chart-modal-box { background:#fff; border-radius:12px; padding:22px 24px 18px; width:min(860px,94vw); max-height:88vh; overflow-y:auto; position:relative; }
+.chart-modal-close { position:absolute; top:10px; right:14px; border:none; background:none; font-size:1.3rem; cursor:pointer; color:#888; line-height:1; }
+.chart-modal-close:hover { color:#333; }
+.vac-note { font-size:.67rem; color:#aaa; line-height:1.5; padding:0 14px 12px; }
+.vac-note details summary { cursor:pointer; color:#888; font-weight:600; }
+.privacy-note { font-size:.67rem; color:#bbb; padding:2px 14px 8px; }
 .leaflet-tooltip { font-family:var(--font); font-size:.8rem; border-radius:6px;
                     box-shadow:0 3px 10px rgba(0,0,0,.18); border:none; padding:8px 12px; }
 .tt-title { font-weight:700; font-size:.85rem; margin-bottom:4px; color:var(--dark); }
@@ -416,6 +426,28 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:8px;font-weight:700;">Evolutie vaccinatiegraad (%)</h4>
       <canvas id="chart-vaccinatie"></canvas>
     </div>
+    <div class="panel-section" id="vac-detail-section" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h4>Registratiegraad per geboortejaar</h4>
+        <button class="expand-btn" onclick="openVacModal('regist')" title="Vergroot grafiek">⛶</button>
+      </div>
+      <div style="min-height:160px"><canvas id="chart-vac-regist"></canvas></div>
+      <div class="privacy-note">░ = privacy-gecensureerd (&lt;5% of &gt;95%)</div>
+    </div>
+    <div class="panel-section" id="vac-clb-section" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h4>CLB-aandeel bij gevaccineerden</h4>
+        <button class="expand-btn" onclick="openVacModal('clb')" title="Vergroot grafiek">⛶</button>
+      </div>
+      <div style="min-height:140px"><canvas id="chart-vac-clb"></canvas></div>
+      <div class="privacy-note">% gevaccineerden dat via CLB (school) gevaccineerd werd</div>
+    </div>
+    <div class="vac-note" id="vac-methode-note" style="display:none">
+      <details>
+        <summary>Methodologische nota</summary>
+        <p style="margin-top:6px">Vaccinatieregistraties in Vaccinnet op 15/01/2026, gecombineerd met bevolkingscijfers Statbel van 01/01/2025. Inwoners Genk, geboortejaar 2000–2014. Gevaccineerd = minstens 2 HPV-vaccins. Registratiegraad kan afwijken van effectieve vaccinatiegraad door onderregistratie (~0,3% in studie 2020). Geboortecohort 2013–2014 zit deels nog in het 1ste jaar secundair — vaccinatie nog niet afgerond. Geen vergelijking mogelijk tussen geboortejaren (ongelijke blootstellingstijd).</p>
+      </details>
+    </div>
   </div>
 </div>
 
@@ -681,6 +713,7 @@ let REFDATA  = {};  // indicator → jaar → {genk, limburg, vlaanderen}
 let GEO      = {};  // geladen GeoJSON-bestanden
 let SCR_JAREN = [];   // beschikbare screeningsjaren (gesorteerd)
 let FARMAFLUX = []; // [{periode, cnk_code, product, registraties}]
+let VAC_DETAIL = []; // [{snapshot, jaar, regist_m, regist_v, regist_tot, clb_m, clb_v, clb_tot}]
 
 // ── CSV HELPERS ───────────────────────────────────────────────────────────────
 function csvNaarObjecten(text) {
@@ -771,16 +804,18 @@ async function laadAlleData() {
     ['genk',       LOCAL_GEO + 'genk_stad.geojson'],
   ];
 
-  const dataUrl     = useSheets ? sheetUrl('data')       : LOCAL_CSV + 'data.csv';
-  const refUrl      = useSheets ? sheetUrl('referentie')  : LOCAL_CSV + 'referentie.csv';
-  const farmaUrl    = useSheets ? sheetUrl('farmaflux')   : LOCAL_CSV + 'farmaflux.csv';
+  const dataUrl      = useSheets ? sheetUrl('data')               : LOCAL_CSV + 'data.csv';
+  const refUrl       = useSheets ? sheetUrl('referentie')          : LOCAL_CSV + 'referentie.csv';
+  const farmaUrl     = useSheets ? sheetUrl('farmaflux')           : LOCAL_CSV + 'farmaflux.csv';
+  const vacDetailUrl = useSheets ? sheetUrl('vaccinaties_detail')  : LOCAL_CSV + 'vaccinaties_detail.csv';
 
-  const [geoResults, dataText, refText, farmaText] = await Promise.all([
+  const [geoResults, dataText, refText, farmaText, vacDetailText] = await Promise.all([
     Promise.all(geoFiles.map(([, url]) => fetch(url).then(r => { if(!r.ok) throw new Error(`Kan ${url} niet laden`); return r.json(); })))
       .then(res => { setProgress(50, 'Statistieken ophalen…'); return res; }),
     fetch(dataUrl).then(r => { if(!r.ok) throw new Error(`Kan data.csv niet laden`); return r.text(); }),
     fetch(refUrl).then(r  => { if(!r.ok) throw new Error(`Kan referentie.csv niet laden`); return r.text(); }),
     fetch(farmaUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
+    fetch(vacDetailUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
   ]);
 
   setProgress(80, 'Data verwerken…');
@@ -788,6 +823,7 @@ async function laadAlleData() {
   SHDATA  = buildLookup(csvNaarObjecten(dataText));
   REFDATA = buildRefLookup(csvNaarObjecten(refText));
   if(farmaText) FARMAFLUX = csvNaarObjecten(farmaText);
+  if(vacDetailText) VAC_DETAIL = parseVacDetail(csvNaarObjecten(vacDetailText));
 
   SCR_JAREN = [...new Set(
     Object.values(SHDATA).flatMap(inds => Object.keys(inds['screening'] || {}))
@@ -1891,6 +1927,109 @@ function initVaccinatie(){
           scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}}}});
     }
   }
+  initVacDetail();
+}
+
+// ── VACCINATIE DETAIL ─────────────────────────────────────────────────────────
+function parseVacDetail(rows) {
+  return rows.map(r => ({
+    snapshot: r.snapshot,
+    jaar: Number(r.geboortejaar),
+    regist_m:   r.regist_mannen,
+    regist_v:   r.regist_vrouwen,
+    regist_tot: r.regist_totaal,
+    clb_m:      r.clb_mannen,
+    clb_v:      r.clb_vrouwen,
+    clb_tot:    r.clb_totaal,
+  }));
+}
+
+function vacVal(raw) {
+  if(raw === null || raw === undefined) return {v: null, capped: null};
+  const s = String(raw).trim();
+  if(s === '<5%') return {v: 2.5, capped: 'low'};
+  if(s === '>95%') return {v: 97.5, capped: 'high'};
+  const n = parseFloat(s);
+  return isNaN(n) ? {v: null, capped: null} : {v: Math.round(n * 1000) / 10, capped: null};
+}
+
+let _vacDetailChartConfigs = {};
+let _vacModalChart = null;
+
+function buildVacDetailChartConfig(rows, type) {
+  const labels = rows.map(r => String(r.jaar));
+  const fields = type === 'regist'
+    ? [{key:'regist_tot', label:'Totaal',  color:'#2E4057'}, {key:'regist_v', label:'Vrouwen', color:'#e05a7a'}, {key:'regist_m', label:'Mannen',  color:'#4472C4'}]
+    : [{key:'clb_tot',    label:'Totaal',  color:'#2E4057'}, {key:'clb_v',   label:'Vrouwen', color:'#e05a7a'}, {key:'clb_m',   label:'Mannen',  color:'#4472C4'}];
+
+  const datasets = fields.map(f => {
+    const parsed = rows.map(r => vacVal(r[f.key]));
+    return {
+      label: f.label,
+      data: parsed.map(p => p.v),
+      backgroundColor: parsed.map(p =>
+        p.capped === 'low'  ? `${f.color}44` :
+        p.capped === 'high' ? `${f.color}77` : `${f.color}cc`),
+      borderColor: parsed.map(p => p.capped ? f.color + '66' : f.color),
+      borderWidth: 1,
+    };
+  });
+
+  return {
+    type: 'bar',
+    data: {labels, datasets},
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {position:'bottom', labels:{boxWidth:10, font:{size:10}}},
+        tooltip: {callbacks:{label: c => {
+          const r = rows[c.dataIndex];
+          const raw = fields[c.datasetIndex].key;
+          const s = String(r[raw]).trim();
+          if(s==='<5%') return `${c.dataset.label}: < 5% (gecensureerd)`;
+          if(s==='>95%') return `${c.dataset.label}: > 95% (gecensureerd)`;
+          return `${c.dataset.label}: ${c.raw != null ? c.raw.toFixed(1)+'%' : '—'}`;
+        }}},
+      },
+      scales: {
+        x: {ticks:{font:{size:9}}, grid:{display:false}},
+        y: {min:0, max:100, ticks:{callback:v=>v+'%', font:{size:10}}, grid:{color:'#f0f0f0'}},
+      },
+    },
+  };
+}
+
+function initVacDetail() {
+  if(!VAC_DETAIL.length) return;
+  const snapshots = [...new Set(VAC_DETAIL.map(r=>r.snapshot))].sort();
+  const latest = snapshots[snapshots.length - 1];
+  const rows = VAC_DETAIL.filter(r => r.snapshot === latest).sort((a,b)=>a.jaar-b.jaar);
+
+  ['vac-detail-section','vac-clb-section','vac-methode-note'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) el.style.display='';
+  });
+
+  const registCfg = buildVacDetailChartConfig(rows, 'regist');
+  const clbCfg    = buildVacDetailChartConfig(rows, 'clb');
+  _vacDetailChartConfigs = {regist: registCfg, clb: clbCfg};
+
+  new Chart(document.getElementById('chart-vac-regist').getContext('2d'), registCfg);
+  new Chart(document.getElementById('chart-vac-clb').getContext('2d'), clbCfg);
+}
+
+function openVacModal(type) {
+  const titles = {regist:'Registratiegraad per geboortejaar — Genk', clb:'CLB-aandeel bij gevaccineerden — Genk'};
+  document.getElementById('vac-modal-title').textContent = titles[type] || '';
+  document.getElementById('vac-modal').classList.add('open');
+  if(_vacModalChart) { _vacModalChart.destroy(); _vacModalChart = null; }
+  const cfg = JSON.parse(JSON.stringify(_vacDetailChartConfigs[type]));
+  cfg.options.maintainAspectRatio = false;
+  _vacModalChart = new Chart(document.getElementById('chart-vac-modal').getContext('2d'), cfg);
+}
+
+function closeVacModal() {
+  document.getElementById('vac-modal').classList.remove('open');
 }
 
 // ── APOTHEKEN ─────────────────────────────────────────────────────────────────
@@ -2004,5 +2143,15 @@ window.addEventListener('load', async ()=>{
   }
 });
 </script>
+
+<!-- ══ VACCINATIE DETAIL MODAL ══════════════════════════════════════════════ -->
+<div id="vac-modal" class="chart-modal-overlay" onclick="if(event.target===this)closeVacModal()">
+  <div class="chart-modal-box">
+    <button class="chart-modal-close" onclick="closeVacModal()">✕</button>
+    <div id="vac-modal-title" style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#999;margin-bottom:16px"></div>
+    <canvas id="chart-vac-modal" style="max-height:480px"></canvas>
+    <div class="privacy-note" style="margin-top:6px">░ = privacy-gecensureerd (&lt;5% of &gt;95%)</div>
+  </div>
+</div>
 </body>
 </html>
