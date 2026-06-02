@@ -249,6 +249,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
   <button class="tab-btn active" onclick="switchTab('project',this)"><span></span> Over het project</button>
   <button class="tab-btn" onclick="switchTab('screening',this)"><span></span> Screening BHK</button>
   <button class="tab-btn" onclick="switchTab('vaccinatie',this)"><span></span> HPV-vaccinatie</button>
+  <button class="tab-btn" onclick="switchTab('bevolking',this)"><span></span> Bevolking</button>
   <button class="tab-btn" onclick="switchTab('demografie',this)"><span></span> Demografie</button>
   <button class="tab-btn" onclick="switchTab('inkomen',this)"><span></span> Inkomen</button>
   <button class="tab-btn" onclick="switchTab('onderwijs',this)"><span></span> Onderwijs</button>
@@ -445,8 +446,43 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
     <div class="vac-note" id="vac-methode-note" style="display:none">
       <details>
         <summary>Methodologische nota</summary>
-        <p style="margin-top:6px">Vaccinatieregistraties in Vaccinnet op 15/01/2026, gecombineerd met bevolkingscijfers Statbel van 01/01/2025. Inwoners Genk, geboortejaar 2000–2014. Gevaccineerd = minstens 2 HPV-vaccins. Registratiegraad kan afwijken van effectieve vaccinatiegraad door onderregistratie (~0,3% in studie 2020). Geboortecohort 2013–2014 zit deels nog in het 1ste jaar secundair — vaccinatie nog niet afgerond. Geen vergelijking mogelijk tussen geboortejaren (ongelijke blootstellingstijd).</p>
+        <p style="margin-top:6px">Vaccinatieregistraties in Vaccinnet op 15/01/2026, gecombineerd met bevolkingscijfers Statbel van 01/01/2025. Inwoners Genk, geboortejaar 2000–2014. Gevaccineerd = minstens 2 HPV-vaccins. Registratiegraad kan afwijken van effectieve vaccinatiegraad door onderregistratie (~0,3% in studie 2020). Geboortecohort 2013–2014 zit deels nog in het 1ste jaar secundair, vaccinatie nog niet afgerond. Geen vergelijking mogelijk tussen geboortejaren (ongelijke blootstellingstijd).</p>
       </details>
+    </div>
+  </div>
+</div>
+
+<!-- ══ BEVOLKING ═══════════════════════════════════════════════════════════ -->
+<div id="pane-bevolking" class="tab-pane">
+  <div class="map-wrap">
+    <div id="map-bevolking" class="leaflet-map"></div>
+    <div class="layer-ctrl">
+      <span class="level-badge" id="lvl-bevolking">📍 Statistisch sector (2025)</span>
+      <div class="tgl-pill">
+        <span class="tgl-opt active" onclick="setLayer('bevolking','sector',this)">Sector</span>
+        <span class="tgl-opt" onclick="setLayer('bevolking','campagne',this)">Campagne</span>
+        <span class="tgl-opt" onclick="setLayer('bevolking','stad',this)">Stad</span>
+      </div>
+    </div>
+    <div class="map-legend">
+      <h5>Inwoners</h5>
+      <div id="leg-bev"></div>
+    </div>
+    <div class="datasource-badge"><strong>Statbel</strong>Bevolking per statistische sector · 2025</div>
+  </div>
+  <div class="side-panel">
+    <div class="panel-header">👥 Bevolking Genk 2025</div>
+    <div class="panel-section">
+      <h4>Genk totaal</h4>
+      <div id="bev-stad-kpi" style="font-size:2rem;font-weight:800;color:#2E4057;padding:4px 0 8px"></div>
+    </div>
+    <div class="panel-section">
+      <h4>Campagnebuurten</h4>
+      <div class="kpi-grid" id="bev-buurt-kpi"></div>
+    </div>
+    <div class="chart-wrap">
+      <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:8px;font-weight:700;">Top sectoren naar bevolking</h4>
+      <canvas id="chart-bevolking"></canvas>
     </div>
   </div>
 </div>
@@ -714,6 +750,7 @@ let GEO      = {};  // geladen GeoJSON-bestanden
 let SCR_JAREN = [];   // beschikbare screeningsjaren (gesorteerd)
 let FARMAFLUX = []; // [{periode, cnk_code, product, registraties}]
 let VAC_DETAIL = []; // [{snapshot, jaar, regist_m, regist_v, regist_tot, clb_m, clb_v, clb_tot}]
+let BEV_DATA   = {}; // code → {naam, buurt, totaal, a0_9, a10_19, ...}
 
 // ── CSV HELPERS ───────────────────────────────────────────────────────────────
 function csvNaarObjecten(text) {
@@ -808,14 +845,16 @@ async function laadAlleData() {
   const refUrl       = useSheets ? sheetUrl('referentie')          : LOCAL_CSV + 'referentie.csv';
   const farmaUrl     = useSheets ? sheetUrl('farmaflux')           : LOCAL_CSV + 'farmaflux.csv';
   const vacDetailUrl = useSheets ? sheetUrl('vaccinaties_detail')  : LOCAL_CSV + 'vaccinaties_detail.csv';
+  const bevUrl       = LOCAL_CSV + 'bevolking_sectoren.csv'; // statisch — altijd lokaal geladen
 
-  const [geoResults, dataText, refText, farmaText, vacDetailText] = await Promise.all([
+  const [geoResults, dataText, refText, farmaText, vacDetailText, bevText] = await Promise.all([
     Promise.all(geoFiles.map(([, url]) => fetch(url).then(r => { if(!r.ok) throw new Error(`Kan ${url} niet laden`); return r.json(); })))
       .then(res => { setProgress(50, 'Statistieken ophalen…'); return res; }),
     fetch(dataUrl).then(r => { if(!r.ok) throw new Error(`Kan data.csv niet laden`); return r.text(); }),
     fetch(refUrl).then(r  => { if(!r.ok) throw new Error(`Kan referentie.csv niet laden`); return r.text(); }),
     fetch(farmaUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
     fetch(vacDetailUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
+    fetch(bevUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
   ]);
 
   setProgress(80, 'Data verwerken…');
@@ -824,6 +863,15 @@ async function laadAlleData() {
   REFDATA = buildRefLookup(csvNaarObjecten(refText));
   if(farmaText) FARMAFLUX = csvNaarObjecten(farmaText);
   if(vacDetailText) VAC_DETAIL = parseVacDetail(csvNaarObjecten(vacDetailText));
+  if(bevText) {
+    BEV_DATA = buildBevLookup(csvNaarObjecten(bevText));
+    // Injecteer sectortotalen in SHDATA zodat bestaande tooltips bevolkingscijfers tonen
+    Object.entries(BEV_DATA).forEach(([code, d]) => {
+      if(!SHDATA[code]) SHDATA[code] = {};
+      if(!SHDATA[code]['bevolking']) SHDATA[code]['bevolking'] = {};
+      SHDATA[code]['bevolking'][2025] = d.totaal;
+    });
+  }
 
   SCR_JAREN = [...new Set(
     Object.values(SHDATA).flatMap(inds => Object.keys(inds['screening'] || {}))
@@ -959,6 +1007,7 @@ function switchTab(name,btn){
 function initTab(name){
   if(name==='project')     return;
   if(name==='screening')   initScreening();
+  if(name==='bevolking')   initBevolking();
   if(name==='demografie')  initDemografie();
   if(name==='inkomen')     initInkomen();
   if(name==='onderwijs')   initOnderwijs();
@@ -1038,6 +1087,7 @@ function setLayer(tab, level, btn){
     inkomen:      {sector:'📍 Statistisch sector (2024)', buurt8:'📍 8 buurten', campagne:'📍 Campagnebuurten', stad:'📍 Genk stad'},
     onderwijs:    {sector:'📍 Statistisch sector (2024)', buurt8:'📍 8 buurten', campagne:'📍 Campagnebuurten', stad:'📍 Genk stad'},
     nationaliteit:{wijk:'📍 Wijkniveau (31 wijken)', buurt8:'📍 8 buurten', campagne:'📍 Campagnebuurten', stad:'📍 Genk stad'},
+    bevolking:    {sector:'📍 Statistisch sector (2025)', campagne:'📍 Campagnebuurten', stad:'📍 Genk stad'},
     vaccinatie:   {sector:'📍 Statistisch sector', buurt8:'📍 8 buurten', campagne:'📍 Campagnebuurten', stad:'📍 Genk stad'},
   };
   const el = document.getElementById('lvl-'+tab);
@@ -1283,6 +1333,153 @@ function buildAgeScrData(){
     limburg: ages.map(a=>getRef('screening_leeftijd_'+a.replace('-','_'),2024,'limburg')),
     vlaams:  ages.map(a=>getRef('screening_leeftijd_'+a.replace('-','_'),2024,'vlaanderen')),
   };
+}
+
+// ══ BEVOLKING ════════════════════════════════════════════════════════════════
+function buildBevLookup(rows) {
+  const out = {};
+  rows.forEach(r => {
+    if(!r.code || r.code === '71016ZZZZ') return;
+    out[r.code] = {
+      naam: r.naam, buurt: r.buurt,
+      totaal: Number(r.totaal)||0,
+      a0_9:   Number(r.bev_0_9)||0,   a10_19: Number(r.bev_10_19)||0,
+      a20_29: Number(r.bev_20_29)||0, a30_39: Number(r.bev_30_39)||0,
+      a40_49: Number(r.bev_40_49)||0, a50_59: Number(r.bev_50_59)||0,
+      a60_69: Number(r.bev_60_69)||0, a70_79: Number(r.bev_70_79)||0,
+      a80_89: Number(r.bev_80_89)||0, a90p:   Number(r.bev_90plus)||0,
+    };
+  });
+  return out;
+}
+
+function initBevolking() {
+  const m = makeMap('map-bevolking');
+  layerState['bevolking'] = 'sector';
+
+  const allVals = Object.values(BEV_DATA).map(d => d.totaal).filter(v => v > 0);
+  const mn = 0;
+  const mx = allVals.length ? Math.max(...allVals) : 8000;
+
+  const BEV_HUE = 200;
+
+  function bevStyle(totaal) {
+    return {fillColor: seqColor(totaal || null, mn, mx, BEV_HUE), fillOpacity: .84, color: 'white', weight: .7};
+  }
+
+  function bevTooltip(code, naam) {
+    const d = BEV_DATA[code];
+    if(!d) return makeTooltip([naam, ['Inwoners', '—']]);
+    const jong  = d.a0_9 + d.a10_19;
+    const midden = d.a20_29 + d.a30_39 + d.a40_49 + d.a50_59 + d.a60_69;
+    const oud   = d.a70_79 + d.a80_89 + d.a90p;
+    return makeTooltip([naam,
+      ['Inwoners', d.totaal.toLocaleString('nl-BE')],
+      ['0–19 jaar', jong.toLocaleString('nl-BE')],
+      ['20–69 jaar', midden.toLocaleString('nl-BE')],
+      ['70+ jaar', oud.toLocaleString('nl-BE')],
+    ]);
+  }
+
+  const secLayer = L.geoJSON(GEO.sectorDemo, {
+    style: f => {
+      const d = BEV_DATA[f.properties.code];
+      return d && d.totaal > 0 ? bevStyle(d.totaal) : {fillColor:'#e0e0e0', fillOpacity:.55, color:'white', weight:.7, dashArray:'3,3'};
+    },
+    onEachFeature: (f, layer) => {
+      const p = f.properties;
+      layer.bindTooltip(bevTooltip(p.code, p.naam), {sticky:true, className:'leaflet-tooltip'});
+      layer.on('mouseover', () => hl(layer, true));
+      layer.on('mouseout',  () => hl(layer, false));
+    }
+  });
+
+  // Campagne-buurt aggregaten
+  const BEV_CAMP = {Noord:0, Oost:0, West:0, Centrum:0};
+  Object.values(BEV_DATA).forEach(d => { if(BEV_CAMP[d.buurt] !== undefined) BEV_CAMP[d.buurt] += d.totaal; });
+  const BEV_STAD = Object.values(BEV_DATA).reduce((s, d) => s + d.totaal, 0);
+  const campMn = Math.min(...Object.values(BEV_CAMP));
+  const campMx = Math.max(...Object.values(BEV_CAMP));
+
+  const campLayer = L.geoJSON(GEO.buurt, {
+    style: f => {
+      const b = f.properties.Buurt;
+      const v = BEV_CAMP[b];
+      return v != null
+        ? {fillColor: seqColor(v, campMn, campMx, BEV_HUE), fillOpacity:.84, color:'#fff', weight:1.5}
+        : {fillColor:'#d0d0d0', fillOpacity:.4, color:'#bbb', weight:1, dashArray:'4,3'};
+    },
+    onEachFeature: (f, layer) => {
+      const b = f.properties.Buurt;
+      const v = BEV_CAMP[b];
+      layer.bindTooltip(makeTooltip([BLABEL[b]||b, ['Inwoners', v != null ? v.toLocaleString('nl-BE') : '—']]),
+        {sticky:true, className:'leaflet-tooltip'});
+      layer.on('mouseover', () => hlBuurt(layer, true));
+      layer.on('mouseout',  () => hlBuurt(layer, false));
+    }
+  });
+
+  const stadLayer = L.geoJSON(GEO.genk, {
+    style: () => ({fillColor: seqColor(BEV_STAD, 0, BEV_STAD, BEV_HUE), fillOpacity:.7, color:'#555', weight:2}),
+    onEachFeature: (f, layer) => {
+      layer.bindTooltip(makeTooltip(['Genk (stad)', ['Inwoners', BEV_STAD.toLocaleString('nl-BE')]]),
+        {sticky:true, className:'leaflet-tooltip'});
+      L.marker(layer.getBounds().getCenter(), {icon: L.divIcon({
+        className:'',
+        html:`<div style="font-size:1.6rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);white-space:nowrap;transform:translateX(-50%)">${BEV_STAD.toLocaleString('nl-BE')}</div>`,
+        iconSize:[0,0]
+      }), interactive:false}).addTo(m);
+    }
+  });
+
+  layerGroups['bevolking'] = {sector: secLayer, campagne: campLayer, stad: stadLayer};
+  secLayer.addTo(m);
+  addBuurtBorder(m);
+
+  gradLegend('leg-bev',
+    [`hsl(${BEV_HUE},62%,90%)`, `hsl(${BEV_HUE},62%,64%)`, `hsl(${BEV_HUE},62%,38%)`],
+    ['0', '', Math.round(mx).toLocaleString('nl-BE')]);
+
+  // Side panel KPI's
+  document.getElementById('bev-stad-kpi').textContent = BEV_STAD.toLocaleString('nl-BE') + ' inwoners';
+  const kpiGrid = document.getElementById('bev-buurt-kpi');
+  ['Noord','Oost','West','Centrum'].forEach(b => {
+    const el = document.createElement('div');
+    el.className = 'kpi-cell';
+    el.innerHTML = `<div class="kpi-val">${(BEV_CAMP[b]||0).toLocaleString('nl-BE')}</div><div class="kpi-lbl">Genk-${b}</div>`;
+    kpiGrid.appendChild(el);
+  });
+
+  // Top-15 sectoren bar chart
+  const topSec = Object.entries(BEV_DATA)
+    .filter(([,d]) => d.totaal > 0)
+    .sort(([,a],[,b]) => b.totaal - a.totaal)
+    .slice(0, 15);
+  const ctx = document.getElementById('chart-bevolking').getContext('2d');
+  new Chart(ctx, {type:'bar',
+    data:{
+      labels: topSec.map(([,d]) => d.naam.charAt(0) + d.naam.slice(1).toLowerCase()),
+      datasets:[{
+        data: topSec.map(([,d]) => d.totaal),
+        backgroundColor: topSec.map(([,d]) => {
+          const col = {Noord:'#70AD47',Oost:'#4472C4',West:'#ED7D31',Centrum:'#FFC000'}[d.buurt];
+          return col ? col+'cc' : '#aaaaaa88';
+        }),
+        borderWidth:0
+      }]
+    },
+    options:{
+      indexAxis:'y', responsive:true,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>`${c.raw.toLocaleString('nl-BE')} inwoners`}}
+      },
+      scales:{
+        x:{ticks:{callback:v=>v.toLocaleString('nl-BE'), font:{size:9}}, grid:{color:'#f0f0f0'}},
+        y:{ticks:{font:{size:9}}, grid:{display:false}}
+      }
+    }
+  });
 }
 
 // ══ DEMOGRAFIE ════════════════════════════════════════════════════════════════
