@@ -20,7 +20,7 @@
 body { background:var(--bg); color:#222; height:100vh; display:flex; flex-direction:column; font-size:14px; }
 
 /* HEADER */
-header { background:var(--dark); color:#fff; padding:9px 20px; display:flex; align-items:center; gap:14px; flex-shrink:0; }
+header { background:linear-gradient(135deg,#4A1275 0%,#7B3FBE 55%,#9B6DD6 100%); color:#fff; padding:9px 20px; display:flex; align-items:center; gap:14px; flex-shrink:0; }
 header h1 { font-size:1.05rem; font-weight:700; letter-spacing:.2px; }
 header span { font-size:.78rem; opacity:.7; }
 .badge { background:rgba(255,255,255,.15); border-radius:4px; padding:2px 8px; font-size:.75rem; margin-left:auto; display:flex; gap:8px; }
@@ -34,6 +34,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
              transition:all .18s; display:flex; align-items:center; gap:5px; font-family:var(--font); }
 .tab-btn:hover { color:var(--dark); background:#f7f9fc; }
 .tab-btn.active { color:var(--dark); border-bottom-color:var(--dark); background:#f7f9fc; }
+.tab-btn-health > span { display:inline-block; width:7px; height:7px; border-radius:50%; background:#9B6DD6; vertical-align:middle; flex-shrink:0; }
 
 /* WORKSPACE */
 .workspace { flex:1; display:flex; overflow:hidden; }
@@ -247,14 +248,14 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
 
 <nav>
   <button class="tab-btn active" onclick="switchTab('project',this)"><span></span> Over het project</button>
-  <button class="tab-btn" onclick="switchTab('screening',this)"><span></span> Screening BHK</button>
-  <button class="tab-btn" onclick="switchTab('vaccinatie',this)"><span></span> HPV-vaccinatie</button>
+  <button class="tab-btn tab-btn-health" onclick="switchTab('screening',this)"><span></span> Screening BHK</button>
+  <button class="tab-btn tab-btn-health" onclick="switchTab('vaccinatie',this)"><span></span> HPV-vaccinatie</button>
+  <button class="tab-btn tab-btn-health" onclick="switchTab('apotheken',this)"><span></span> Apotheken</button>
   <button class="tab-btn" onclick="switchTab('bevolking',this)"><span></span> Bevolking</button>
   <button class="tab-btn" onclick="switchTab('demografie',this)"><span></span> Demografie</button>
   <button class="tab-btn" onclick="switchTab('inkomen',this)"><span></span> Inkomen</button>
   <button class="tab-btn" onclick="switchTab('onderwijs',this)"><span></span> Onderwijs</button>
   <button class="tab-btn" onclick="switchTab('nationaliteit',this)"><span></span> Nationaliteit</button>
-  <button class="tab-btn" onclick="switchTab('apotheken',this)"><span></span> Apotheken</button>
   <button class="tab-btn" onclick="switchTab('niveaus',this)"><span></span> Niveaus &amp; Bronnen</button>
 </nav>
 
@@ -373,6 +374,9 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
   </div>
   <div class="side-panel">
     <div class="panel-header">🩺 Borstkankerscreening BHK</div>
+    <div id="scr-sector-warn" style="margin:8px 14px 0;padding:8px 10px;background:#fff8e1;border-left:3px solid #ffd54f;border-radius:0 4px 4px 0;font-size:.73rem;color:#7a5800;line-height:1.5;">
+      ⚠️ <strong>Opgelet:</strong> Op sectorniveau schommelen dekkingsgraden sterk door kleine populaties. Data is gevoelig voor kleine wijzigingen en moeilijk te interpreteren.
+    </div>
     <div class="panel-section">
       <h4>Referentie 2024</h4>
       <div class="ref-box">
@@ -387,7 +391,10 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       <div class="chart-wrap" style="padding:0;min-height:160px;"><canvas id="chart-scr-evol"></canvas></div>
     </div>
     <div class="panel-section">
-      <h4>Dekkingsgraad per leeftijdscategorie — Genk stad (2024)</h4>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h4>Dekkingsgraad per leeftijdscategorie — Genk stad (2024)</h4>
+        <button class="expand-btn" onclick="openExpandModal('Dekkingsgraad per leeftijdscategorie — Genk stad (2024)', 'chart-scr-age')" title="Vergroot grafiek">⛶</button>
+      </div>
       <div class="chart-wrap" style="padding:0;min-height:220px;"><canvas id="chart-scr-age"></canvas></div>
     </div>
     <div class="chart-wrap">
@@ -402,13 +409,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
   <div class="map-wrap">
     <div id="map-vaccinatie" class="leaflet-map"></div>
     <div class="layer-ctrl">
-      <span class="level-badge" id="lvl-vaccinatie">📍 Statistisch sector</span>
-      <div class="tgl-pill">
-        <span class="tgl-opt active" onclick="setLayer('vaccinatie','sector',this)">Sector</span>
-        <span class="tgl-opt" onclick="setLayer('vaccinatie','buurt8',this)">8 Buurten</span>
-        <span class="tgl-opt" onclick="setLayer('vaccinatie','campagne',this)">Campagne</span>
-        <span class="tgl-opt" onclick="setLayer('vaccinatie','stad',this)">Stad</span>
-      </div>
+      <span class="level-badge" id="lvl-vaccinatie">📍 Genk stad</span>
     </div>
     <div class="year-bar" id="vac-years"></div>
     <div class="map-legend">
@@ -419,6 +420,13 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
   </div>
   <div class="side-panel">
     <div class="panel-header">💉 HPV-vaccinatie</div>
+    <div class="panel-section">
+      <h4>Referentiecijfers</h4>
+      <div class="ref-box">
+        <div class="ref-row"><span class="ref-name">Vlaanderen (2020)</span><span class="ref-val" style="color:#1a9641">80.7%</span></div>
+        <div class="ref-row"><span class="ref-name">WHO doelstelling (2030)</span><span class="ref-val" style="color:#7B3FBE">90%</span></div>
+      </div>
+    </div>
     <div class="panel-section">
       <h4>Vaccinatiegraad per buurt</h4>
       <div class="kpi-grid" id="vac-kpi"></div>
@@ -514,7 +522,10 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       <div class="kpi-grid" id="dem-kpi"></div>
     </div>
     <div class="chart-wrap">
-      <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:8px;font-weight:700;">Leeftijdsgroepen per buurt (%)</h4>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;font-weight:700;">Leeftijdsgroepen per buurt (%)</h4>
+        <button class="expand-btn" onclick="openExpandModal('Leeftijdsgroepen per buurt (%)', 'chart-demografie')" title="Vergroot grafiek">⛶</button>
+      </div>
       <canvas id="chart-demografie"></canvas>
     </div>
   </div>
@@ -545,10 +556,6 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
     <div class="panel-section">
       <h4>Mediaan inkomen per buurt</h4>
       <div class="kpi-grid" id="ink-kpi"></div>
-    </div>
-    <div class="chart-wrap">
-      <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:8px;font-weight:700;">Evolutie mediaan inkomen 2005–2023</h4>
-      <canvas id="chart-inkomen"></canvas>
     </div>
   </div>
 </div>
@@ -1141,6 +1148,8 @@ function setScrLayer(mode, btn){
     if(nodataRow) nodataRow.style.display='';
     if(srcBadge) srcBadge.innerHTML=`<strong>CVKO</strong>BHK dekkingsgraad · ${SCR_JAREN.join('–')}<br>Statistische sectoren 2025 (${GEO.sectorScr.features.length})`;
   }
+  const warn = document.getElementById('scr-sector-warn');
+  if(warn) warn.style.display = mode === 'sector' ? '' : 'none';
 }
 
 function initScreening(){
@@ -1391,7 +1400,7 @@ function initBevolking() {
   const BEV_BUURT8 = {};
   BUURT8.forEach(b => { BEV_BUURT8[b] = 0; });
   Object.values(BEV_DATA).forEach(d => { if(BEV_BUURT8[d.buurt8] !== undefined) BEV_BUURT8[d.buurt8] += d.totaal; });
-  const BEV_STAD = Object.values(BEV_DATA).reduce((s, d) => s + d.totaal, 0);
+  const BEV_STAD = 68198;
   const b8Vals = Object.values(BEV_BUURT8).filter(v => v > 0);
   const b8Mn = b8Vals.length ? Math.min(...b8Vals) : 0;
   const b8Mx = b8Vals.length ? Math.max(...b8Vals) : 15000;
@@ -1666,34 +1675,6 @@ function initInkomen(){
     buildKpiGrid('ink-kpi','inkomen_mediaan',yr,fmtEuro,'');
   });
 
-  const incData = buildIncData();
-  const ctx=document.getElementById('chart-inkomen').getContext('2d');
-  const inkCodes = [...BUURT8, STAD_CODE].filter(b=>incData.years.some(yr=>getVal(b,'inkomen_mediaan',yr)!=null));
-  const ds=inkCodes.map(b=>{
-    const data=incData.years.map(yr=>{const v=getVal(b,'inkomen_mediaan',yr);return v;});
-    const isStad = b===STAD_CODE;
-    return {label:BLABEL8[b]||b,data,borderColor:BCOLOR8[b]||STAD_COLOR,backgroundColor:'transparent',
-             borderWidth:isStad?2:2.2,borderDash:isStad?[5,3]:undefined,pointRadius:0,tension:0.3,spanGaps:true};
-  });
-  new Chart(ctx,{type:'line',data:{labels:incData.years,datasets:ds},
-    options:{responsive:true,interaction:{mode:'index',intersect:false},
-      plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}},
-               tooltip:{callbacks:{label:c=>c.dataset.label+': €'+Math.round(c.raw).toLocaleString('nl-BE')}}},
-      scales:{
-        x:{ticks:{font:{size:9},maxTicksLimit:8},grid:{display:false}},
-        y:{ticks:{callback:v=>'€'+Math.round(v/1000)+'k',font:{size:10}},grid:{color:'#f0f0f0'}}
-      }
-    }});
-}
-
-function buildIncData(){
-  const jarenSet = new Set();
-  Object.values(SHDATA).forEach(inds=>{
-    Object.keys(inds['inkomen_mediaan']||{}).forEach(yr=>jarenSet.add(parseInt(yr)));
-  });
-  const years=[...jarenSet].filter(yr=>yr>=2005).sort();
-  const genkData=years.map(yr=>getVal('Genk','inkomen_mediaan',yr));
-  return {years, genkData};
 }
 
 // ══ ONDERWIJS ═════════════════════════════════════════════════════════════════
@@ -2016,7 +1997,7 @@ function initNiveaus(){
 // ══ VACCINATIE ════════════════════════════════════════════════════════════════
 function initVaccinatie(){
   const m = makeMap('map-vaccinatie');
-  layerState['vaccinatie'] = 'sector';
+  layerState['vaccinatie'] = 'stad';
 
   const VAC_IND = 'vaccinatie_hpv';
   const vacJarenAll = [...new Set(
@@ -2069,7 +2050,7 @@ function initVaccinatie(){
   });
 
   layerGroups['vaccinatie'] = {sector:secLayer, buurt8:buurt8Layer, campagne:campagneLayer, stad:vacStadLayer};
-  secLayer.addTo(m);
+  vacStadLayer.addTo(m);
   addBuurtBorder(m);
 
   let vacCityMarker = null;
@@ -2084,6 +2065,7 @@ function initVaccinatie(){
         iconSize:[0,0]}),interactive:false}).addTo(m);
   };
   layerSwitchCb['vaccinatie'] = () => refreshVacCityMarker(tabJaar.vaccinatie);
+  refreshVacCityMarker(VAC_JAAR);
 
   gradLegend('leg-vac',['hsl(150,62%,90%)','hsl(150,62%,64%)','hsl(150,62%,38%)'],
     [allVals.length?`${Math.round(mn)}%`:'0%','',allVals.length?`${Math.round(mx)}%`:'100%']);
@@ -2222,6 +2204,21 @@ function closeVacModal() {
   document.getElementById('vac-modal').classList.remove('open');
 }
 
+let _expandModalChart = null;
+function openExpandModal(title, canvasId) {
+  document.getElementById('expand-modal-title').textContent = title;
+  document.getElementById('chart-expand-modal').classList.add('open');
+  if(_expandModalChart) { _expandModalChart.destroy(); _expandModalChart = null; }
+  const src = Chart.getChart(document.getElementById(canvasId));
+  if(!src) return;
+  const cfg = {type:src.config.type, data:JSON.parse(JSON.stringify(src.data)), options:Object.assign({},JSON.parse(JSON.stringify(src.options)),{maintainAspectRatio:false})};
+  _expandModalChart = new Chart(document.getElementById('chart-expand-canvas').getContext('2d'), cfg);
+}
+function closeExpandModal() {
+  document.getElementById('chart-expand-modal').classList.remove('open');
+  if(_expandModalChart) { _expandModalChart.destroy(); _expandModalChart = null; }
+}
+
 // ── APOTHEKEN ─────────────────────────────────────────────────────────────────
 const APO_PRODUCTS = {
   5522289: 'Sensibilisering HPV',
@@ -2333,6 +2330,15 @@ window.addEventListener('load', async ()=>{
   }
 });
 </script>
+
+<!-- ══ GENERIC CHART EXPAND MODAL ═══════════════════════════════════════════ -->
+<div id="chart-expand-modal" class="chart-modal-overlay" onclick="if(event.target===this)closeExpandModal()">
+  <div class="chart-modal-box">
+    <button class="chart-modal-close" onclick="closeExpandModal()">✕</button>
+    <div id="expand-modal-title" style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:#999;margin-bottom:16px"></div>
+    <div style="position:relative;height:440px"><canvas id="chart-expand-canvas"></canvas></div>
+  </div>
+</div>
 
 <!-- ══ VACCINATIE DETAIL MODAL ══════════════════════════════════════════════ -->
 <div id="vac-modal" class="chart-modal-overlay" onclick="if(event.target===this)closeVacModal()">
