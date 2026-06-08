@@ -359,6 +359,8 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       <span class="level-badge" id="lvl-screening">📍 Statistisch sector (2025)</span>
       <div class="tgl-pill">
         <span class="tgl-opt active" onclick="setScrLayer('sector',this)">Sector</span>
+        <span class="tgl-opt" onclick="setScrLayer('wijk',this)">Wijk</span>
+        <span class="tgl-opt" onclick="setScrLayer('buurt',this)">Buurt</span>
         <span class="tgl-opt" onclick="setScrLayer('stad',this)">Genk stad</span>
       </div>
     </div>
@@ -1161,7 +1163,15 @@ function setScrLayer(mode, btn){
     if(hiddenRow) hiddenRow.style.display='none';
     if(nodataRow) nodataRow.style.display='none';
     if(srcBadge) srcBadge.innerHTML='<strong>CVKO</strong>BHK dekkingsgraad Genk stad · ' + SCR_JAREN.join('–');
-  }else{
+  } else if(mode==='wijk'){
+    if(hiddenRow) hiddenRow.style.display='none';
+    if(nodataRow) nodataRow.style.display='';
+    if(srcBadge) srcBadge.innerHTML=`<strong>CVKO</strong>BHK dekkingsgraad · ${SCR_JAREN.join('–')}<br>31 wijken`;
+  } else if(mode==='buurt'){
+    if(hiddenRow) hiddenRow.style.display='none';
+    if(nodataRow) nodataRow.style.display='';
+    if(srcBadge) srcBadge.innerHTML=`<strong>CVKO</strong>BHK dekkingsgraad · ${SCR_JAREN.join('–')}<br>8 buurten`;
+  } else {
     if(hiddenRow) hiddenRow.style.display='';
     if(nodataRow) nodataRow.style.display='';
     if(srcBadge) srcBadge.innerHTML=`<strong>CVKO</strong>BHK dekkingsgraad · ${SCR_JAREN.join('–')}<br>Statistische sectoren 2025 (${GEO.sectorScr.features.length})`;
@@ -1300,6 +1310,42 @@ function drawScrMap(m){
       }
     }).addTo(m);
     document.getElementById('lvl-screening').textContent=`📍 Genk stad — ${scrYear}`;
+  } else if(scrLayerMode==='wijk'){
+    scrMapLayer = L.geoJSON(GEO.wijkNiv,{
+      style:f=>{
+        const r = getVal(f.properties.wijk_naam,'screening',scrYear);
+        return {fillColor:scrColor(r),fillOpacity:.84,color:'white',weight:.8};
+      },
+      onEachFeature:(f,layer)=>{
+        const naam = f.properties.wijk_naam;
+        const buurt8 = f.properties.buurt8;
+        const r = getVal(naam,'screening',scrYear);
+        layer.bindTooltip(makeTooltip([naam,
+          [`Dekkingsgraad ${scrYear}`, r!=null?(r*100).toFixed(1)+'%':'Geen data'],
+          ['Buurt',buurt8]]),
+          {sticky:true,className:'leaflet-tooltip'});
+        layer.on('mouseover',()=>hl(layer,true));
+        layer.on('mouseout',()=>hl(layer,false));
+      }
+    }).addTo(m);
+    document.getElementById('lvl-screening').textContent=`📍 Wijk (31 wijken) — ${scrYear}`;
+  } else if(scrLayerMode==='buurt'){
+    scrMapLayer = L.geoJSON(GEO.achtBuurt,{
+      style:f=>{
+        const r = getVal(f.properties.buurt8,'screening',scrYear);
+        return {fillColor:scrColor(r),fillOpacity:.84,color:'white',weight:1.5};
+      },
+      onEachFeature:(f,layer)=>{
+        const buurt = f.properties.buurt8;
+        const r = getVal(buurt,'screening',scrYear);
+        layer.bindTooltip(makeTooltip([buurt,
+          [`Dekkingsgraad ${scrYear}`, r!=null?(r*100).toFixed(1)+'%':'Geen data']]),
+          {sticky:true,className:'leaflet-tooltip'});
+        layer.on('mouseover',()=>hlBuurt(layer,true));
+        layer.on('mouseout',()=>hlBuurt(layer,false));
+      }
+    }).addTo(m);
+    document.getElementById('lvl-screening').textContent=`📍 Buurt (8 buurten) — ${scrYear}`;
   } else {
     scrMapLayer = L.geoJSON(GEO.sectorScr,{
       style:f=>{
