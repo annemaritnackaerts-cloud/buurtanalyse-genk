@@ -855,19 +855,33 @@ async function laadAlleData() {
   const refUrl       = useSheets ? sheetUrl('referentie')          : LOCAL_CSV + 'referentie.csv';
   const farmaUrl     = useSheets ? sheetUrl('farmaflux')           : LOCAL_CSV + 'farmaflux.csv';
   const vacDetailUrl = useSheets ? sheetUrl('vaccinaties_detail')  : LOCAL_CSV + 'vaccinaties_detail.csv';
+  const scrUrl       = useSheets ? sheetUrl('screening')           : LOCAL_CSV + 'screening.csv';
+  const vacUrl       = useSheets ? sheetUrl('vaccinatie')          : LOCAL_CSV + 'vaccinatie.csv';
 
-  const [geoResults, dataText, refText, farmaText, vacDetailText] = await Promise.all([
+  const [geoResults, dataText, refText, farmaText, vacDetailText, scrText, vacText] = await Promise.all([
     Promise.all(geoFiles.map(([, url]) => fetch(url).then(r => { if(!r.ok) throw new Error(`Kan ${url} niet laden`); return r.json(); })))
       .then(res => { setProgress(50, 'Statistieken ophalen…'); return res; }),
     fetch(dataUrl).then(r => { if(!r.ok) throw new Error(`Kan data.csv niet laden`); return r.text(); }),
     fetch(refUrl).then(r  => { if(!r.ok) throw new Error(`Kan referentie.csv niet laden`); return r.text(); }),
     fetch(farmaUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
     fetch(vacDetailUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
+    fetch(scrUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
+    fetch(vacUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
   ]);
 
   setProgress(80, 'Data verwerken…');
   geoFiles.forEach(([key], i) => GEO[key] = geoResults[i]);
   SHDATA  = buildLookup(csvNaarObjecten(dataText));
+  [scrText, vacText].forEach(txt => {
+    if(!txt) return;
+    Object.entries(buildLookup(csvNaarObjecten(txt))).forEach(([code, inds]) => {
+      if(!SHDATA[code]) SHDATA[code] = {};
+      Object.entries(inds).forEach(([ind, jaren]) => {
+        if(!SHDATA[code][ind]) SHDATA[code][ind] = {};
+        Object.assign(SHDATA[code][ind], jaren);
+      });
+    });
+  });
   REFDATA = buildRefLookup(csvNaarObjecten(refText));
   if(farmaText) FARMAFLUX = csvNaarObjecten(farmaText);
   if(vacDetailText) VAC_DETAIL = parseVacDetail(csvNaarObjecten(vacDetailText));
