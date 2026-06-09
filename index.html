@@ -110,8 +110,8 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
 .chart-modal-box { background:#fff; border-radius:12px; padding:22px 24px 18px; width:min(860px,94vw); max-height:88vh; overflow-y:auto; position:relative; }
 .chart-modal-close { position:absolute; top:10px; right:14px; border:none; background:none; font-size:1.3rem; cursor:pointer; color:#888; line-height:1; }
 .chart-modal-close:hover { color:#333; }
-.vac-note { font-size:.67rem; color:#aaa; line-height:1.5; padding:0 14px 12px; }
-.vac-note details summary { cursor:pointer; color:#888; font-weight:600; }
+.vac-note { font-size:.75rem; color:#888; line-height:1.5; padding:0 14px 12px; }
+.vac-note details summary { cursor:pointer; color:#555; font-weight:700; font-size:.8rem; }
 .privacy-note { font-size:.67rem; color:#bbb; padding:2px 14px 8px; }
 .leaflet-tooltip { font-family:var(--font); font-size:.8rem; border-radius:6px;
                     box-shadow:0 3px 10px rgba(0,0,0,.18); border:none; padding:8px 12px; }
@@ -237,7 +237,6 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
 <header>
   <div>
     <h1>Buurtanalyse Genk</h1>
-    <span>Noord · Oost · West · Centrum</span>
   </div>
   <div class="badge">
     <span>🗺 59 sectoren (2025)</span>
@@ -319,7 +318,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       </p>
       <p>
         We evalueren de vaccinatiegraad en de evolutie van het bewustzijn rond
-        baarmoederhalskanker <strong>voor en na het project</strong> en bekijken zo in
+        baarmoederhalskanker en HPV <strong>voor en na het project</strong> en bekijken zo in
         welke mate een datagedreven en buurtgerichte aanpak daaraan kan bijdragen.
       </p>
       <div class="proj-highlight">
@@ -339,6 +338,49 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       <div class="partner-chip">MSD Belgium</div>
       <div class="partner-chip">Solidaris Limburg</div>
       <div class="partner-chip">Stad Genk</div>
+    </div>
+  </div>
+
+  <!-- OVERZICHT TABS -->
+  <div style="margin:24px 0">
+    <h4 style="font-size:.8rem;text-transform:uppercase;letter-spacing:.7px;color:#999;font-weight:700;margin-bottom:14px">Wat vind je op deze pagina?</h4>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+      <div style="background:#fff;border-radius:8px;padding:12px 14px;border-left:3px solid #9B6DD6;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+        <div style="font-weight:700;font-size:.85rem;color:#2E4057;margin-bottom:4px">🩺 Screening BHK</div>
+        <div style="font-size:.75rem;color:#666;line-height:1.5">Dekkingsgraad borstkankerscreening per statistisch sector, wijk, buurt en stad. Evolutie 2020–2024.</div>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:12px 14px;border-left:3px solid #9B6DD6;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+        <div style="font-weight:700;font-size:.85rem;color:#2E4057;margin-bottom:4px">💉 HPV-vaccinatie</div>
+        <div style="font-size:.75rem;color:#666;line-height:1.5">Vaccinatiegraad HPV per geboortejaar (2000–2014). CLB-aandeel en registratiegraad. Referentie Vlaanderen &amp; WHO.</div>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:12px 14px;border-left:3px solid #9B6DD6;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+        <div style="font-weight:700;font-size:.85rem;color:#2E4057;margin-bottom:4px">💊 Apotheken</div>
+        <div style="font-size:.75rem;color:#666;line-height:1.5">FarmaFlux-registraties van sensibiliseringsgesprekken, folders, doorverwijzingen en vaccinaties via apotheken.</div>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:12px 14px;border-left:3px solid #aaa;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+        <div style="font-weight:700;font-size:.85rem;color:#2E4057;margin-bottom:4px">👥 Bevolking</div>
+        <div style="font-size:.75rem;color:#666;line-height:1.5">Aantal inwoners per statistisch sector en buurt (Statbel 2025). Totaal: 68.198 inwoners.</div>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:12px 14px;border-left:3px solid #aaa;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+        <div style="font-weight:700;font-size:.85rem;color:#2E4057;margin-bottom:4px">👥 Demografie</div>
+        <div style="font-size:.75rem;color:#666;line-height:1.5">Leeftijdsstructuur en vergrijzingsindex per buurt en sector. Leeftijdsgroepen 0–90+.</div>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:12px 14px;border-left:3px solid #aaa;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+        <div style="font-weight:700;font-size:.85rem;color:#2E4057;margin-bottom:4px">💶 Inkomen</div>
+        <div style="font-size:.75rem;color:#666;line-height:1.5">Mediaan en gemiddeld belastbaar inkomen per sector en buurt (FOD Financiën, 2023).</div>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:12px 14px;border-left:3px solid #aaa;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+        <div style="font-weight:700;font-size:.85rem;color:#2E4057;margin-bottom:4px">🎓 Onderwijs</div>
+        <div style="font-size:.75rem;color:#666;line-height:1.5">Opleidingsniveau (laag / middel / hoog) per sector en buurt (Census 2021).</div>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:12px 14px;border-left:3px solid #aaa;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+        <div style="font-weight:700;font-size:.85rem;color:#2E4057;margin-bottom:4px">🌍 Nationaliteit</div>
+        <div style="font-size:.75rem;color:#666;line-height:1.5">% Belgische en niet-Belgische inwoners per wijk en buurt. Top-10 nationaliteiten (Statbel 2025).</div>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:12px 14px;border-left:3px solid #aaa;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+        <div style="font-weight:700;font-size:.85rem;color:#2E4057;margin-bottom:4px">🗺 Niveaus &amp; Bronnen</div>
+        <div style="font-size:.75rem;color:#666;line-height:1.5">Uitleg over de geografische niveaus: statistisch sector, wijk, buurt en campagnebuurt.</div>
+      </div>
     </div>
   </div>
 
@@ -426,7 +468,8 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       <h4>Referentiecijfers</h4>
       <div class="ref-box">
         <div class="ref-row"><span class="ref-name">Vlaanderen (2020)</span><span class="ref-val" style="color:#1a9641">80.7%</span></div>
-        <div class="ref-row"><span class="ref-name">WHO doelstelling (2030)</span><span class="ref-val" style="color:#7B3FBE">90%</span></div>
+        <div class="ref-row"><span class="ref-name">WHO doelstelling (2030)</span><span class="ref-val" style="color:#7B3FBE">75%</span></div>
+        <div class="ref-row"><span class="ref-name">Belgische doelstelling</span><span class="ref-val" style="color:#2c7bb6">90%</span></div>
       </div>
     </div>
     <div class="panel-section">
@@ -1377,7 +1420,7 @@ function drawScrMap(m){
       const c = L.geoJSON(GEO.genk).getBounds().getCenter();
       scrCityMarker = L.marker(c,{icon:L.divIcon({
         className:'',
-        html:`<div style="font-size:1.4rem;font-weight:800;color:#2E4057;background:rgba(255,255,255,.82);padding:2px 8px;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.25);white-space:nowrap;transform:translateX(-50%)">${(genkRate*100).toFixed(1)}%<span style="font-size:.7rem;font-weight:500;margin-left:4px">Genk</span></div>`,
+        html:`<div style="font-size:2rem;font-weight:800;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.7);white-space:nowrap;transform:translateX(-50%)">${(genkRate*100).toFixed(1)}%</div>`,
         iconSize:[0,0]
       }),interactive:false}).addTo(m);
     }
