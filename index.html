@@ -159,6 +159,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
 #pane-project.active   { display:block; overflow-y:auto; }
 #pane-apotheken.active { display:block; overflow-y:auto; }
 #pane-huisartsen.active{ display:flex; }
+#pane-huisartsen .side-panel { width:490px; }
 .proj-page { max-width:980px; margin:0 auto; padding:28px 24px 48px; }
 
 .proj-hero {
@@ -790,8 +791,8 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
     <div class="panel-section" id="ha-placeholder-section">
       <h4>Toekomstige praktijkdata</h4>
       <div style="font-size:.78rem;color:#777;line-height:1.6;background:#f7f9fc;border-left:3px solid #ccc;padding:9px 12px;border-radius:4px">
-        Nog geen registratiedata ontvangen. Zodra praktijken BHK-screening- of HPV-vaccinatiecijfers aanleveren via de <strong>Google Sheets tab "Huisartsen"</strong>, verschijnen die automatisch als extra kolommen in onderstaande tabel en als indicatoren op de kaart.
-        <br><br>Verwachte kolommen: <code>praktijk · bhk_pct · hpv_pct</code>
+        Nog geen registratiedata ontvangen. Mochten er praktijken BHK-screening- of HPV-vaccinatiecijfers aanleveren, verschijnen die automatisch als extra kolommen in onderstaande tabel en als indicatoren op de kaart.
+        <br><br>Verwachte kolommen in Google Sheets tab "Huisartsen": <code>praktijk · datum · bhk_pct · hpv_pct</code>
       </div>
     </div>
     <div class="panel-section" style="padding:0;border-bottom:none;flex:1;overflow-y:auto">
@@ -864,7 +865,7 @@ let HUISARTSEN_SHEETS = []; // [{praktijk, bhk_pct, hpv_pct}] — optioneel via 
 const PRAKTIJKEN = [
   {naam:"Ars Curae",adres:"Koning Boudewijnlaan 43/1",stadsdeel:"Genk-Noord",wijk:"Nieuwe-Kempen",lat:51.01272,lng:5.48901,artsen:["Dr. Candreva Rene","Dr. Caveye Luc","Dr. Duran Bünyamin","Dr. Vanheusden Kobe"]},
   {naam:"Groepspraktijk Doktershuys 30",adres:"Weg naar As 27",stadsdeel:"Genk-Centrum",wijk:"Genk-Centrum-Noord",lat:50.96664,lng:5.50389,artsen:["Dr. Antheunis Kristien","Dr. Buyse Hanne"]},
-  {naam:"Groepspraktijk Luce",adres:"Weg naar As 143/1",stadsdeel:"Genk-Centrum",wijk:"Genk-Centrum-Noord",lat:50.98014,lng:5.53029,artsen:["Dr. Berghmans Leo","Dr. De Bruyn Leen"]},
+  {naam:"Groepspraktijk Luce",adres:"Weg naar As 143/1",stadsdeel:"Bret-Gelieren-Kattevenne",wijk:"Bret",lat:50.98014,lng:5.53029,artsen:["Dr. Berghmans Leo","Dr. De Bruyn Leen"]},
   {naam:"Huisartsen Box",adres:"Zouwstraat 2",stadsdeel:"Genk-Midden",wijk:"Hasseltweg",lat:50.95857,lng:5.43903,artsen:["Dr. Bijnens Tom","Dr. Breure Karen"]},
   {naam:"Huisartsenpraktijk Kolderbos",adres:"Hooiweg 134/1",stadsdeel:"Kolderbos-Langerlo",wijk:"Kolderbos",lat:50.94558,lng:5.50083,artsen:["Dr. Bongaerts Anouk"]},
   {naam:"Artsen Zaveldries",adres:"Guillaume Lambertlaan 88",stadsdeel:"Genk-Noord",wijk:"Driehoeven",lat:51.00574,lng:5.49598,artsen:["Dr. Destino Massimo","Dr. Niesten Benedicte","Dr. Wijnker Thijs"]},
@@ -2509,10 +2510,17 @@ function initHuisartsen(){
     }).addTo(m);
   }
 
-  // Merge statische lijst met optionele Sheets-data
+  // Groepeer Sheets-metingen per praktijk (enkel rijen met échte data)
   const sheetsIdx = {};
-  HUISARTSEN_SHEETS.forEach(r => { sheetsIdx[(r.praktijk||'').trim()] = r; });
-  const hasSheets = HUISARTSEN_SHEETS.length > 0;
+  HUISARTSEN_SHEETS.forEach(r => {
+    const hasBhk = r.bhk_pct != null && r.bhk_pct !== '';
+    const hasHpv = r.hpv_pct != null && r.hpv_pct !== '';
+    if(!hasBhk && !hasHpv) return;
+    const key = (r.praktijk||'').trim();
+    if(!sheetsIdx[key]) sheetsIdx[key] = [];
+    sheetsIdx[key].push(r);
+  });
+  const hasSheets = Object.keys(sheetsIdx).length > 0;
 
   // KPI
   const totArtsen   = PRAKTIJKEN.reduce((s,p)=>s+p.artsen.length,0);
@@ -2531,13 +2539,13 @@ function initHuisartsen(){
   if(hasSheets){
     document.getElementById('ha-placeholder-section').style.display='none';
     document.getElementById('ha-sheets-section').style.display='';
-    const updated = HUISARTSEN_SHEETS.find(r=>r.bijgewerkt)||null;
+    const totMetingen = Object.values(sheetsIdx).reduce((s,arr)=>s+arr.length,0);
+    const totPraktijkenMetData = Object.keys(sheetsIdx).length;
     document.getElementById('ha-sheets-info').textContent =
-      `${HUISARTSEN_SHEETS.length} praktijk(en) met data ontvangen.`
-      + (updated ? ` Laatste update: ${updated.bijgewerkt}.` : '');
-    // Voeg BHK/HPV kolommen toe aan tabel
+      `${totMetingen} meting(en) ontvangen van ${totPraktijkenMetData} praktijk(en) met registratiedata.`;
+    // Voeg Datum/BHK/HPV kolommen toe aan tabel
     const thead = document.getElementById('ha-thead');
-    thead.innerHTML='<tr><th>Praktijk</th><th>Stadsdeel</th><th>Artsen</th><th>BHK %</th><th>HPV %</th></tr>';
+    thead.innerHTML='<tr><th>Praktijk</th><th>Stadsdeel</th><th>Artsen</th><th>Datum</th><th>BHK %</th><th>HPV %</th></tr>';
   }
 
   // Legenda opbouwen
@@ -2555,36 +2563,50 @@ function initHuisartsen(){
   const tbody = document.getElementById('ha-tbody');
   PRAKTIJKEN.forEach(p=>{
     const kleur = BCOLOR8[p.stadsdeel]||'#888';
-    const sd = sheetsIdx[p.naam]||{};
-    const bhkTxt = (sd.bhk_pct!=null&&sd.bhk_pct!=='') ? Number(sd.bhk_pct).toFixed(1)+'%' : '—';
-    const hpvTxt = (sd.hpv_pct!=null&&sd.hpv_pct!=='') ? Number(sd.hpv_pct).toFixed(1)+'%' : '—';
-    const tr = document.createElement('tr');
-    let cells = `<td style="border-left:3px solid ${kleur};padding-left:8px;font-weight:600">${p.naam}</td>`
-              + `<td style="font-size:.76rem;color:#555">${p.stadsdeel}</td>`
-              + `<td style="font-size:.74rem;color:#444">${p.artsen.join('<br>')}</td>`;
-    if(hasSheets) cells += `<td style="text-align:right;font-weight:600;color:${bhkTxt==='—'?'#bbb':'#2E4057'}">${bhkTxt}</td>`
-                         + `<td style="text-align:right;font-weight:600;color:${hpvTxt==='—'?'#bbb':'#2E4057'}">${hpvTxt}</td>`;
-    tr.innerHTML = cells;
-    tbody.appendChild(tr);
+    const metingen = sheetsIdx[p.naam] || [];
+    const artsenHtml = p.artsen.join('<br>');
+    const basisCellen = `<td style="border-left:3px solid ${kleur};padding-left:8px;font-weight:600">${p.naam}</td>`
+                      + `<td style="font-size:.76rem;color:#555">${p.stadsdeel}</td>`
+                      + `<td style="font-size:.74rem;color:#444">${artsenHtml}</td>`;
+
+    if(hasSheets && metingen.length > 0){
+      metingen.forEach((sd, idx)=>{
+        const bhkTxt = (sd.bhk_pct!=null&&sd.bhk_pct!=='') ? Number(sd.bhk_pct).toFixed(1)+'%' : '—';
+        const hpvTxt = (sd.hpv_pct!=null&&sd.hpv_pct!=='') ? Number(sd.hpv_pct).toFixed(1)+'%' : '—';
+        const datumTxt = sd.datum || '—';
+        const tr = document.createElement('tr');
+        const herhaald = idx > 0
+          ? `<td style="border-left:3px solid ${kleur};padding-left:8px;color:#aaa;font-size:.74rem">${p.naam}</td>`
+            + `<td></td><td></td>`
+          : basisCellen;
+        tr.innerHTML = herhaald
+          + `<td style="font-size:.76rem;color:#666">${datumTxt}</td>`
+          + `<td style="text-align:right;font-weight:600;color:${bhkTxt==='—'?'#bbb':'#2E4057'}">${bhkTxt}</td>`
+          + `<td style="text-align:right;font-weight:600;color:${hpvTxt==='—'?'#bbb':'#2E4057'}">${hpvTxt}</td>`;
+        tbody.appendChild(tr);
+      });
+    } else {
+      const tr = document.createElement('tr');
+      let cells = basisCellen;
+      if(hasSheets) cells += `<td style="color:#bbb">—</td><td style="color:#bbb">—</td><td style="color:#bbb">—</td>`;
+      tr.innerHTML = cells;
+      tbody.appendChild(tr);
+    }
   });
 
   // Markers op kaart
   PRAKTIJKEN.forEach(p=>{
     if(!p.lat||!p.lng) return;
     const kleur = BCOLOR8[p.stadsdeel]||'#888';
-    const sd = sheetsIdx[p.naam]||{};
-    const hasBhk = sd.bhk_pct!=null&&sd.bhk_pct!=='';
-    const hasHpv = sd.hpv_pct!=null&&sd.hpv_pct!=='';
+    const metingen = sheetsIdx[p.naam] || [];
+    const laatste = metingen[metingen.length-1] || {};
+    const hasBhk = laatste.bhk_pct!=null&&laatste.bhk_pct!=='';
+    const hasHpv = laatste.hpv_pct!=null&&laatste.hpv_pct!=='';
 
     const marker = L.circleMarker([p.lat,p.lng],{
-      radius: 10,
-      color: '#fff',
-      weight: 2,
-      fillColor: kleur,
-      fillOpacity: 0.88
+      radius: 10, color: '#fff', weight: 2, fillColor: kleur, fillOpacity: 0.88
     }).addTo(m);
 
-    // Dubbele ring als beide metrics beschikbaar
     if(hasBhk && hasHpv){
       L.circleMarker([p.lat,p.lng],{
         radius:14, color:kleur, weight:2, fill:false
@@ -2593,8 +2615,16 @@ function initHuisartsen(){
 
     const artsenHtml = p.artsen.map(a=>`<div style="margin:1px 0">${a}</div>`).join('');
     let extraHtml = '';
-    if(hasBhk) extraHtml += `<div class="tt-row"><span class="tt-lbl">BHK screening</span><span class="tt-val">${Number(sd.bhk_pct).toFixed(1)}%</span></div>`;
-    if(hasHpv) extraHtml += `<div class="tt-row"><span class="tt-lbl">HPV vaccinatie</span><span class="tt-val">${Number(sd.hpv_pct).toFixed(1)}%</span></div>`;
+    if(metingen.length > 0){
+      extraHtml += `<div style="margin-top:5px;font-size:.74rem;color:#888;font-weight:700">Metingen</div>`;
+      metingen.forEach(sd=>{
+        const datum = sd.datum ? `<span style="color:#888">${sd.datum} — </span>` : '';
+        if(sd.bhk_pct!=null&&sd.bhk_pct!=='')
+          extraHtml += `<div class="tt-row">${datum}<span class="tt-lbl">BHK</span><span class="tt-val">${Number(sd.bhk_pct).toFixed(1)}%</span></div>`;
+        if(sd.hpv_pct!=null&&sd.hpv_pct!=='')
+          extraHtml += `<div class="tt-row">${datum}<span class="tt-lbl">HPV</span><span class="tt-val">${Number(sd.hpv_pct).toFixed(1)}%</span></div>`;
+      });
+    }
 
     marker.bindTooltip(`
       <div class="tt-title">${p.naam}</div>
