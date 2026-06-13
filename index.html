@@ -156,8 +156,9 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
 .niv-camp-star { color:#FFC000; font-size:.8rem; }
 
 /* ── LANDINGSPAGINA ────────────────────────────────────────────────── */
-#pane-project.active  { display:block; overflow-y:auto; }
-#pane-apotheken.active{ display:block; overflow-y:auto; }
+#pane-project.active   { display:block; overflow-y:auto; }
+#pane-apotheken.active { display:block; overflow-y:auto; }
+#pane-huisartsen.active{ display:flex; }
 .proj-page { max-width:980px; margin:0 auto; padding:28px 24px 48px; }
 
 .proj-hero {
@@ -250,6 +251,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
   <button class="tab-btn tab-btn-health" onclick="switchTab('screening',this)"><span></span> Screening BHK</button>
   <button class="tab-btn tab-btn-health" onclick="switchTab('vaccinatie',this)"><span></span> HPV-vaccinatie</button>
   <button class="tab-btn tab-btn-health" onclick="switchTab('apotheken',this)"><span></span> Apotheken</button>
+  <button class="tab-btn tab-btn-health" onclick="switchTab('huisartsen',this)"><span></span> Huisartsen</button>
   <button class="tab-btn" onclick="switchTab('bevolking',this)"><span></span> Bevolking</button>
   <button class="tab-btn" onclick="switchTab('demografie',this)"><span></span> Demografie</button>
   <button class="tab-btn" onclick="switchTab('inkomen',this)"><span></span> Inkomen</button>
@@ -356,6 +358,10 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       <div style="background:#fff;border-radius:8px;padding:12px 14px;border-left:3px solid #9B6DD6;box-shadow:0 1px 4px rgba(0,0,0,.06)">
         <div style="font-weight:700;font-size:.85rem;color:#2E4057;margin-bottom:4px">💊 Apotheken</div>
         <div style="font-size:.75rem;color:#666;line-height:1.5">FarmaFlux-registraties van sensibiliseringsgesprekken, folders, doorverwijzingen en vaccinaties via apotheken.</div>
+      </div>
+      <div style="background:#fff;border-radius:8px;padding:12px 14px;border-left:3px solid #9B6DD6;box-shadow:0 1px 4px rgba(0,0,0,.06)">
+        <div style="font-weight:700;font-size:.85rem;color:#2E4057;margin-bottom:4px">👨‍⚕️ Huisartsen</div>
+        <div style="font-size:.75rem;color:#666;line-height:1.5">Kaart van deelnemende huisartspraktijken per stadsdeel. Overzicht van betrokken artsen. Optioneel: BHK- en HPV-data per praktijk via Google Sheets.</div>
       </div>
       <div style="background:#fff;border-radius:8px;padding:12px 14px;border-left:3px solid #aaa;box-shadow:0 1px 4px rgba(0,0,0,.06)">
         <div style="font-weight:700;font-size:.85rem;color:#2E4057;margin-bottom:4px">👥 Bevolking</div>
@@ -761,6 +767,49 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
   </div>
 </div>
 
+<!-- ══ HUISARTSEN ══════════════════════════════════════════════════════════ -->
+<div id="pane-huisartsen" class="tab-pane">
+  <div class="map-wrap">
+    <div id="map-huisartsen" class="leaflet-map"></div>
+    <div class="map-legend" id="ha-legend">
+      <h5>Stadsdeel</h5>
+      <div id="ha-leg-items"></div>
+    </div>
+    <div class="datasource-badge"><strong>Stakeholdermapping</strong>HPV vrij Genk · 2025</div>
+  </div>
+  <div class="side-panel">
+    <div class="panel-header">👨‍⚕️ Betrokken huisartsen</div>
+    <div class="panel-section">
+      <h4>Overzicht</h4>
+      <div class="kpi-grid" id="ha-kpi"></div>
+    </div>
+    <div class="panel-section" id="ha-sheets-section" style="display:none">
+      <h4>Praktijkdata (Google Sheets)</h4>
+      <div id="ha-sheets-info" style="font-size:.78rem;color:#555;line-height:1.55;background:#f7f3ff;border-left:3px solid #7B3FBE;padding:8px 11px;border-radius:4px"></div>
+    </div>
+    <div class="panel-section" id="ha-placeholder-section">
+      <h4>Toekomstige praktijkdata</h4>
+      <div style="font-size:.78rem;color:#777;line-height:1.6;background:#f7f9fc;border-left:3px solid #ccc;padding:9px 12px;border-radius:4px">
+        Nog geen registratiedata ontvangen. Zodra praktijken BHK-screening- of HPV-vaccinatiecijfers aanleveren via de <strong>Google Sheets tab "Huisartsen"</strong>, verschijnen die automatisch als extra kolommen in onderstaande tabel en als indicatoren op de kaart.
+        <br><br>Verwachte kolommen: <code>praktijk · bhk_pct · hpv_pct</code>
+      </div>
+    </div>
+    <div class="panel-section" style="padding:0;border-bottom:none;flex:1;overflow-y:auto">
+      <div style="padding:12px 14px 6px">
+        <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;font-weight:700">Praktijken &amp; artsen</h4>
+      </div>
+      <div style="overflow-x:auto">
+        <table class="niv-table" id="ha-table">
+          <thead id="ha-thead">
+            <tr><th>Praktijk</th><th>Stadsdeel</th><th>Artsen</th></tr>
+          </thead>
+          <tbody id="ha-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
 </div><!-- /workspace -->
 
 <!-- Laadoverlay -->
@@ -810,6 +859,26 @@ let SCR_JAREN = [];   // beschikbare screeningsjaren (gesorteerd)
 let FARMAFLUX = []; // [{periode, cnk_code, product, registraties}]
 let VAC_DETAIL = []; // [{snapshot, jaar, regist_m, regist_v, regist_tot, clb_m, clb_v, clb_tot}]
 let BEV_DATA   = {}; // code → {naam, buurt, totaal, a0_9, a10_19, ...}
+let HUISARTSEN_SHEETS = []; // [{praktijk, bhk_pct, hpv_pct}] — optioneel via Google Sheets
+
+const PRAKTIJKEN = [
+  {naam:"Ars Curae",adres:"Koning Boudewijnlaan 43/1",stadsdeel:"Genk-Noord",wijk:"Nieuwe-Kempen",lat:51.01272,lng:5.48901,artsen:["Dr. Candreva Rene","Dr. Caveye Luc","Dr. Duran Bünyamin","Dr. Vanheusden Kobe"]},
+  {naam:"Groepspraktijk Doktershuys 30",adres:"Weg naar As 27",stadsdeel:"Genk-Centrum",wijk:"Genk-Centrum-Noord",lat:50.96664,lng:5.50389,artsen:["Dr. Antheunis Kristien","Dr. Buyse Hanne"]},
+  {naam:"Groepspraktijk Luce",adres:"Weg naar As 143/1",stadsdeel:"Genk-Centrum",wijk:"Genk-Centrum-Noord",lat:50.98014,lng:5.53029,artsen:["Dr. Berghmans Leo","Dr. De Bruyn Leen"]},
+  {naam:"Huisartsen Box",adres:"Zouwstraat 2",stadsdeel:"Genk-Midden",wijk:"Hasseltweg",lat:50.95857,lng:5.43903,artsen:["Dr. Bijnens Tom","Dr. Breure Karen"]},
+  {naam:"Huisartsenpraktijk Kolderbos",adres:"Hooiweg 134/1",stadsdeel:"Kolderbos-Langerlo",wijk:"Kolderbos",lat:50.94558,lng:5.50083,artsen:["Dr. Bongaerts Anouk"]},
+  {naam:"Artsen Zaveldries",adres:"Guillaume Lambertlaan 88",stadsdeel:"Genk-Noord",wijk:"Driehoeven",lat:51.00574,lng:5.49598,artsen:["Dr. Destino Massimo","Dr. Niesten Benedicte","Dr. Wijnker Thijs"]},
+  {naam:"Geneeskunde voor het Volk Genk",adres:"Keinkesstraat 3A",stadsdeel:"Kolderbos-Langerlo",wijk:"Kolderbos",lat:50.95132,lng:5.50349,artsen:["Dr. Bourgraff Pauline"]},
+  {naam:"Buurtgezondheidscentrum Althea",adres:"Risstraat 22",stadsdeel:"Genk-Oost",wijk:"Waterschei-Noord",lat:51.00259,lng:5.51062,artsen:["Dr. Ben Messaoud Latifa","Dr. Dupont Kobe","Dr. Frints Suzanna","Dr. Nicodemus Peter","Dr. Vanmechelen Patrick"]},
+  {naam:"Dr. Giribuola Rina",adres:"Stalenstraat 271",stadsdeel:"Genk-Oost",wijk:"Waterschei-Zuid",lat:50.99016,lng:5.51151,artsen:["Dr. Giribuola Rina"]},
+  {naam:"Dr. Mewis Annelies",adres:"Sledderlo 62",stadsdeel:"Genk-Zuid",wijk:"Oud-Sledderlo",lat:50.93142,lng:5.52111,artsen:["Dr. Mewis Annelies"]},
+  {naam:"Dr. Van Aerde Herwig",adres:"Onderwijslaan 81",stadsdeel:"Genk-Oost",wijk:"Waterschei-Zuid",lat:50.99808,lng:5.51152,artsen:["Dr. Van Aerde Herwig"]},
+  {naam:"Medebo",adres:"Heeldstraat 58",stadsdeel:"Bret-Gelieren-Kattevenne",wijk:"Bret",lat:50.97304,lng:5.52731,artsen:["Dr. Denier Willy"]},
+  {naam:"Dr. Vrancken Francis",adres:"Herenstraat 21",stadsdeel:"Genk-Oost",wijk:"Oud-Waterschei",lat:50.99298,lng:5.53145,artsen:["Dr. Vrancken Francis"]},
+  {naam:"Groepspraktijk De Boxberg",adres:"Boxbergstraat 33",stadsdeel:"Genk-West",wijk:"Boxbergheide",lat:50.97250,lng:5.45620,artsen:["Dr. Bosmans Carmen","Dr. Bosmans Eva","Dr. Caponi Anselmo","Dr. Caponi Lara","Dr. Ieven Kaat","Dr. Paredis Laurien"]},
+  {naam:"Medi-Mine",adres:"Buitenlaan 11",stadsdeel:"Genk-West",wijk:"Winterslag 2 en 4",lat:50.97460,lng:5.46686,artsen:["Dr. Claesen Maarten","Dr. Dezeure Jaak","Dr. Germeaux Jacques","Dr. Lierman Jolien","Dr. Matthys Jolien","Dr. Potargent Bram","Dr. Tournel Amber","Dr. Vanaenrode Michiele","Dr. Verhoeven Nancy"]},
+  {naam:"Praktijk Zonhoverheide",adres:"Zonhoverweg 35",stadsdeel:"Genk-West",wijk:"Boxbergheide",lat:50.97440,lng:5.45631,artsen:["Dr. Ampe Emilienne","Dr. Avci Seher","Dr. Grouwels Yves","Dr. Meers Jana","Dr. Najma Manja"]},
+];
 
 // ── CSV HELPERS ───────────────────────────────────────────────────────────────
 function csvNaarObjecten(text) {
@@ -902,12 +971,13 @@ async function laadAlleData() {
 
   const dataUrl      = useSheets ? sheetUrl('data')               : LOCAL_CSV + 'data.csv';
   const refUrl       = useSheets ? sheetUrl('referentie')          : LOCAL_CSV + 'referentie.csv';
-  const farmaUrl     = useSheets ? sheetUrl('farmaflux')           : LOCAL_CSV + 'farmaflux.csv';
-  const vacDetailUrl = useSheets ? sheetUrl('vaccinaties_detail')  : LOCAL_CSV + 'vaccinaties_detail.csv';
-  const scrUrl       = useSheets ? sheetUrl('screening')           : LOCAL_CSV + 'screening.csv';
-  const vacUrl       = useSheets ? sheetUrl('vaccinatie')          : LOCAL_CSV + 'vaccinatie.csv';
+  const farmaUrl        = useSheets ? sheetUrl('farmaflux')           : LOCAL_CSV + 'farmaflux.csv';
+  const vacDetailUrl    = useSheets ? sheetUrl('vaccinaties_detail')  : LOCAL_CSV + 'vaccinaties_detail.csv';
+  const scrUrl          = useSheets ? sheetUrl('screening')           : LOCAL_CSV + 'screening.csv';
+  const vacUrl          = useSheets ? sheetUrl('vaccinatie')          : LOCAL_CSV + 'vaccinatie.csv';
+  const huisartsenUrl   = useSheets ? sheetUrl('Huisartsen')          : '';
 
-  const [geoResults, dataText, refText, farmaText, vacDetailText, scrText, vacText] = await Promise.all([
+  const [geoResults, dataText, refText, farmaText, vacDetailText, scrText, vacText, huisartsenText] = await Promise.all([
     Promise.all(geoFiles.map(([, url]) => fetch(url).then(r => { if(!r.ok) throw new Error(`Kan ${url} niet laden`); return r.json(); })))
       .then(res => { setProgress(50, 'Statistieken ophalen…'); return res; }),
     fetch(dataUrl).then(r => { if(!r.ok) throw new Error(`Kan data.csv niet laden`); return r.text(); }),
@@ -916,6 +986,7 @@ async function laadAlleData() {
     fetch(vacDetailUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
     fetch(scrUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
     fetch(vacUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
+    huisartsenUrl ? fetch(huisartsenUrl).then(r => r.ok ? r.text() : '').catch(() => '') : Promise.resolve(''),
   ]);
 
   setProgress(80, 'Data verwerken…');
@@ -934,6 +1005,7 @@ async function laadAlleData() {
   REFDATA = buildRefLookup(csvNaarObjecten(refText));
   if(farmaText) FARMAFLUX = csvNaarObjecten(farmaText);
   if(vacDetailText) VAC_DETAIL = parseVacDetail(csvNaarObjecten(vacDetailText));
+  if(huisartsenText) HUISARTSEN_SHEETS = csvNaarObjecten(huisartsenText).filter(r => r.praktijk);
   BEV_DATA = buildBevLookup(BEV_STATIC);
   Object.entries(BEV_DATA).forEach(([code, d]) => {
     if(!SHDATA[code]) SHDATA[code] = {};
@@ -1082,6 +1154,7 @@ function initTab(name){
   if(name==='nationaliteit') initNationaliteit();
   if(name==='vaccinatie')   initVaccinatie();
   if(name==='apotheken')   initApotheken();
+  if(name==='huisartsen')  initHuisartsen();
   if(name==='niveaus')     initNiveaus();
 }
 
@@ -2423,6 +2496,118 @@ function initApotheken(){
     tr.innerHTML = `<td>${r.periode}</td><td>${r.product||r.cnk_code}</td><td style="text-align:right;font-weight:600">${r.registraties}</td>`;
     tbody.appendChild(tr);
   });
+}
+
+// ── HUISARTSEN ────────────────────────────────────────────────────────────────
+function initHuisartsen(){
+  const m = makeMap('map-huisartsen');
+
+  // Achtergrondlaag: 8 buurten als grijze vlakken
+  if(GEO.achtBuurt){
+    L.geoJSON(GEO.achtBuurt,{
+      style:{ color:'#888', weight:1.5, fillColor:'#f5f5f5', fillOpacity:.35 }
+    }).addTo(m);
+  }
+
+  // Merge statische lijst met optionele Sheets-data
+  const sheetsIdx = {};
+  HUISARTSEN_SHEETS.forEach(r => { sheetsIdx[(r.praktijk||'').trim()] = r; });
+  const hasSheets = HUISARTSEN_SHEETS.length > 0;
+
+  // KPI
+  const totArtsen   = PRAKTIJKEN.reduce((s,p)=>s+p.artsen.length,0);
+  const totPraktijk = PRAKTIJKEN.length;
+  const totStad     = new Set(PRAKTIJKEN.map(p=>p.stadsdeel)).size;
+  const kpiEl = document.getElementById('ha-kpi');
+  [{v:totArtsen,l:'Huisartsen'},{v:totPraktijk,l:'Praktijken'},{v:totStad,l:'Stadsdelen'}].forEach(({v,l})=>{
+    const d = document.createElement('div');
+    d.className='kpi-card';
+    d.style.cssText='border-left-color:#7B3FBE';
+    d.innerHTML=`<div class="kpi-val" style="color:#7B3FBE">${v}</div><div class="kpi-lbl">${l}</div>`;
+    kpiEl.appendChild(d);
+  });
+
+  // Sheets-data sectie
+  if(hasSheets){
+    document.getElementById('ha-placeholder-section').style.display='none';
+    document.getElementById('ha-sheets-section').style.display='';
+    const updated = HUISARTSEN_SHEETS.find(r=>r.bijgewerkt)||null;
+    document.getElementById('ha-sheets-info').textContent =
+      `${HUISARTSEN_SHEETS.length} praktijk(en) met data ontvangen.`
+      + (updated ? ` Laatste update: ${updated.bijgewerkt}.` : '');
+    // Voeg BHK/HPV kolommen toe aan tabel
+    const thead = document.getElementById('ha-thead');
+    thead.innerHTML='<tr><th>Praktijk</th><th>Stadsdeel</th><th>Artsen</th><th>BHK %</th><th>HPV %</th></tr>';
+  }
+
+  // Legenda opbouwen
+  const gebruikteSd = [...new Set(PRAKTIJKEN.map(p=>p.stadsdeel))].sort();
+  const legEl = document.getElementById('ha-leg-items');
+  gebruikteSd.forEach(sd=>{
+    const kleur = BCOLOR8[sd]||'#888';
+    const row = document.createElement('div');
+    row.className='leg-row';
+    row.innerHTML=`<div class="leg-swatch" style="background:${kleur};border-radius:50%"></div><span>${sd}</span>`;
+    legEl.appendChild(row);
+  });
+
+  // Tabel opbouwen
+  const tbody = document.getElementById('ha-tbody');
+  PRAKTIJKEN.forEach(p=>{
+    const kleur = BCOLOR8[p.stadsdeel]||'#888';
+    const sd = sheetsIdx[p.naam]||{};
+    const bhkTxt = (sd.bhk_pct!=null&&sd.bhk_pct!=='') ? Number(sd.bhk_pct).toFixed(1)+'%' : '—';
+    const hpvTxt = (sd.hpv_pct!=null&&sd.hpv_pct!=='') ? Number(sd.hpv_pct).toFixed(1)+'%' : '—';
+    const tr = document.createElement('tr');
+    let cells = `<td style="border-left:3px solid ${kleur};padding-left:8px;font-weight:600">${p.naam}</td>`
+              + `<td style="font-size:.76rem;color:#555">${p.stadsdeel}</td>`
+              + `<td style="font-size:.74rem;color:#444">${p.artsen.join('<br>')}</td>`;
+    if(hasSheets) cells += `<td style="text-align:right;font-weight:600;color:${bhkTxt==='—'?'#bbb':'#2E4057'}">${bhkTxt}</td>`
+                         + `<td style="text-align:right;font-weight:600;color:${hpvTxt==='—'?'#bbb':'#2E4057'}">${hpvTxt}</td>`;
+    tr.innerHTML = cells;
+    tbody.appendChild(tr);
+  });
+
+  // Markers op kaart
+  PRAKTIJKEN.forEach(p=>{
+    if(!p.lat||!p.lng) return;
+    const kleur = BCOLOR8[p.stadsdeel]||'#888';
+    const sd = sheetsIdx[p.naam]||{};
+    const hasBhk = sd.bhk_pct!=null&&sd.bhk_pct!=='';
+    const hasHpv = sd.hpv_pct!=null&&sd.hpv_pct!=='';
+
+    const marker = L.circleMarker([p.lat,p.lng],{
+      radius: 10,
+      color: '#fff',
+      weight: 2,
+      fillColor: kleur,
+      fillOpacity: 0.88
+    }).addTo(m);
+
+    // Dubbele ring als beide metrics beschikbaar
+    if(hasBhk && hasHpv){
+      L.circleMarker([p.lat,p.lng],{
+        radius:14, color:kleur, weight:2, fill:false
+      }).addTo(m);
+    }
+
+    const artsenHtml = p.artsen.map(a=>`<div style="margin:1px 0">${a}</div>`).join('');
+    let extraHtml = '';
+    if(hasBhk) extraHtml += `<div class="tt-row"><span class="tt-lbl">BHK screening</span><span class="tt-val">${Number(sd.bhk_pct).toFixed(1)}%</span></div>`;
+    if(hasHpv) extraHtml += `<div class="tt-row"><span class="tt-lbl">HPV vaccinatie</span><span class="tt-val">${Number(sd.hpv_pct).toFixed(1)}%</span></div>`;
+
+    marker.bindTooltip(`
+      <div class="tt-title">${p.naam}</div>
+      <div class="tt-row"><span class="tt-lbl">Adres</span><span class="tt-val">${p.adres}</span></div>
+      <div class="tt-row"><span class="tt-lbl">Stadsdeel</span><span class="tt-val" style="color:${kleur}">${p.stadsdeel}</span></div>
+      <div class="tt-row"><span class="tt-lbl">Wijk</span><span class="tt-val">${p.wijk}</span></div>
+      ${extraHtml}
+      <div style="margin-top:6px;font-size:.76rem;color:#888;font-weight:700">Huisartsen</div>
+      <div style="font-size:.78rem;color:#333;line-height:1.55">${artsenHtml}</div>
+    `,{sticky:true,opacity:0.97});
+  });
+
+  m.invalidateSize();
 }
 
 // ── BOOT ──────────────────────────────────────────────────────────────────────
