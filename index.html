@@ -429,12 +429,12 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       ⚠️ <strong>Opgelet:</strong> Op sectorniveau schommelen dekkingsgraden sterk door kleine populaties. Data is gevoelig voor kleine wijzigingen en moeilijk te interpreteren.
     </div>
     <div class="panel-section">
-      <h4>Referentie 2024</h4>
+      <h4 id="scr-ref-hdr">Referentie 2024</h4>
       <div class="ref-box">
-        <div class="ref-row"><span class="ref-name">Genk (campagnebuurten)</span><span class="ref-val genk">53.9%</span></div>
-        <div class="ref-row"><span class="ref-name">Genk (stad totaal)</span><span class="ref-val genk">55.5%</span></div>
-        <div class="ref-row"><span class="ref-name">Limburg</span><span class="ref-val limb">57.2%</span></div>
-        <div class="ref-row"><span class="ref-name">Vlaanderen</span><span class="ref-val vl">60.6%</span></div>
+        <div class="ref-row"><span class="ref-name">Genk (campagnebuurten)</span><span class="ref-val genk" id="scr-ref-camp">53.9%</span></div>
+        <div class="ref-row"><span class="ref-name">Genk (stad totaal)</span><span class="ref-val genk" id="scr-ref-genk">55.5%</span></div>
+        <div class="ref-row"><span class="ref-name">Limburg</span><span class="ref-val limb" id="scr-ref-limb">57.2%</span></div>
+        <div class="ref-row"><span class="ref-name">Vlaanderen</span><span class="ref-val vl" id="scr-ref-vl">60.6%</span></div>
       </div>
     </div>
     <div class="panel-section">
@@ -1260,7 +1260,7 @@ function buildScrChartData(jaar){
     labels:  rows.map(r=>r.naam),
     rates:   rows.map(r=>+(r.rate*100).toFixed(1)),
     buurten: rows.map(r=>r.buurt),
-    genk:    getRef('screening', jaar, 'genk'),
+    genk:    getVal(STAD_CODE,'screening',jaar)??getRef('screening', jaar, 'genk'),
     limburg: getRef('screening', jaar, 'limburg'),
     flanders:getRef('screening', jaar, 'vlaanderen'),
   };
@@ -1308,29 +1308,30 @@ function initScreening(){
     b.onclick=()=>{
       document.querySelectorAll('.yr-btn').forEach(x=>x.classList.remove('active'));
       b.classList.add('active');
-      scrYear=yr; drawScrMap(m); updateScrBarChart();
+      scrYear=yr; drawScrMap(m); updateScrBarChart(); updateScrRefPanel();
     };
     bar.appendChild(b);
   });
 
   drawScrMap(m);
+  updateScrRefPanel();
   addBuurtBorder(m);
   gradLegend('leg-scr',['#d7191c','#fdae61','#ffffbf','#a6d96a','#1a9641'],['35%','','57%','','80%']);
   appendHatchLegend('leg-scr');
 
   // Evolutie lijndiagram
   const ectx = document.getElementById('chart-scr-evol').getContext('2d');
-  const latestYr = Math.max(...SCR_JAREN);
+  const latestRefYr = [...SCR_JAREN].reverse().find(yr=>getRef('screening',yr,'limburg')!=null) ?? Math.max(...SCR_JAREN);
   const evDs = CAMP_BUURTEN.map(b=>{
     const data = SCR_JAREN.map(yr=>{ const v=getVal(b,'screening',yr); return v!==null?+(v*100).toFixed(1):null; });
     return {label:BLABEL[b],data,borderColor:BCOLOR[b],backgroundColor:'transparent',
              borderWidth:2,pointRadius:3,pointHoverRadius:5,tension:0.3,spanGaps:true};
   });
-  const genkData = SCR_JAREN.map(yr=>{ const v=getRef('screening',yr,'genk'); return v!==null?+(v*100).toFixed(1):null; });
+  const genkData = SCR_JAREN.map(yr=>{ const v=getVal(STAD_CODE,'screening',yr)??getRef('screening',yr,'genk'); return v!==null?+(v*100).toFixed(1):null; });
   evDs.push({label:'Genk stad',data:genkData,borderColor:'#2E4057',backgroundColor:'transparent',
     borderWidth:2.5,borderDash:[5,3],pointRadius:3,tension:0.3,spanGaps:true});
-  const limRef = getRef('screening', latestYr, 'limburg');
-  const vlRef  = getRef('screening', latestYr, 'vlaanderen');
+  const limRef = getRef('screening', latestRefYr, 'limburg');
+  const vlRef  = getRef('screening', latestRefYr, 'vlaanderen');
   if(limRef) evDs.push({label:'Limburg',   data:SCR_JAREN.map(()=>+(limRef*100).toFixed(1)),
     borderColor:'#d7191c',borderWidth:1.5,borderDash:[3,4],pointRadius:0,backgroundColor:'transparent'});
   if(vlRef)  evDs.push({label:'Vlaanderen',data:SCR_JAREN.map(()=>+(vlRef*100).toFixed(1)),
@@ -1404,7 +1405,7 @@ function drawScrMap(m){
   if(scrCityMarker){ m.removeLayer(scrCityMarker); scrCityMarker=null; }
 
   if(scrLayerMode==='stad'){
-    const rate = getRef('screening', scrYear, 'genk');
+    const rate = getVal(STAD_CODE,'screening',scrYear)??getRef('screening', scrYear, 'genk');
     scrMapLayer = L.geoJSON(GEO.genk,{
       style:{ fillColor:scrColor(rate), fillOpacity:.78, color:'#444', weight:2 },
       onEachFeature:(f,layer)=>{
@@ -1511,6 +1512,22 @@ function updateScrBarChart(){
     scrBarChart._refData = d;
     scrBarChart.update();
   }
+}
+
+function updateScrRefPanel(){
+  const hdr = document.getElementById('scr-ref-hdr');
+  if(hdr) hdr.textContent = 'Referentie '+scrYear;
+  const genkVal  = getVal(STAD_CODE,'screening',scrYear)??getRef('screening',scrYear,'genk');
+  const limbVal  = getRef('screening',scrYear,'limburg');
+  const vlVal    = getRef('screening',scrYear,'vlaanderen');
+  const campVals = CAMP_BUURTEN.map(b=>getVal(b,'screening',scrYear)).filter(v=>v!=null);
+  const campAvg  = campVals.length ? campVals.reduce((a,b)=>a+b,0)/campVals.length : null;
+  const fmt = v => v!=null ? (v*100).toFixed(1)+'%' : '—';
+  const el = id => document.getElementById(id);
+  if(el('scr-ref-camp'))  el('scr-ref-camp').textContent  = fmt(campAvg);
+  if(el('scr-ref-genk'))  el('scr-ref-genk').textContent  = fmt(genkVal);
+  if(el('scr-ref-limb'))  el('scr-ref-limb').textContent  = fmt(limbVal);
+  if(el('scr-ref-vl'))    el('scr-ref-vl').textContent    = fmt(vlVal);
 }
 
 function buildAgeScrData(){
