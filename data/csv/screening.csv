@@ -1,0 +1,330 @@
+﻿code,naam,niveau,indicator,jaar,waarde
+Genk,Genk,referentie,screening,2020,0.528
+Limburg,Limburg,referentie,screening,2020,0.534
+Vlaanderen,Vlaanderen,referentie,screening,2020,0.565
+Genk,Genk,referentie,screening,2021,0.533
+Limburg,Limburg,referentie,screening,2021,0.545
+Vlaanderen,Vlaanderen,referentie,screening,2021,0.578
+Genk,Genk,referentie,screening,2022,0.529
+Limburg,Limburg,referentie,screening,2022,0.552
+Vlaanderen,Vlaanderen,referentie,screening,2022,0.588
+Genk,Genk,referentie,screening,2023,0.547
+Limburg,Limburg,referentie,screening,2023,0.571
+Vlaanderen,Vlaanderen,referentie,screening,2023,0.606
+Genk,Genk,referentie,screening,2024,0.555
+Limburg,Limburg,referentie,screening,2024,0.572
+Vlaanderen,Vlaanderen,referentie,screening,2024,0.606
+Genk,Genk,referentie,screening_leeftijd_25_29,2024,0.547
+Limburg,Limburg,referentie,screening_leeftijd_25_29,2024,0.561
+Vlaanderen,Vlaanderen,referentie,screening_leeftijd_25_29,2024,0.598
+Genk,Genk,referentie,screening_leeftijd_30_34,2024,0.646
+Limburg,Limburg,referentie,screening_leeftijd_30_34,2024,0.662
+Vlaanderen,Vlaanderen,referentie,screening_leeftijd_30_34,2024,0.691
+Genk,Genk,referentie,screening_leeftijd_35_39,2024,0.629
+Limburg,Limburg,referentie,screening_leeftijd_35_39,2024,0.647
+Vlaanderen,Vlaanderen,referentie,screening_leeftijd_35_39,2024,0.679
+Genk,Genk,referentie,screening_leeftijd_40_44,2024,0.598
+Limburg,Limburg,referentie,screening_leeftijd_40_44,2024,0.625
+Vlaanderen,Vlaanderen,referentie,screening_leeftijd_40_44,2024,0.66
+Genk,Genk,referentie,screening_leeftijd_45_49,2024,0.596
+Limburg,Limburg,referentie,screening_leeftijd_45_49,2024,0.608
+Vlaanderen,Vlaanderen,referentie,screening_leeftijd_45_49,2024,0.64
+Genk,Genk,referentie,screening_leeftijd_50_54,2024,0.546
+Limburg,Limburg,referentie,screening_leeftijd_50_54,2024,0.565
+Vlaanderen,Vlaanderen,referentie,screening_leeftijd_50_54,2024,0.601
+Genk,Genk,referentie,screening_leeftijd_55_59,2024,0.467
+Limburg,Limburg,referentie,screening_leeftijd_55_59,2024,0.498
+Vlaanderen,Vlaanderen,referentie,screening_leeftijd_55_59,2024,0.529
+Genk,Genk,referentie,screening_leeftijd_60_64,2024,0.444
+Limburg,Limburg,referentie,screening_leeftijd_60_64,2024,0.439
+Vlaanderen,Vlaanderen,referentie,screening_leeftijd_60_64,2024,0.463
+71016A001,GENK-CENTRUM,sector,screening,2020,0.495
+71016A001,GENK-CENTRUM,sector,screening,2021,0.48
+71016A001,GENK-CENTRUM,sector,screening,2022,0.475
+71016A001,GENK-CENTRUM,sector,screening,2023,0.483
+71016A001,GENK-CENTRUM,sector,screening,2024,0.509
+71016A010,MOLENBLOOK,sector,screening,2020,0.598
+71016A010,MOLENBLOOK,sector,screening,2021,0.626
+71016A010,MOLENBLOOK,sector,screening,2022,0.588
+71016A010,MOLENBLOOK,sector,screening,2023,0.578
+71016A010,MOLENBLOOK,sector,screening,2024,0.556
+71016A02K,D' IERD-ZONNEWEELDE,sector,screening,2020,0.502
+71016A02K,D' IERD-ZONNEWEELDE,sector,screening,2021,0.473
+71016A02K,D' IERD-ZONNEWEELDE,sector,screening,2022,0.464
+71016A02K,D' IERD-ZONNEWEELDE,sector,screening,2023,0.477
+71016A02K,D' IERD-ZONNEWEELDE,sector,screening,2024,0.512
+71016A02L,VLAKVELD TUINWIJK,sector,screening,2020,0.481
+71016A02L,VLAKVELD TUINWIJK,sector,screening,2021,0.504
+71016A02L,VLAKVELD TUINWIJK,sector,screening,2022,0.531
+71016A02L,VLAKVELD TUINWIJK,sector,screening,2023,0.578
+71016A02L,VLAKVELD TUINWIJK,sector,screening,2024,0.588
+71016A02M,VLAKVELD OP STROEP,sector,screening,2020,0.619
+71016A02M,VLAKVELD OP STROEP,sector,screening,2021,0.706
+71016A02M,VLAKVELD OP STROEP,sector,screening,2022,0.722
+71016A02M,VLAKVELD OP STROEP,sector,screening,2023,0.684
+71016A02M,VLAKVELD OP STROEP,sector,screening,2024,0.714
+71016A03-,GENK-CENTRUM - NOORD,sector,screening,2020,0.571
+71016A03-,GENK-CENTRUM - NOORD,sector,screening,2021,0.576
+71016A03-,GENK-CENTRUM - NOORD,sector,screening,2022,0.578
+71016A03-,GENK-CENTRUM - NOORD,sector,screening,2023,0.587
+71016A03-,GENK-CENTRUM - NOORD,sector,screening,2024,0.591
+71016A04-,BRETHEI,sector,screening,2020,0.56
+71016A04-,BRETHEI,sector,screening,2021,0.585
+71016A04-,BRETHEI,sector,screening,2022,0.553
+71016A04-,BRETHEI,sector,screening,2023,0.575
+71016A04-,BRETHEI,sector,screening,2024,0.594
+71016A08K,STIEMER,sector,screening,2020,0.2
+71016A08K,STIEMER,sector,screening,2021,0.4
+71016A08K,STIEMER,sector,screening,2022,0.6
+71016A08K,STIEMER,sector,screening,2023,0.6
+71016A0MA,MELBERG,sector,screening,2020,0.833
+71016A0MA,MELBERG,sector,screening,2021,0.667
+71016A0MA,MELBERG,sector,screening,2022,0.667
+71016A0MA,MELBERG,sector,screening,2023,0.25
+71016A0MA,MELBERG,sector,screening,2024,0.182
+71016A0PA,MELBERG-NATUUR,sector,screening,2020,0.533
+71016A0PA,MELBERG-NATUUR,sector,screening,2021,0.52
+71016A0PA,MELBERG-NATUUR,sector,screening,2022,0.708
+71016A0PA,MELBERG-NATUUR,sector,screening,2023,0.682
+71016A0PA,MELBERG-NATUUR,sector,screening,2024,0.773
+71016A20-,KOLDERBOS,sector,screening,2020,0.489
+71016A20-,KOLDERBOS,sector,screening,2021,0.47
+71016A20-,KOLDERBOS,sector,screening,2022,0.486
+71016A20-,KOLDERBOS,sector,screening,2023,0.534
+71016A20-,KOLDERBOS,sector,screening,2024,0.567
+71016A210,LANGERLO,sector,screening,2020,0.619
+71016A210,LANGERLO,sector,screening,2021,0.562
+71016A210,LANGERLO,sector,screening,2022,0.537
+71016A210,LANGERLO,sector,screening,2023,0.577
+71016A210,LANGERLO,sector,screening,2024,0.614
+71016A292,FLETERSDEL,sector,screening,2020,0.689
+71016A292,FLETERSDEL,sector,screening,2021,0.623
+71016A292,FLETERSDEL,sector,screening,2022,0.655
+71016A292,FLETERSDEL,sector,screening,2023,0.669
+71016A292,FLETERSDEL,sector,screening,2024,0.669
+71016A300,WINTERSLAG - TUINWIJK I,sector,screening,2020,0.498
+71016A300,WINTERSLAG - TUINWIJK I,sector,screening,2021,0.533
+71016A300,WINTERSLAG - TUINWIJK I,sector,screening,2022,0.533
+71016A300,WINTERSLAG - TUINWIJK I,sector,screening,2023,0.549
+71016A300,WINTERSLAG - TUINWIJK I,sector,screening,2024,0.557
+71016A31K,OUD-WINTERSLAG C-MINE,sector,screening,2020,0.568
+71016A31K,OUD-WINTERSLAG C-MINE,sector,screening,2021,0.575
+71016A31K,OUD-WINTERSLAG C-MINE,sector,screening,2022,0.555
+71016A31K,OUD-WINTERSLAG C-MINE,sector,screening,2023,0.593
+71016A31K,OUD-WINTERSLAG C-MINE,sector,screening,2024,0.588
+71016A41K,HASSELTWEG KNEIPPWIEK,sector,screening,2020,0.604
+71016A41K,HASSELTWEG KNEIPPWIEK,sector,screening,2021,0.592
+71016A41K,HASSELTWEG KNEIPPWIEK,sector,screening,2022,0.588
+71016A41K,HASSELTWEG KNEIPPWIEK,sector,screening,2023,0.623
+71016A41K,HASSELTWEG KNEIPPWIEK,sector,screening,2024,0.629
+71016A42-,WINTERSLAG - TUINWIJK II & IV,sector,screening,2020,0.474
+71016A42-,WINTERSLAG - TUINWIJK II & IV,sector,screening,2021,0.49
+71016A42-,WINTERSLAG - TUINWIJK II & IV,sector,screening,2022,0.416
+71016A42-,WINTERSLAG - TUINWIJK II & IV,sector,screening,2023,0.451
+71016A42-,WINTERSLAG - TUINWIJK II & IV,sector,screening,2024,0.448
+71016A432,SCHEMMERSBERG,sector,screening,2020,0.558
+71016A432,SCHEMMERSBERG,sector,screening,2021,0.586
+71016A432,SCHEMMERSBERG,sector,screening,2022,0.593
+71016A432,SCHEMMERSBERG,sector,screening,2023,0.62
+71016A432,SCHEMMERSBERG,sector,screening,2024,0.613
+71016A490,BOKRIJK-NOORD,sector,screening,2020,0.598
+71016A490,BOKRIJK-NOORD,sector,screening,2021,0.569
+71016A490,BOKRIJK-NOORD,sector,screening,2022,0.542
+71016A490,BOKRIJK-NOORD,sector,screening,2023,0.591
+71016A490,BOKRIJK-NOORD,sector,screening,2024,0.566
+71016A4AB,WENNEL,sector,screening,2020,0.496
+71016A4AB,WENNEL,sector,screening,2021,0.487
+71016A4AB,WENNEL,sector,screening,2022,0.528
+71016A4AB,WENNEL,sector,screening,2023,0.535
+71016A4AB,WENNEL,sector,screening,2024,0.524
+71016A4OK,BOXBERG,sector,screening,2020,0.554
+71016A4OK,BOXBERG,sector,screening,2021,0.57
+71016A4OK,BOXBERG,sector,screening,2022,0.599
+71016A4OK,BOXBERG,sector,screening,2023,0.594
+71016A4OK,BOXBERG,sector,screening,2024,0.609
+71016A50K,TERMIEN,sector,screening,2020,0.595
+71016A50K,TERMIEN,sector,screening,2021,0.593
+71016A50K,TERMIEN,sector,screening,2022,0.609
+71016A50K,TERMIEN,sector,screening,2023,0.6
+71016A50K,TERMIEN,sector,screening,2024,0.606
+71016A51-,TERMIEN - TUINWIJK,sector,screening,2020,0.445
+71016A51-,TERMIEN - TUINWIJK,sector,screening,2021,0.443
+71016A51-,TERMIEN - TUINWIJK,sector,screening,2022,0.453
+71016A51-,TERMIEN - TUINWIJK,sector,screening,2023,0.467
+71016A51-,TERMIEN - TUINWIJK,sector,screening,2024,0.501
+71016A512,TERMIEN - KLOOSTER,sector,screening,2020,0.464
+71016A512,TERMIEN - KLOOSTER,sector,screening,2021,0.474
+71016A512,TERMIEN - KLOOSTER,sector,screening,2022,0.552
+71016A512,TERMIEN - KLOOSTER,sector,screening,2023,0.605
+71016A512,TERMIEN - KLOOSTER,sector,screening,2024,0.625
+71016A579,INDUSTRIE-ZUID,sector,screening,2020,0.438
+71016A579,INDUSTRIE-ZUID,sector,screening,2021,0.529
+71016A579,INDUSTRIE-ZUID,sector,screening,2022,0.5
+71016A579,INDUSTRIE-ZUID,sector,screening,2023,0.625
+71016A579,INDUSTRIE-ZUID,sector,screening,2024,0.478
+71016A59K,DE MATEN-NATUUR,sector,screening,2020,0.55
+71016A59K,DE MATEN-NATUUR,sector,screening,2021,0.625
+71016A59K,DE MATEN-NATUUR,sector,screening,2022,0.61
+71016A59K,DE MATEN-NATUUR,sector,screening,2023,0.622
+71016A59K,DE MATEN-NATUUR,sector,screening,2024,0.553
+71016A600,BOKRIJK-ZUID,sector,screening,2020,0.568
+71016A600,BOKRIJK-ZUID,sector,screening,2021,0.632
+71016A600,BOKRIJK-ZUID,sector,screening,2022,0.668
+71016A600,BOKRIJK-ZUID,sector,screening,2023,0.657
+71016A600,BOKRIJK-ZUID,sector,screening,2024,0.643
+71016A70K,SLEDDERLO OUD,sector,screening,2020,0.536
+71016A70K,SLEDDERLO OUD,sector,screening,2021,0.591
+71016A70K,SLEDDERLO OUD,sector,screening,2022,0.574
+71016A70K,SLEDDERLO OUD,sector,screening,2023,0.623
+71016A70K,SLEDDERLO OUD,sector,screening,2024,0.624
+71016A71-,TERBOEKT,sector,screening,2020,0.62
+71016A71-,TERBOEKT,sector,screening,2021,0.588
+71016A71-,TERBOEKT,sector,screening,2022,0.496
+71016A71-,TERBOEKT,sector,screening,2023,0.6
+71016A71-,TERBOEKT,sector,screening,2024,0.627
+71016A72K,KOEBAAN-NOORD,sector,screening,2020,0.541
+71016A72K,KOEBAAN-NOORD,sector,screening,2021,0.561
+71016A72K,KOEBAAN-NOORD,sector,screening,2022,0.627
+71016A72K,KOEBAAN-NOORD,sector,screening,2023,0.645
+71016A72K,KOEBAAN-NOORD,sector,screening,2024,0.581
+71016A734,NIEUW SLEDDERLO,sector,screening,2020,0.462
+71016A734,NIEUW SLEDDERLO,sector,screening,2021,0.474
+71016A734,NIEUW SLEDDERLO,sector,screening,2022,0.463
+71016A734,NIEUW SLEDDERLO,sector,screening,2023,0.502
+71016A734,NIEUW SLEDDERLO,sector,screening,2024,0.484
+71016A775,KLEIN LANGERLO,sector,screening,2020,0.4
+71016A775,KLEIN LANGERLO,sector,screening,2021,0.455
+71016A775,KLEIN LANGERLO,sector,screening,2022,0.556
+71016A775,KLEIN LANGERLO,sector,screening,2023,0.4
+71016A775,KLEIN LANGERLO,sector,screening,2024,0.643
+71016A791,MEIBOS,sector,screening,2020,0.385
+71016A791,MEIBOS,sector,screening,2021,0.44
+71016A791,MEIBOS,sector,screening,2022,0.48
+71016A791,MEIBOS,sector,screening,2023,0.5
+71016A791,MEIBOS,sector,screening,2024,0.577
+71016A800,GELIEREN - HOOGZIJ,sector,screening,2020,0.598
+71016A800,GELIEREN - HOOGZIJ,sector,screening,2021,0.596
+71016A800,GELIEREN - HOOGZIJ,sector,screening,2022,0.613
+71016A800,GELIEREN - HOOGZIJ,sector,screening,2023,0.631
+71016A800,GELIEREN - HOOGZIJ,sector,screening,2024,0.63
+71016A890,KATTEVENNE,sector,screening,2020,0.667
+71016A890,KATTEVENNE,sector,screening,2021,0.583
+71016A890,KATTEVENNE,sector,screening,2022,0.727
+71016A890,KATTEVENNE,sector,screening,2023,0.385
+71016A890,KATTEVENNE,sector,screening,2024,0.5
+71016A912,CAETSBEEK,sector,screening,2020,0.596
+71016A912,CAETSBEEK,sector,screening,2021,0.617
+71016A912,CAETSBEEK,sector,screening,2022,0.599
+71016A912,CAETSBEEK,sector,screening,2023,0.566
+71016A912,CAETSBEEK,sector,screening,2024,0.547
+71016B11-,OUD-WATERSCHEI,sector,screening,2020,0.537
+71016B11-,OUD-WATERSCHEI,sector,screening,2021,0.533
+71016B11-,OUD-WATERSCHEI,sector,screening,2022,0.541
+71016B11-,OUD-WATERSCHEI,sector,screening,2023,0.545
+71016B11-,OUD-WATERSCHEI,sector,screening,2024,0.548
+71016B1AB,WATERSCHEI-ZUID,sector,screening,2020,0.517
+71016B1AB,WATERSCHEI-ZUID,sector,screening,2021,0.533
+71016B1AB,WATERSCHEI-ZUID,sector,screening,2022,0.509
+71016B1AB,WATERSCHEI-ZUID,sector,screening,2023,0.518
+71016B1AB,WATERSCHEI-ZUID,sector,screening,2024,0.521
+71016B1BK,NOORD WATERSCHEI,sector,screening,2020,0.485
+71016B1BK,NOORD WATERSCHEI,sector,screening,2021,0.479
+71016B1BK,NOORD WATERSCHEI,sector,screening,2022,0.455
+71016B1BK,NOORD WATERSCHEI,sector,screening,2023,0.468
+71016B1BK,NOORD WATERSCHEI,sector,screening,2024,0.484
+71016B1CK,WATERSCHEI TEXAS,sector,screening,2020,0.44
+71016B1CK,WATERSCHEI TEXAS,sector,screening,2021,0.495
+71016B1CK,WATERSCHEI TEXAS,sector,screening,2022,0.486
+71016B1CK,WATERSCHEI TEXAS,sector,screening,2023,0.472
+71016B1CK,WATERSCHEI TEXAS,sector,screening,2024,0.437
+71016B20K,ZWARTBERG-TUINWIJK-NOORD-WEST,sector,screening,2020,0.566
+71016B20K,ZWARTBERG-TUINWIJK-NOORD-WEST,sector,screening,2021,0.526
+71016B20K,ZWARTBERG-TUINWIJK-NOORD-WEST,sector,screening,2022,0.56
+71016B20K,ZWARTBERG-TUINWIJK-NOORD-WEST,sector,screening,2023,0.606
+71016B20K,ZWARTBERG-TUINWIJK-NOORD-WEST,sector,screening,2024,0.571
+71016B20L,ZWARTBERG-TUINWIJK-NOORD-OOST,sector,screening,2020,0.461
+71016B20L,ZWARTBERG-TUINWIJK-NOORD-OOST,sector,screening,2021,0.471
+71016B20L,ZWARTBERG-TUINWIJK-NOORD-OOST,sector,screening,2022,0.435
+71016B20L,ZWARTBERG-TUINWIJK-NOORD-OOST,sector,screening,2023,0.456
+71016B20L,ZWARTBERG-TUINWIJK-NOORD-OOST,sector,screening,2024,0.49
+71016B22K,HEIDEBLOOK,sector,screening,2020,0.479
+71016B22K,HEIDEBLOOK,sector,screening,2021,0.505
+71016B22K,HEIDEBLOOK,sector,screening,2022,0.505
+71016B22K,HEIDEBLOOK,sector,screening,2023,0.52
+71016B22K,HEIDEBLOOK,sector,screening,2024,0.517
+71016B22L,HOEVENZAVELLAAN,sector,screening,2020,0.495
+71016B22L,HOEVENZAVELLAAN,sector,screening,2021,0.35
+71016B22L,HOEVENZAVELLAAN,sector,screening,2022,0.4
+71016B22L,HOEVENZAVELLAAN,sector,screening,2023,0.424
+71016B22L,HOEVENZAVELLAAN,sector,screening,2024,0.474
+71016B23K,OUD-DRIEHOEVEN,sector,screening,2020,0.566
+71016B23K,OUD-DRIEHOEVEN,sector,screening,2021,0.562
+71016B23K,OUD-DRIEHOEVEN,sector,screening,2022,0.535
+71016B23K,OUD-DRIEHOEVEN,sector,screening,2023,0.577
+71016B23K,OUD-DRIEHOEVEN,sector,screening,2024,0.622
+71016B242,NIEUWE KEMPEN,sector,screening,2020,0.53
+71016B242,NIEUWE KEMPEN,sector,screening,2021,0.491
+71016B242,NIEUWE KEMPEN,sector,screening,2022,0.502
+71016B242,NIEUWE KEMPEN,sector,screening,2023,0.524
+71016B242,NIEUWE KEMPEN,sector,screening,2024,0.526
+71016B27K,WOLFSBERG INDUSTRIE,sector,screening,2020,0.5
+71016B27K,WOLFSBERG INDUSTRIE,sector,screening,2021,0.667
+71016B29L,ZWARTBERG INDUSTRIE,sector,screening,2020,0.5
+71016B29L,ZWARTBERG INDUSTRIE,sector,screening,2021,0.5
+71016B29L,ZWARTBERG INDUSTRIE,sector,screening,2022,0.615
+71016B29L,ZWARTBERG INDUSTRIE,sector,screening,2023,0.583
+71016B29L,ZWARTBERG INDUSTRIE,sector,screening,2024,0.667
+71016B2AA,ZWARTBERG-ZUID,sector,screening,2020,0.496
+71016B2AA,ZWARTBERG-ZUID,sector,screening,2021,0.467
+71016B2AA,ZWARTBERG-ZUID,sector,screening,2022,0.461
+71016B2AA,ZWARTBERG-ZUID,sector,screening,2023,0.481
+71016B2AA,ZWARTBERG-ZUID,sector,screening,2024,0.502
+71016B2BA,NIEUW-DRIEHOEVEN,sector,screening,2020,0.483
+71016B2BA,NIEUW-DRIEHOEVEN,sector,screening,2021,0.467
+71016B2BA,NIEUW-DRIEHOEVEN,sector,screening,2022,0.455
+71016B2BA,NIEUW-DRIEHOEVEN,sector,screening,2023,0.479
+71016B2BA,NIEUW-DRIEHOEVEN,sector,screening,2024,0.481
+Noord,Genk-Noord,campagnebuurt,screening,2020,0.5076
+Noord,Genk-Noord,campagnebuurt,screening,2021,0.5006
+Noord,Genk-Noord,campagnebuurt,screening,2022,0.4964
+Noord,Genk-Noord,campagnebuurt,screening,2023,0.5167
+Noord,Genk-Noord,campagnebuurt,screening,2024,0.5389
+Oost,Genk-Oost,campagnebuurt,screening,2020,0.4948
+Oost,Genk-Oost,campagnebuurt,screening,2021,0.51
+Oost,Genk-Oost,campagnebuurt,screening,2022,0.4978
+Oost,Genk-Oost,campagnebuurt,screening,2023,0.5008
+Oost,Genk-Oost,campagnebuurt,screening,2024,0.4975
+West,Genk-West,campagnebuurt,screening,2020,0.5304
+West,Genk-West,campagnebuurt,screening,2021,0.5508
+West,Genk-West,campagnebuurt,screening,2022,0.5392
+West,Genk-West,campagnebuurt,screening,2023,0.5614
+West,Genk-West,campagnebuurt,screening,2024,0.563
+Centrum,Genk-Centrum,campagnebuurt,screening,2020,0.5547
+Centrum,Genk-Centrum,campagnebuurt,screening,2021,0.5607
+Centrum,Genk-Centrum,campagnebuurt,screening,2022,0.547
+Centrum,Genk-Centrum,campagnebuurt,screening,2023,0.5493
+Centrum,Genk-Centrum,campagnebuurt,screening,2024,0.552
+Genk,Genk,referentie,screening_leeftijd_25_29,2024,0.547
+Genk,Genk,referentie,screening_leeftijd_30_34,2024,0.646
+Genk,Genk,referentie,screening_leeftijd_35_39,2024,0.629
+Genk,Genk,referentie,screening_leeftijd_40_44,2024,0.598
+Genk,Genk,referentie,screening_leeftijd_45_49,2024,0.596
+Genk,Genk,referentie,screening_leeftijd_50_54,2024,0.546
+Genk,Genk,referentie,screening_leeftijd_55_59,2024,0.467
+Genk,Genk,referentie,screening_leeftijd_60_64,2024,0.444
+Limburg,Limburg,referentie,screening_leeftijd_25_29,2024,0.561
+Limburg,Limburg,referentie,screening_leeftijd_30_34,2024,0.662
+Limburg,Limburg,referentie,screening_leeftijd_35_39,2024,0.647
+Limburg,Limburg,referentie,screening_leeftijd_40_44,2024,0.625
+Limburg,Limburg,referentie,screening_leeftijd_45_49,2024,0.608
+Limburg,Limburg,referentie,screening_leeftijd_50_54,2024,0.565
+Limburg,Limburg,referentie,screening_leeftijd_55_59,2024,0.498
+Limburg,Limburg,referentie,screening_leeftijd_60_64,2024,0.439
+Vlaanderen,Vlaanderen,referentie,screening_leeftijd_25_29,2024,0.598
+Vlaanderen,Vlaanderen,referentie,screening_leeftijd_30_34,2024,0.691
+Vlaanderen,Vlaanderen,referentie,screening_leeftijd_35_39,2024,0.679
+Vlaanderen,Vlaanderen,referentie,screening_leeftijd_40_44,2024,0.66
+Vlaanderen,Vlaanderen,referentie,screening_leeftijd_45_49,2024,0.64
+Vlaanderen,Vlaanderen,referentie,screening_leeftijd_50_54,2024,0.601
+Vlaanderen,Vlaanderen,referentie,screening_leeftijd_55_59,2024,0.529
+Vlaanderen,Vlaanderen,referentie,screening_leeftijd_60_64,2024,0.463

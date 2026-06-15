@@ -854,7 +854,6 @@ const CAMP_COLORS = {'Genk-Centrum':'#FFC000','Genk-Noord':'#70AD47','Genk-Oost'
 
 // ── GLOBALE DATA STORES ───────────────────────────────────────────────────────
 let SHDATA   = {};  // code → indicator → jaar → waarde
-let REFDATA  = {};  // indicator → jaar → {genk, limburg, vlaanderen}
 let GEO      = {};  // geladen GeoJSON-bestanden
 let SCR_JAREN = [];   // beschikbare screeningsjaren (gesorteerd)
 let FARMAFLUX = []; // [{periode, cnk_code, product, registraties}]
@@ -916,21 +915,6 @@ function buildLookup(rows) {
   return lk;
 }
 
-function buildRefLookup(rows) {
-  const lk = {};
-  rows.forEach(r => {
-    const ind  = String(r.indicator || '');
-    const jaar = parseInt(r.jaar);
-    if (!lk[ind]) lk[ind] = {};
-    lk[ind][jaar] = {
-      genk:       r.genk        === null ? null : Number(r.genk),
-      limburg:    r.limburg     === null ? null : Number(r.limburg),
-      vlaanderen: r.vlaanderen  === null ? null : Number(r.vlaanderen),
-    };
-  });
-  return lk;
-}
-
 function getVal(code, ind, jaar) {
   const v = SHDATA[code]?.[ind]?.[jaar] ?? null;
   if(v !== null) return v;
@@ -938,8 +922,9 @@ function getVal(code, ind, jaar) {
   return camp ? (SHDATA[camp]?.[ind]?.[jaar] ?? null) : null;
 }
 
+const REF_CODE = {genk: 'Genk', limburg: 'Limburg', vlaanderen: 'Vlaanderen'};
 function getRef(ind, jaar, col) {
-  return REFDATA[ind]?.[jaar]?.[col] ?? null;
+  return getVal(REF_CODE[col], ind, jaar);
 }
 
 // ── DATA LADEN ────────────────────────────────────────────────────────────────
@@ -971,18 +956,16 @@ async function laadAlleData() {
   ];
 
   const dataUrl      = useSheets ? sheetUrl('data')               : LOCAL_CSV + 'data.csv';
-  const refUrl       = useSheets ? sheetUrl('referentie')          : LOCAL_CSV + 'referentie.csv';
   const farmaUrl        = useSheets ? sheetUrl('farmaflux')           : LOCAL_CSV + 'farmaflux.csv';
   const vacDetailUrl    = useSheets ? sheetUrl('vaccinaties_detail')  : LOCAL_CSV + 'vaccinaties_detail.csv';
   const scrUrl          = useSheets ? sheetUrl('screening')           : LOCAL_CSV + 'screening.csv';
   const vacUrl          = useSheets ? sheetUrl('vaccinatie')          : LOCAL_CSV + 'vaccinatie.csv';
   const huisartsenUrl   = useSheets ? sheetUrl('Huisartsen')          : '';
 
-  const [geoResults, dataText, refText, farmaText, vacDetailText, scrText, vacText, huisartsenText] = await Promise.all([
+  const [geoResults, dataText, farmaText, vacDetailText, scrText, vacText, huisartsenText] = await Promise.all([
     Promise.all(geoFiles.map(([, url]) => fetch(url).then(r => { if(!r.ok) throw new Error(`Kan ${url} niet laden`); return r.json(); })))
       .then(res => { setProgress(50, 'Statistieken ophalen…'); return res; }),
     fetch(dataUrl).then(r => { if(!r.ok) throw new Error(`Kan data.csv niet laden`); return r.text(); }),
-    fetch(refUrl).then(r  => { if(!r.ok) throw new Error(`Kan referentie.csv niet laden`); return r.text(); }),
     fetch(farmaUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
     fetch(vacDetailUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
     fetch(scrUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
@@ -1003,7 +986,6 @@ async function laadAlleData() {
       });
     });
   });
-  REFDATA = buildRefLookup(csvNaarObjecten(refText));
   if(farmaText) FARMAFLUX = csvNaarObjecten(farmaText);
   if(vacDetailText) VAC_DETAIL = parseVacDetail(csvNaarObjecten(vacDetailText));
   if(huisartsenText) HUISARTSEN_SHEETS = csvNaarObjecten(huisartsenText).filter(r => r.praktijk);
