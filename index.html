@@ -1330,7 +1330,7 @@ function initScreening(){
     borderColor:'#1a9641',borderWidth:1.5,borderDash:[3,4],pointRadius:2,backgroundColor:'transparent',spanGaps:true});
 
   // 3-jaar gemiddelde (vast, verandert niet met jaarselector)
-  const yr3 = SCR_JAREN.slice(-3);
+  const yr3 = SCR_JAREN.filter(yr => getRef('screening', yr, 'limburg') != null).slice(-3);
   const avg3 = fn => { const vs=yr3.map(fn).filter(v=>v!=null); return vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null; };
   const fmt3 = v => v!=null ? (v*100).toFixed(1)+'%' : '—';
   const el3  = id => document.getElementById(id);
