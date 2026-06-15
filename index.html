@@ -431,14 +431,27 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
     <div class="panel-section">
       <h4 id="scr-ref-hdr">Referentie 2024</h4>
       <div class="ref-box">
-        <div class="ref-row"><span class="ref-name">Genk (campagnebuurten)</span><span class="ref-val genk" id="scr-ref-camp">53.9%</span></div>
+        <div class="ref-row">
+          <span class="ref-name">Genk (campagnebuurten) <span title="Schatting: gemiddelde van de 4 campagnebuurten (Noord, Oost, West, Centrum) op basis van geaggregeerde sectordata. Geen aparte CVKO-registratie per buurt." style="cursor:help;font-size:.8em">ⓘ</span></span>
+          <span class="ref-val genk" id="scr-ref-camp">53.9%</span>
+        </div>
         <div class="ref-row"><span class="ref-name">Genk (stad totaal)</span><span class="ref-val genk" id="scr-ref-genk">55.5%</span></div>
         <div class="ref-row"><span class="ref-name">Limburg</span><span class="ref-val limb" id="scr-ref-limb">57.2%</span></div>
         <div class="ref-row"><span class="ref-name">Vlaanderen</span><span class="ref-val vl" id="scr-ref-vl">60.6%</span></div>
       </div>
+      <div style="font-size:.72rem;font-weight:600;color:#666;margin:8px 4px 3px;text-transform:uppercase;letter-spacing:.5px">Gemiddelde meest recente 3 jaar <span id="scr-3jr-label" style="font-weight:400;text-transform:none;letter-spacing:0"></span></div>
+      <div class="ref-box">
+        <div class="ref-row"><span class="ref-name">Genk (stad totaal)</span><span class="ref-val genk" id="scr-ref-genk3j">—</span></div>
+        <div class="ref-row"><span class="ref-name">Limburg</span><span class="ref-val limb" id="scr-ref-limb3j">—</span></div>
+        <div class="ref-row"><span class="ref-name">Vlaanderen</span><span class="ref-val vl" id="scr-ref-vl3j">—</span></div>
+      </div>
     </div>
     <div class="panel-section">
-      <h4>Evolutie dekkingsgraad per buurt (2020–2024)</h4>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h4>Evolutie dekkingsgraad per buurt (2020–2024)</h4>
+        <button class="expand-btn" onclick="openExpandModal('Evolutie dekkingsgraad per buurt (2020–2024)', 'chart-scr-evol')" title="Vergroot grafiek">⛶</button>
+      </div>
+      <div style="font-size:.69rem;color:#888;margin:1px 0 5px;line-height:1.4">* Genk-Oost, Genk-Midden, Genk-Centrum en Genk-Noord zijn schattingen o.b.v. sectordata</div>
       <div class="chart-wrap" style="padding:0;min-height:160px;"><canvas id="chart-scr-evol"></canvas></div>
     </div>
     <div class="panel-section">
@@ -1303,7 +1316,6 @@ function initScreening(){
 
   // Evolutie lijndiagram
   const ectx = document.getElementById('chart-scr-evol').getContext('2d');
-  const latestRefYr = [...SCR_JAREN].reverse().find(yr=>getRef('screening',yr,'limburg')!=null) ?? Math.max(...SCR_JAREN);
   const evDs = CAMP_BUURTEN.map(b=>{
     const data = SCR_JAREN.map(yr=>{ const v=getVal(b,'screening',yr); return v!==null?+(v*100).toFixed(1):null; });
     return {label:BLABEL[b],data,borderColor:BCOLOR[b],backgroundColor:'transparent',
@@ -1312,12 +1324,20 @@ function initScreening(){
   const genkData = SCR_JAREN.map(yr=>{ const v=getVal(STAD_CODE,'screening',yr)??getRef('screening',yr,'genk'); return v!==null?+(v*100).toFixed(1):null; });
   evDs.push({label:'Genk stad',data:genkData,borderColor:'#2E4057',backgroundColor:'transparent',
     borderWidth:2.5,borderDash:[5,3],pointRadius:3,tension:0.3,spanGaps:true});
-  const limRef = getRef('screening', latestRefYr, 'limburg');
-  const vlRef  = getRef('screening', latestRefYr, 'vlaanderen');
-  if(limRef) evDs.push({label:'Limburg',   data:SCR_JAREN.map(()=>+(limRef*100).toFixed(1)),
-    borderColor:'#d7191c',borderWidth:1.5,borderDash:[3,4],pointRadius:0,backgroundColor:'transparent'});
-  if(vlRef)  evDs.push({label:'Vlaanderen',data:SCR_JAREN.map(()=>+(vlRef*100).toFixed(1)),
-    borderColor:'#1a9641',borderWidth:1.5,borderDash:[3,4],pointRadius:0,backgroundColor:'transparent'});
+  evDs.push({label:'Limburg', data:SCR_JAREN.map(yr=>{ const v=getRef('screening',yr,'limburg'); return v!=null?+(v*100).toFixed(1):null; }),
+    borderColor:'#d7191c',borderWidth:1.5,borderDash:[3,4],pointRadius:2,backgroundColor:'transparent',spanGaps:true});
+  evDs.push({label:'Vlaanderen', data:SCR_JAREN.map(yr=>{ const v=getRef('screening',yr,'vlaanderen'); return v!=null?+(v*100).toFixed(1):null; }),
+    borderColor:'#1a9641',borderWidth:1.5,borderDash:[3,4],pointRadius:2,backgroundColor:'transparent',spanGaps:true});
+
+  // 3-jaar gemiddelde (vast, verandert niet met jaarselector)
+  const yr3 = SCR_JAREN.slice(-3);
+  const avg3 = fn => { const vs=yr3.map(fn).filter(v=>v!=null); return vs.length?vs.reduce((a,b)=>a+b,0)/vs.length:null; };
+  const fmt3 = v => v!=null ? (v*100).toFixed(1)+'%' : '—';
+  const el3  = id => document.getElementById(id);
+  if(yr3.length && el3('scr-3jr-label')) el3('scr-3jr-label').textContent = `(${yr3[0]}–${yr3[yr3.length-1]})`;
+  if(el3('scr-ref-genk3j')) el3('scr-ref-genk3j').textContent = fmt3(avg3(yr=>getVal(STAD_CODE,'screening',yr)??getRef('screening',yr,'genk')));
+  if(el3('scr-ref-limb3j')) el3('scr-ref-limb3j').textContent = fmt3(avg3(yr=>getRef('screening',yr,'limburg')));
+  if(el3('scr-ref-vl3j'))   el3('scr-ref-vl3j').textContent   = fmt3(avg3(yr=>getRef('screening',yr,'vlaanderen')));
 
   new Chart(ectx,{type:'line',data:{labels:SCR_JAREN,datasets:evDs},
     options:{responsive:true,
