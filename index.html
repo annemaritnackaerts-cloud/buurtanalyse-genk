@@ -392,9 +392,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
   </div>
 
   <p class="proj-closing">
-    We nodigen u graag uit voor een gesprek waarin we het project uitgebreider toelichten
-    en samen verkennen hoe we onze krachten kunnen bundelen.<br>
-    Indien u interesse heeft, plannen we graag een moment in dat voor u het best past.
+    
   </p>
 
 </div>
@@ -438,6 +436,8 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
         <div class="ref-row"><span class="ref-name">Genk (stad totaal)</span><span class="ref-val genk" id="scr-ref-genk">55.5%</span></div>
         <div class="ref-row"><span class="ref-name">Limburg</span><span class="ref-val limb" id="scr-ref-limb">57.2%</span></div>
         <div class="ref-row"><span class="ref-name">Vlaanderen</span><span class="ref-val vl" id="scr-ref-vl">60.6%</span></div>
+        <div class="ref-row"><span class="ref-name">WHO doelstelling (2030)</span><span class="ref-val" style="color:#7B3FBE">75%</span></div>
+        <div class="ref-row"><span class="ref-name">Europese doelstelling (2030)</span><span class="ref-val" style="color:#FF6B35">90%</span></div>
       </div>
       <div style="font-size:.72rem;font-weight:600;color:#666;margin:8px 4px 3px;text-transform:uppercase;letter-spacing:.5px">Gemiddelde meest recente 3 jaar <span id="scr-3jr-label" style="font-weight:400;text-transform:none;letter-spacing:0"></span></div>
       <div class="ref-box">
@@ -461,7 +461,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       </div>
       <div class="chart-wrap" style="padding:0;min-height:220px;"><canvas id="chart-scr-age"></canvas></div>
     </div>
-    <div class="chart-wrap">
+    <div class="chart-wrap" style="padding-top:0">
       <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:8px;font-weight:700;">Sectoren gerangschikt (geselecteerd jaar)</h4>
       <canvas id="chart-screening"></canvas>
     </div>
@@ -488,7 +488,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       <h4>Referentiecijfers</h4>
       <div class="ref-box">
         <div class="ref-row"><span class="ref-name">Vlaanderen (2020)</span><span class="ref-val" style="color:#1a9641">80.7%</span></div>
-        <div class="ref-row"><span class="ref-name">WHO doelstelling (2030)</span><span class="ref-val" style="color:#7B3FBE">75%</span></div>
+        <div class="ref-row"><span class="ref-name">WHO doelstelling (2030)</span><span class="ref-val" style="color:#7B3FBE">90%</span></div>
         <div class="ref-row"><span class="ref-name">Europese doelstelling (2030)</span><span class="ref-val" style="color:#2c7bb6">90%</span></div>
       </div>
     </div>
@@ -734,14 +734,14 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
     <div class="datasource-badge"><strong>Stakeholdermapping</strong>HPV vrij Genk · 2025</div>
   </div>
   <div class="side-panel">
-    <div class="panel-header">💊 Apotheken Genk</div>
+    <div class="panel-header">💊 Betrokken apotheken</div>
     <div class="panel-section">
       <h4>Overzicht</h4>
       <div class="kpi-grid" id="apo-kpi-overzicht"></div>
     </div>
     <div class="panel-section">
       <h4>FarmaFlux registraties</h4>
-      <p style="font-size:.75rem;color:#888;line-height:1.5;margin-bottom:10px">Geaggregeerde registraties van sensibiliserings- en doorverwijzingsgesprekken (postcode 3600). Data per 2-maandse periode. <em>Pilootfase: dummy data.</em></p>
+      <p style="font-size:.75rem;color:#888;line-height:1.5;margin-bottom:10px">Geaggregeerde registraties van sensibiliserings- en doorverwijzingsgesprekken (postcode 3600). Data per 2-maandse periode.</em></p>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
         <div class="kpi-card" style="border-left-color:#7B3FBE;padding:10px 12px">
           <div class="kpi-val" id="apo-kpi-sensib" style="font-size:1.2rem;color:#7B3FBE">—</div>
@@ -807,7 +807,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       <div id="ha-sheets-info" style="font-size:.78rem;color:#555;line-height:1.55;background:#f7f3ff;border-left:3px solid #7B3FBE;padding:8px 11px;border-radius:4px"></div>
     </div>
     <div class="panel-section" id="ha-placeholder-section">
-      <h4>Toekomstige praktijkdata</h4>
+      <h4> Mogelijkheid tot praktijkdata</h4>
       <div style="font-size:.78rem;color:#777;line-height:1.6;background:#f7f9fc;border-left:3px solid #ccc;padding:9px 12px;border-radius:4px">
         Nog geen registratiedata ontvangen. Mochten er praktijken BHK-screening- of HPV-vaccinatiecijfers aanleveren, verschijnen die automatisch als extra kolommen in onderstaande tabel en als indicatoren op de kaart.
         <br><br>Verwachte kolommen in Google Sheets tab "Huisartsen": <code>praktijk · datum · bhk_pct · hpv_pct</code>
@@ -869,6 +869,7 @@ const WIJK_TABLE  = [{"wijk": "Bokrijk", "buurt8": "Genk-Midden"}, {"wijk": "Box
 const TOP10    = {"Noord": [{"land": "Itali\u00eb", "n": 635, "pct": 6.9}, {"land": "Bulgarije", "n": 183, "pct": 2.0}, {"land": "Turkije", "n": 170, "pct": 1.9}, {"land": "Nederland", "n": 166, "pct": 1.8}, {"land": "Griekenland", "n": 75, "pct": 0.8}, {"land": "Marokko", "n": 60, "pct": 0.7}, {"land": "Spanje", "n": 59, "pct": 0.6}, {"land": "Polen", "n": 54, "pct": 0.6}, {"land": "Afghanistan", "n": 29, "pct": 0.3}, {"land": "Oekra\u00efne", "n": 23, "pct": 0.3}], "Oost": [{"land": "Itali\u00eb", "n": 441, "pct": 3.9}, {"land": "Turkije", "n": 300, "pct": 2.7}, {"land": "Bulgarije", "n": 290, "pct": 2.6}, {"land": "Nederland", "n": 213, "pct": 1.9}, {"land": "Griekenland", "n": 85, "pct": 0.8}, {"land": "Oekra\u00efne", "n": 64, "pct": 0.6}, {"land": "Marokko", "n": 57, "pct": 0.5}, {"land": "Spanje", "n": 52, "pct": 0.5}, {"land": "Portugal", "n": 42, "pct": 0.4}, {"land": "Afghanistan", "n": 37, "pct": 0.3}], "West": [{"land": "Itali\u00eb", "n": 587, "pct": 4.6}, {"land": "Turkije", "n": 150, "pct": 1.2}, {"land": "Nederland", "n": 149, "pct": 1.2}, {"land": "Bulgarije", "n": 103, "pct": 0.8}, {"land": "Marokko", "n": 68, "pct": 0.5}, {"land": "Griekenland", "n": 56, "pct": 0.4}, {"land": "Spanje", "n": 55, "pct": 0.4}, {"land": "Oekra\u00efne", "n": 49, "pct": 0.4}, {"land": "Afghanistan", "n": 27, "pct": 0.2}, {"land": "Polen", "n": 22, "pct": 0.2}], "Centrum": [{"land": "Itali\u00eb", "n": 306, "pct": 2.5}, {"land": "Nederland", "n": 296, "pct": 2.5}, {"land": "Oekra\u00efne", "n": 127, "pct": 1.1}, {"land": "Turkije", "n": 107, "pct": 0.9}, {"land": "Bulgarije", "n": 103, "pct": 0.9}, {"land": "Afghanistan", "n": 101, "pct": 0.8}, {"land": "Spanje", "n": 78, "pct": 0.6}, {"land": "Marokko", "n": 67, "pct": 0.6}, {"land": "Polen", "n": 59, "pct": 0.5}, {"land": "Syri\u00eb", "n": 42, "pct": 0.3}]};  // nationaliteit top-10 per buurt (complex formaat, hard-coded)
 const NIV_INFO = {"1": {"color": "#4472C4", "title": "Stap 1 \u2014 Statistische sectoren (59)", "body": "<p>Statistische sectoren zijn de <strong>kleinst mogelijke territoriale basiseenheden</strong> in Belgi\u00eb, gecre\u00eberd door Statbel om statistieken op een fijnmaziger niveau dan de gemeente te verspreiden.</p><p>Genk telt <strong>59 statistische sectoren</strong> in de codering van 2025, en 53 in de 2024-codering. Datasets van FOD Financi\u00ebn en de Census 2021 gebruiken nog de oudere 2024-codering.</p><p style=\"background:#f7f9fc;border-left:3px solid #4472C4;padding:6px 10px;border-radius:3px;font-size:.78rem\">Elke sector heeft een unieke code, bv. <code>71016A00A</code> \u2014 de eerste 5 cijfers zijn de NIS-gemeentecode (71016 = Genk).</p>", "showTable": false, "tableHighlight": false}, "2": {"color": "#2ECC71", "title": "Stap 2 \u2014 Wijken (31)", "body": "<p>Voor sommige statistieken zijn statistische sectoren te klein om betrouwbare cijfers te publiceren. Sinds juni 2019 bevat <strong>provincies.incijfers.be</strong> daarom op statistische sectoren gebaseerde wijken.</p><p>Elke wijk bestaat uit minstens \u00e9\u00e9n sector; elke sector behoort tot <strong>precies \u00e9\u00e9n wijk</strong>. De indeling volgt bij voorkeur de gebiedsindeling die de gemeente zelf hanteert.</p><p>Genk heeft <strong>31 wijken</strong>, elk met een herkenbare naam zoals Waterschei, Winterslag of Bokrijk.</p>", "showTable": true, "tableHighlight": false}, "3": {"color": "#9B59B6", "title": "Stap 3 \u2014 Buurten (8)", "body": "<p>De buurten zijn een eigen indeling van de <strong>stad Genk</strong>, samengesteld uit aaneensluitende wijken. Genk is opgedeeld in <strong>8 buurten</strong> die elk een ruimer geografisch geheel vormen:</p><div style=\"display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:8px 0\"><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:11px;height:11px;border-radius:2px;background:#FFC000;display:inline-block;flex-shrink:0\"></span>Genk-Centrum</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:11px;height:11px;border-radius:2px;background:#70AD47;display:inline-block;flex-shrink:0\"></span>Genk-Noord</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:11px;height:11px;border-radius:2px;background:#4472C4;display:inline-block;flex-shrink:0\"></span>Genk-Oost</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:11px;height:11px;border-radius:2px;background:#ED7D31;display:inline-block;flex-shrink:0\"></span>Genk-West</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:11px;height:11px;border-radius:2px;background:#9B59B6;display:inline-block;flex-shrink:0\"></span>Genk-Midden</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:11px;height:11px;border-radius:2px;background:#E74C3C;display:inline-block;flex-shrink:0\"></span>Genk-Zuid</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:11px;height:11px;border-radius:2px;background:#2ECC71;display:inline-block;flex-shrink:0\"></span>Bret-Gelieren-Kattevenne</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:11px;height:11px;border-radius:2px;background:#7F8C8D;display:inline-block;flex-shrink:0\"></span>Kolderbos-Langerlo</div></div>", "showTable": true, "tableHighlight": false}, "4": {"color": "#ED7D31", "title": "Stap 4 \u2014 Campagnebuurten (4 geselecteerd)", "body": "<p>Voor de HPV-awareness campagne zijn <strong>4 van de 8 buurten</strong> geselecteerd op basis van lage screeningsdekkingsgraad en socio-economische kwetsbaarheid:</p><div style=\"display:flex;flex-direction:column;gap:5px;margin:8px 0 12px\"><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:13px;height:13px;border-radius:2px;background:#70AD47;display:inline-block;flex-shrink:0\"></span>Genk-Noord</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:13px;height:13px;border-radius:2px;background:#4472C4;display:inline-block;flex-shrink:0\"></span>Genk-Oost</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:13px;height:13px;border-radius:2px;background:#ED7D31;display:inline-block;flex-shrink:0\"></span>Genk-West</div><div style=\"display:flex;align-items:center;gap:6px;font-size:.78rem\"><span style=\"width:13px;height:13px;border-radius:2px;background:#FFC000;display:inline-block;flex-shrink:0\"></span>Genk-Centrum</div></div><p>De overige 4 buurten (Genk-Midden, Genk-Zuid, Bret-Gelieren-Kattevenne en Kolderbos-Langerlo) zijn <strong>niet geselecteerd</strong> voor de campagne en worden grijs weergegeven.</p>", "showTable": true, "tableHighlight": true}};
 const CAMP_COLORS = {'Genk-Centrum':'#FFC000','Genk-Noord':'#70AD47','Genk-Oost':'#4472C4','Genk-West':'#ED7D31'};
+const SECTOR_BUURT8 = Object.fromEntries(BEV_STATIC.map(r=>[r.c, r.b]));
 
 // ── GLOBALE DATA STORES ───────────────────────────────────────────────────────
 let SHDATA   = {};  // code → indicator → jaar → waarde
@@ -911,7 +912,7 @@ const APOTHEKEN = [
   {naam:"Apoteek G & J Bijnens Bvba",adres:"Stalenstraat 52",stadsdeel:"Genk-Oost",wijk:"Waterschei-Zuid",lat:50.9940899,lng:5.518964},
   {naam:"Apotheek Winterslag",adres:"Acacialaan 30",stadsdeel:"Genk-West",wijk:"Winterslag 1",lat:50.9766232,lng:5.48592},
   {naam:"Apotheek Geraerts Bvba",adres:"Vennestraat 165",stadsdeel:"Genk-West",wijk:"Oud-Winterslag",lat:50.9792657,lng:5.4912779},
-  {naam:"Apotheek Boxberg",adres:"Landwaartslaan 34 A",stadsdeel:"Genk-West",wijk:"Boxbergheide",lat:50.9626712,lng:5.4501385},
+  {naam:"Apotheek Boxberg",adres:"Landwaartslaan 34 A",stadsdeel:"Genk-Midden",wijk:"Boxbergheide",lat:50.9626712,lng:5.4501385},
   {naam:"Apoteek Lauwers",adres:"Boxbergstraat 90",stadsdeel:"Genk-West",wijk:"Boxbergheide",lat:50.9734426,lng:5.4611},
   {naam:"Apotheek Bollen Els",adres:"Sledderloweg 26",stadsdeel:"Kolderbos-Langerlo",wijk:"Langerlo",lat:50.9519399,lng:5.5123254},
   {naam:"Apotheek Synaps Park",adres:"Synaps Park 1190",stadsdeel:"Kolderbos-Langerlo",wijk:"Langerlo",lat:50.9569981,lng:5.5183124},
@@ -1023,6 +1024,14 @@ async function laadAlleData() {
       });
     });
   });
+  // Normaliseer vaccinatie_hpv van 0-1 naar percentage (Google Sheets levert 0.56 i.p.v. 56)
+  Object.values(SHDATA).forEach(inds => {
+    const vac = inds['vaccinatie_hpv'];
+    if(vac) Object.keys(vac).forEach(yr => {
+      if(vac[yr] != null && vac[yr] <= 1) vac[yr] = Math.round(vac[yr] * 1000) / 10;
+    });
+  });
+
   if(farmaText) FARMAFLUX = csvNaarObjecten(farmaText);
   if(vacDetailText) VAC_DETAIL = parseVacDetail(csvNaarObjecten(vacDetailText));
   if(huisartsenText) HUISARTSEN_SHEETS = csvNaarObjecten(huisartsenText).filter(r => r.praktijk);
@@ -1272,7 +1281,7 @@ function buildScrChartData(jaar){
     if(rate===null) return;
     const bev = getVal(p.code, 'bevolking', 2025);
     if(bev!==null && bev<50) return;
-    rows.push({naam:p.naam, rate, buurt:p.Buurt});
+    rows.push({naam:p.naam, rate, buurt: SECTOR_BUURT8[p.code] || p.Buurt});
   });
   rows.sort((a,b)=>a.rate-b.rate);
   return {
@@ -1352,6 +1361,10 @@ function initScreening(){
     borderColor:'#d7191c',borderWidth:1.5,borderDash:[3,4],pointRadius:2,backgroundColor:'transparent',spanGaps:true});
   evDs.push({label:'Vlaanderen', data:SCR_JAREN.map(yr=>{ const v=getRef('screening',yr,'vlaanderen'); return v!=null?+(v*100).toFixed(1):null; }),
     borderColor:'#1a9641',borderWidth:1.5,borderDash:[3,4],pointRadius:2,backgroundColor:'transparent',spanGaps:true});
+  evDs.push({label:'WHO doel. (75%)', data:SCR_JAREN.map(()=>75),
+    borderColor:'#7B3FBE',borderWidth:1.5,borderDash:[6,3],pointRadius:0,backgroundColor:'transparent',spanGaps:true});
+  evDs.push({label:'EU doel. (90%)', data:SCR_JAREN.map(()=>90),
+    borderColor:'#FF6B35',borderWidth:1.5,borderDash:[6,3],pointRadius:0,backgroundColor:'transparent',spanGaps:true});
 
   // 3-jaar gemiddelde (vast, verandert niet met jaarselector)
   const yr3 = SCR_JAREN.filter(yr => getRef('screening', yr, 'limburg') != null).slice(-3);
@@ -1369,7 +1382,7 @@ function initScreening(){
                tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw+'%'}}},
       scales:{
         x:{grid:{display:false},ticks:{font:{size:10}}},
-        y:{min:40,max:80,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'#f0f0f0'}}
+        y:{min:40,max:95,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'#f0f0f0'}}
       }
     }});
 
@@ -1401,19 +1414,21 @@ function initScreening(){
   const bctx = document.getElementById('chart-screening').getContext('2d');
   scrBarChart = new Chart(bctx,{type:'bar',
     data:{labels:d0.labels,datasets:[{data:d0.rates,
-      backgroundColor:d0.buurten.map(b=>BCOLOR[b]||'#999'),borderWidth:0}]},
+      backgroundColor:d0.buurten.map(b=>BCOLOR8[b]||'#999'),borderWidth:0}]},
     options:{responsive:true,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw.toFixed(1)+'%'}}},
       scales:{
         x:{display:false},
-        y:{min:30,max:90,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'#f0f0f0'}}
+        y:{min:30,max:95,ticks:{callback:v=>v+'%',font:{size:10}},grid:{color:'#f0f0f0'}}
       }},
     plugins:[{id:'rl',afterDraw(ch){
       const ys=ch.scales.y,cx=ch.ctx;
       const rd=ch._refData||d0;
       [[rd.genk,'#2c7bb6',`Genk ${rd.genk!=null?+(rd.genk*100).toFixed(1)+'%':'—'}`],
        [rd.limburg,'#d7191c',`Limb. ${rd.limburg!=null?+(rd.limburg*100).toFixed(1)+'%':'—'}`],
-       [rd.flanders,'#1a9641',`Vl. ${rd.flanders!=null?+(rd.flanders*100).toFixed(1)+'%':'—'}`]
+       [rd.flanders,'#1a9641',`Vl. ${rd.flanders!=null?+(rd.flanders*100).toFixed(1)+'%':'—'}`],
+       [0.75,'#7B3FBE','WHO 75%'],
+       [0.90,'#FF6B35','EU 90%']
       ].forEach(([v,col,lbl])=>{
         if(!v) return;
         const y=ys.getPixelForValue(v*100);
@@ -1504,7 +1519,7 @@ function drawScrMap(m){
         const p=f.properties;
         const r = getVal(p.code,'screening',scrYear);
         const bev = getVal(p.code,'bevolking',2025);
-        const bl = p.Buurt&&p.Buurt!='/'?BLABEL[p.Buurt]||p.Buurt:'Overig';
+        const bl = SECTOR_BUURT8[p.code] || (p.Buurt&&p.Buurt!='/'?BLABEL[p.Buurt]||p.Buurt:'Onbekend');
         const rStr = p.hidden?'Verborgen':r!=null?(r*100).toFixed(1)+'%':'Geen data';
         if(!p.hidden&&bev!=null&&bev<50) layer._lowPop=true;
         layer.bindTooltip(makeTooltip([p.naam,
@@ -2487,7 +2502,7 @@ function initApotheken(){
       radius:10, color:'#fff', weight:2, fillColor:kleur, fillOpacity:0.88
     }).addTo(m);
     marker.bindTooltip(`
-      <div class="tt-title">💊 ${a.naam}</div>
+      <div class="tt-title"> ${a.naam}</div>
       <div class="tt-row"><span class="tt-lbl">Adres</span><span class="tt-val">${a.adres}, Genk</span></div>
       <div class="tt-row"><span class="tt-lbl">Stadsdeel</span><span class="tt-val" style="color:${kleur}">${a.stadsdeel}</span></div>
       <div class="tt-row"><span class="tt-lbl">Wijk</span><span class="tt-val">${a.wijk}</span></div>
