@@ -157,9 +157,10 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
 
 /* ── LANDINGSPAGINA ────────────────────────────────────────────────── */
 #pane-project.active   { display:block; overflow-y:auto; }
-#pane-apotheken.active { display:block; overflow-y:auto; }
+#pane-apotheken.active { display:flex; }
 #pane-huisartsen.active{ display:flex; }
-#pane-huisartsen .side-panel { width:490px; }
+#pane-apotheken .side-panel { width:560px; }
+#pane-huisartsen .side-panel { width:560px; }
 .proj-page { max-width:980px; margin:0 auto; padding:28px 24px 48px; }
 
 .proj-hero {
@@ -723,59 +724,64 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
 <!-- ══ HPV-VACCINATIE ════════════════════════════════════════════════════ -->
 
 <!-- ══ APOTHEKEN ══════════════════════════════════════════════════════════ -->
-<div id="pane-apotheken" class="tab-pane" style="overflow-y:auto;flex-direction:column;background:#f0f2f5;">
-  <div style="max-width:900px;margin:0 auto;padding:22px 20px 40px;width:100%">
-    <div style="margin-bottom:18px">
-      <h2 style="font-size:1.05rem;font-weight:700;color:#2E4057;margin-bottom:4px">💊 FarmaFlux: Apothekersregistraties</h2>
-      <p style="font-size:.8rem;color:#888;line-height:1.6">Geaggregeerde registraties van sensibiliserings- en doorverwijzingsgesprekken via deelnemende apotheken (postcode 3600). Data per 2-maandse periode. <em>Pilootfase: dummy data ter illustratie.</em></p>
+<div id="pane-apotheken" class="tab-pane">
+  <div class="map-wrap">
+    <div id="map-apotheken" class="leaflet-map"></div>
+    <div class="map-legend" id="apo-map-legend">
+      <h5>Stadsdeel</h5>
+      <div id="apo-leg-items"></div>
     </div>
-
-    <!-- KPI CARDS -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px">
-      <div class="kpi-card" style="border-left-color:#7B3FBE;padding:14px 16px">
-        <div class="kpi-val" id="apo-kpi-sensib" style="font-size:1.4rem;color:#7B3FBE">—</div>
-        <div class="kpi-lbl" style="font-size:.78rem">Sensibiliseringsgesprekken</div>
-      </div>
-      <div class="kpi-card" style="border-left-color:#C084FC;padding:14px 16px">
-        <div class="kpi-val" id="apo-kpi-folder" style="font-size:1.4rem;color:#C084FC">—</div>
-        <div class="kpi-lbl" style="font-size:.78rem">Folders uitgedeeld</div>
-      </div>
-      <div class="kpi-card" style="border-left-color:#4472C4;padding:14px 16px">
-        <div class="kpi-val" id="apo-kpi-doorverw" style="font-size:1.4rem;color:#4472C4">—</div>
-        <div class="kpi-lbl" style="font-size:.78rem">Doorverwijzingen</div>
-      </div>
-      <div class="kpi-card" style="border-left-color:#70AD47;padding:14px 16px">
-        <div class="kpi-val" id="apo-kpi-vac" style="font-size:1.4rem;color:#70AD47">—</div>
-        <div class="kpi-lbl" style="font-size:.78rem">Vaccinaties uitgeleverd</div>
+    <div class="datasource-badge"><strong>Stakeholdermapping</strong>HPV vrij Genk · 2025</div>
+  </div>
+  <div class="side-panel">
+    <div class="panel-header">💊 Apotheken Genk</div>
+    <div class="panel-section">
+      <h4>Overzicht</h4>
+      <div class="kpi-grid" id="apo-kpi-overzicht"></div>
+    </div>
+    <div class="panel-section">
+      <h4>FarmaFlux registraties</h4>
+      <p style="font-size:.75rem;color:#888;line-height:1.5;margin-bottom:10px">Geaggregeerde registraties van sensibiliserings- en doorverwijzingsgesprekken (postcode 3600). Data per 2-maandse periode. <em>Pilootfase: dummy data.</em></p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div class="kpi-card" style="border-left-color:#7B3FBE;padding:10px 12px">
+          <div class="kpi-val" id="apo-kpi-sensib" style="font-size:1.2rem;color:#7B3FBE">—</div>
+          <div class="kpi-lbl">Sensibiliseringsgesprekken</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#C084FC;padding:10px 12px">
+          <div class="kpi-val" id="apo-kpi-folder" style="font-size:1.2rem;color:#C084FC">—</div>
+          <div class="kpi-lbl">Folders uitgedeeld</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#4472C4;padding:10px 12px">
+          <div class="kpi-val" id="apo-kpi-doorverw" style="font-size:1.2rem;color:#4472C4">—</div>
+          <div class="kpi-lbl">Doorverwijzingen</div>
+        </div>
+        <div class="kpi-card" style="border-left-color:#70AD47;padding:10px 12px">
+          <div class="kpi-val" id="apo-kpi-vac" style="font-size:1.2rem;color:#70AD47">—</div>
+          <div class="kpi-lbl">Vaccinaties uitgeleverd</div>
+        </div>
       </div>
     </div>
-
-    <!-- CHARTS ROW -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
-      <div style="background:#fff;border-radius:8px;padding:16px 18px;box-shadow:0 1px 6px rgba(0,0,0,.07)">
-        <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:12px;font-weight:700">Totaal per type registratie</h4>
-        <canvas id="chart-apo-bar" height="200"></canvas>
-      </div>
-      <div style="background:#fff;border-radius:8px;padding:16px 18px;box-shadow:0 1px 6px rgba(0,0,0,.07)">
-        <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:12px;font-weight:700">Evolutie per periode</h4>
-        <canvas id="chart-apo-trend" height="200"></canvas>
-      </div>
+    <div class="panel-section">
+      <h4>Totaal per type registratie</h4>
+      <canvas id="chart-apo-bar" height="160"></canvas>
     </div>
-
-    <!-- DETAIL TABLE -->
-    <div style="background:#fff;border-radius:8px;padding:16px 18px;box-shadow:0 1px 6px rgba(0,0,0,.07);margin-bottom:16px">
-      <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:10px;font-weight:700">Detail per periode &amp; type</h4>
+    <div class="panel-section">
+      <h4>Evolutie per periode</h4>
+      <canvas id="chart-apo-trend" height="160"></canvas>
+    </div>
+    <div class="panel-section" style="padding:0;border-bottom:none;flex:1;overflow-y:auto">
+      <div style="padding:12px 14px 6px">
+        <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;font-weight:700">Detail per periode &amp; type</h4>
+      </div>
       <div style="overflow-x:auto">
         <table class="niv-table" id="apo-table">
           <thead><tr><th>Periode</th><th>Product</th><th>Registraties</th></tr></thead>
           <tbody id="apo-tbody"></tbody>
         </table>
       </div>
-    </div>
-
-    <!-- DISCLAIMER -->
-    <div style="background:#fff8e6;border-radius:8px;padding:12px 16px;border-left:4px solid #FFC000;font-size:.78rem;color:#664d00;line-height:1.65">
-      <strong>Nota:</strong> Gegevens zijn geaggregeerd per 2-maandse FarmaFlux-periode voor postcode 3600. Individuele patiënten zijn niet herleidbaar. Aantallen &lt; 5 worden niet gerapporteerd. Data betreft een pilootfase: resultaten zijn ter illustratie.
+      <div style="margin:10px 14px 16px;background:#fff8e6;border-radius:8px;padding:10px 12px;border-left:4px solid #FFC000;font-size:.75rem;color:#664d00;line-height:1.6">
+        <strong>Nota:</strong> Gegevens zijn geaggregeerd per 2-maandse FarmaFlux-periode voor postcode 3600. Individuele patiënten zijn niet herleidbaar. Aantallen &lt; 5 worden niet gerapporteerd. Data betreft een pilootfase: resultaten zijn ter illustratie.
+      </div>
     </div>
   </div>
 </div>
@@ -890,6 +896,25 @@ const PRAKTIJKEN = [
   {naam:"Groepspraktijk De Boxberg",adres:"Boxbergstraat 33",stadsdeel:"Genk-West",wijk:"Boxbergheide",lat:50.97250,lng:5.45620,artsen:["Dr. Bosmans Carmen","Dr. Bosmans Eva","Dr. Caponi Anselmo","Dr. Caponi Lara","Dr. Ieven Kaat","Dr. Paredis Laurien"]},
   {naam:"Medi-Mine",adres:"Buitenlaan 11",stadsdeel:"Genk-West",wijk:"Winterslag 2 en 4",lat:50.97460,lng:5.46686,artsen:["Dr. Claesen Maarten","Dr. Dezeure Jaak","Dr. Germeaux Jacques","Dr. Lierman Jolien","Dr. Matthys Jolien","Dr. Potargent Bram","Dr. Tournel Amber","Dr. Vanaenrode Michiele","Dr. Verhoeven Nancy"]},
   {naam:"Praktijk Zonhoverheide",adres:"Zonhoverweg 35",stadsdeel:"Genk-West",wijk:"Boxbergheide",lat:50.97440,lng:5.45631,artsen:["Dr. Ampe Emilienne","Dr. Avci Seher","Dr. Grouwels Yves","Dr. Meers Jana","Dr. Najma Manja"]},
+];
+
+const APOTHEKEN = [
+  {naam:"Apotheek Vanhaesebrouck Bvba",adres:"Hoogstraat 100",stadsdeel:"Genk-Centrum",wijk:"Kattevenne-Molenblook",lat:50.9606524,lng:5.5033297},
+  {naam:"Apotheek Solidaris Genk",adres:"Winterslagstraat 34",stadsdeel:"Genk-Centrum",wijk:"Genk-Centrum-Noord",lat:50.9656947,lng:5.49912},
+  {naam:"Apotheek Bijnens Centrum Cvba",adres:"Stationsstraat 26",stadsdeel:"Genk-Centrum",wijk:"Genk-Centrum",lat:50.9652546,lng:5.5013047},
+  {naam:"Apotheek Paredis Genk",adres:"Bochtlaan 58",stadsdeel:"Genk-Centrum",wijk:"Genk-Centrum-Noord",lat:50.9693134,lng:5.5024947},
+  {naam:"Apoteek Mertens",adres:"Zaveldriesstraat 14",stadsdeel:"Genk-Noord",wijk:"Zwartberg-Zuid",lat:51.0053763,lng:5.4970052},
+  {naam:"Apotheek Goddeeris Bvba",adres:"Torenlaan 10",stadsdeel:"Genk-Noord",wijk:"Zwartberg-Noord",lat:51.0124677,lng:5.5133946},
+  {naam:"Apotheek Jenné",adres:"Hoevenzavellaan 57",stadsdeel:"Genk-Noord",wijk:"Hoevenzavel",lat:51.0010143,lng:5.5070384},
+  {naam:"Apotheek Duchateau Bvba",adres:"Stalenstraat 19",stadsdeel:"Genk-Oost",wijk:"Waterschei-Zuid",lat:50.996515,lng:5.5227401},
+  {naam:"Apotheek André Dumont Bvba",adres:"André Dumontlaan 50",stadsdeel:"Genk-Oost",wijk:"Oud-Waterschei",lat:50.9948442,lng:5.5314241},
+  {naam:"Apoteek G & J Bijnens Bvba",adres:"Stalenstraat 52",stadsdeel:"Genk-Oost",wijk:"Waterschei-Zuid",lat:50.9940899,lng:5.518964},
+  {naam:"Apotheek Winterslag",adres:"Acacialaan 30",stadsdeel:"Genk-West",wijk:"Winterslag 1",lat:50.9766232,lng:5.48592},
+  {naam:"Apotheek Geraerts Bvba",adres:"Vennestraat 165",stadsdeel:"Genk-West",wijk:"Oud-Winterslag",lat:50.9792657,lng:5.4912779},
+  {naam:"Apotheek Boxberg",adres:"Landwaartslaan 34 A",stadsdeel:"Genk-West",wijk:"Boxbergheide",lat:50.9626712,lng:5.4501385},
+  {naam:"Apoteek Lauwers",adres:"Boxbergstraat 90",stadsdeel:"Genk-West",wijk:"Boxbergheide",lat:50.9734426,lng:5.4611},
+  {naam:"Apotheek Bollen Els",adres:"Sledderloweg 26",stadsdeel:"Kolderbos-Langerlo",wijk:"Langerlo",lat:50.9519399,lng:5.5123254},
+  {naam:"Apotheek Synaps Park",adres:"Synaps Park 1190",stadsdeel:"Kolderbos-Langerlo",wijk:"Langerlo",lat:50.9569981,lng:5.5183124},
 ];
 
 // ── CSV HELPERS ───────────────────────────────────────────────────────────────
@@ -2435,6 +2460,55 @@ const APO_TYPE = {
 };
 
 function initApotheken(){
+  // ── Kaart ────────────────────────────────────────────────────────────────────
+  const m = makeMap('map-apotheken');
+
+  if(GEO.achtBuurt){
+    L.geoJSON(GEO.achtBuurt,{
+      style:{ color:'#888', weight:1.5, fillColor:'#f5f5f5', fillOpacity:.35 }
+    }).addTo(m);
+  }
+
+  // Legenda stadsdelen
+  const gebruikteSd = [...new Set(APOTHEKEN.map(a=>a.stadsdeel))].sort();
+  const legEl = document.getElementById('apo-leg-items');
+  gebruikteSd.forEach(sd=>{
+    const kleur = BCOLOR8[sd]||'#888';
+    const row = document.createElement('div');
+    row.className='leg-row';
+    row.innerHTML=`<div class="leg-swatch" style="background:${kleur};border-radius:50%"></div><span>${sd}</span>`;
+    legEl.appendChild(row);
+  });
+
+  // Markers op kaart
+  APOTHEKEN.forEach(a=>{
+    const kleur = BCOLOR8[a.stadsdeel]||'#888';
+    const marker = L.circleMarker([a.lat,a.lng],{
+      radius:10, color:'#fff', weight:2, fillColor:kleur, fillOpacity:0.88
+    }).addTo(m);
+    marker.bindTooltip(`
+      <div class="tt-title">💊 ${a.naam}</div>
+      <div class="tt-row"><span class="tt-lbl">Adres</span><span class="tt-val">${a.adres}, Genk</span></div>
+      <div class="tt-row"><span class="tt-lbl">Stadsdeel</span><span class="tt-val" style="color:${kleur}">${a.stadsdeel}</span></div>
+      <div class="tt-row"><span class="tt-lbl">Wijk</span><span class="tt-val">${a.wijk}</span></div>
+    `,{sticky:true,opacity:0.97});
+  });
+
+  // KPI overzicht
+  const totApo  = APOTHEKEN.length;
+  const totSd   = new Set(APOTHEKEN.map(a=>a.stadsdeel)).size;
+  const kpiEl   = document.getElementById('apo-kpi-overzicht');
+  [{v:totApo,l:'Apotheken'},{v:totSd,l:'Stadsdelen'}].forEach(({v,l})=>{
+    const d = document.createElement('div');
+    d.className='kpi-card';
+    d.style.cssText='border-left-color:#7B3FBE';
+    d.innerHTML=`<div class="kpi-val" style="color:#7B3FBE">${v}</div><div class="kpi-lbl">${l}</div>`;
+    kpiEl.appendChild(d);
+  });
+
+  m.invalidateSize();
+
+  // ── FarmaFlux data ───────────────────────────────────────────────────────────
   const rows = FARMAFLUX.length ? FARMAFLUX : [
     {periode:'sep-okt 2025', cnk_code:'5522289', product:'Sensibilisering HPV',       registraties:'8'},
     {periode:'sep-okt 2025', cnk_code:'5846761', product:'Folder HPV-awareness',       registraties:'5'},
@@ -2458,7 +2532,6 @@ function initApotheken(){
     {periode:'mrt-apr 2026', cnk_code:'3402799', product:'Gardasil 9 (vaccin)',        registraties:'14'},
   ];
 
-  // Totals per type
   let totSensib=0, totFolder=0, totDoorverw=0, totVac=0;
   rows.forEach(r=>{
     const n = parseInt(r.registraties)||0;
@@ -2470,12 +2543,11 @@ function initApotheken(){
     if(t==='doorverw') totDoorverw += n;
     if(t==='vac')      totVac      += n;
   });
-  document.getElementById('apo-kpi-sensib').textContent  = totSensib;
-  document.getElementById('apo-kpi-folder').textContent  = totFolder;
+  document.getElementById('apo-kpi-sensib').textContent   = totSensib;
+  document.getElementById('apo-kpi-folder').textContent   = totFolder;
   document.getElementById('apo-kpi-doorverw').textContent = totDoorverw;
   document.getElementById('apo-kpi-vac').textContent      = totVac;
 
-  // Bar chart: totals per product
   const prodTotals = {};
   rows.forEach(r=>{ const p=r.product||r.cnk_code; prodTotals[p]=(prodTotals[p]||0)+(parseInt(r.registraties)||0); });
   const barColors = ['#7B3FBE','#9B6DD6','#4472C4','#5B8DD9','#70AD47'];
@@ -2490,7 +2562,6 @@ function initApotheken(){
       scales:{x:{ticks:{stepSize:5}}}}
   });
 
-  // Line chart: trend per periode
   const periodes = [...new Set(rows.map(r=>r.periode))];
   const trendSensib  = periodes.map(p=>rows.filter(r=>r.periode===p&&APO_TYPE[r.cnk_code]==='sensib').reduce((s,r)=>s+(parseInt(r.registraties)||0),0));
   const trendFolder  = periodes.map(p=>rows.filter(r=>r.periode===p&&APO_TYPE[r.cnk_code]==='folder').reduce((s,r)=>s+(parseInt(r.registraties)||0),0));
@@ -2508,7 +2579,6 @@ function initApotheken(){
       scales:{y:{beginAtZero:true,ticks:{stepSize:5}}}}
   });
 
-  // Detail table
   const tbody = document.getElementById('apo-tbody');
   rows.forEach(r=>{
     const tr = document.createElement('tr');
