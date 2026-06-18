@@ -1472,13 +1472,13 @@ function drawScrMap(m){
   } else if(scrLayerMode==='wijk'){
     scrMapLayer = L.geoJSON(GEO.wijkNiv,{
       style:f=>{
-        const r = getVal(f.properties.wijk_naam,'screening',scrYear);
+        const r = getVal(f.properties.ggw7,'screening',scrYear);
         return {fillColor:scrColor(r),fillOpacity:.84,color:'white',weight:.8};
       },
       onEachFeature:(f,layer)=>{
         const naam = f.properties.wijk_naam;
         const buurt8 = f.properties.buurt8;
-        const r = getVal(naam,'screening',scrYear);
+        const r = getVal(f.properties.ggw7,'screening',scrYear);
         layer.bindTooltip(makeTooltip([naam,
           [`Dekkingsgraad ${scrYear}`, r!=null?(r*100).toFixed(1)+'%':'Geen data'],
           ['Buurt',buurt8]]),
