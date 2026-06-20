@@ -781,11 +781,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       <canvas id="chart-apo-trend" height="160"></canvas>
     </div>
     <div class="panel-section" id="apo-groep-section" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <h4 style="margin-bottom:0">Uitsplitsing</h4>
-        <div class="tgl-pill" id="apo-groep-toggle"></div>
-      </div>
-      <div id="apo-groep-info" style="font-size:.76rem;color:#555;line-height:1.5;background:#f7f3ff;border-left:3px solid #7B3FBE;padding:8px 11px;border-radius:4px;margin-bottom:8px"></div>
+      <h4>Uitsplitsing per groep (FarmaFlux)</h4>
       <div style="overflow-x:auto">
         <table class="niv-table" id="apo-groep-table">
           <thead id="apo-groep-thead"></thead>
@@ -793,11 +789,22 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
         </table>
       </div>
     </div>
+    <div class="panel-section" id="apo-indiv-section" style="display:none">
+      <h4>Uitsplitsing per apotheek (individueel gerapporteerd)</h4>
+      <div style="overflow-x:auto">
+        <table class="niv-table" id="apo-indiv-table">
+          <thead id="apo-indiv-thead"></thead>
+          <tbody id="apo-indiv-tbody"></tbody>
+        </table>
+      </div>
+    </div>
     <div class="panel-section" id="apo-groep-placeholder">
-      <h4>Mogelijkheid tot opdeling per apotheek/groep</h4>
+      <h4>Mogelijkheid tot opdeling per groep/apotheek</h4>
       <div style="font-size:.78rem;color:#777;line-height:1.6;background:#f7f9fc;border-left:3px solid #ccc;padding:9px 12px;border-radius:4px">
-        Nu worden alle FarmaFlux-registraties als één Genk-totaal getoond. Zodra een kolom <code>apotheek</code> wordt toegevoegd aan de Google Sheets tab "farmaflux" (waarde = exacte apotheeknaam), verschijnt hier automatisch een uitsplitsing per apotheek.
-        <br><br>Wil je de apotheken ook in groepen tonen (bv. wanneer beslist wordt welke apotheken samen genomen worden)? Maak dan een extra tab "apotheek_groepen" aan met kolommen <code>apotheek · groep</code> — één rij per apotheek met de gewenste groepnaam. Apotheken die niet in die lijst staan, vallen automatisch onder "Overige". Geen codewijziging nodig.
+        Nu worden alle FarmaFlux-registraties als één Genk-totaal getoond. Dit kan op twee onafhankelijke manieren uitgebreid worden, zonder codewijziging:
+        <br><br><strong>Per groep</strong> — voeg een kolom <code>groep</code> toe aan de Google Sheets tab "farmaflux_groep" (kolommen: <code>periode · cnk_code · product · registraties · groep</code>). Rijen zonder groep tellen gewoon mee in het Genk-totaal; rijen mét groep verschijnen extra in de tabel hierboven.
+        <br><br><strong>Per apotheek</strong> — maak een nieuwe tab "farmaflux_individueel" aan met kolommen <code>periode · cnk_code · product · registraties · apotheek</code>, voor data die een apotheek zelf rechtstreeks aanlevert (los van de FarmaFlux-totalen, om dubbeltellingen te vermijden).
+        <br><br>De koppeling welke apotheek bij welke groep hoort, staat in een apart tabblad "apotheek_groepen" (<code>apotheek · groep</code>) — apotheken die daar niet in staan, vallen onder "Overige".
       </div>
     </div>
     <div class="panel-section" style="padding:0;border-bottom:none;flex:1;overflow-y:auto">
@@ -906,7 +913,8 @@ const SECTOR_BUURT8 = Object.fromEntries(BEV_STATIC.map(r=>[r.c, r.b]));
 let SHDATA   = {};  // code → indicator → jaar → waarde
 let GEO      = {};  // geladen GeoJSON-bestanden
 let SCR_JAREN = [];   // beschikbare screeningsjaren (gesorteerd)
-let FARMAFLUX = []; // [{periode, cnk_code, product, registraties}]
+let FARMAFLUX_GROEP = []; // [{periode, cnk_code, product, registraties, groep}] — FarmaFlux-totalen, optioneel per groep
+let FARMAFLUX_INDIV = []; // [{periode, cnk_code, product, registraties, apotheek}] — los, individueel door apotheken aangeleverd
 let VAC_DETAIL = []; // [{snapshot, jaar, regist_m, regist_v, regist_tot, clb_m, clb_v, clb_tot}]
 let BEV_DATA   = {}; // code → {naam, buurt, totaal, a0_9, a10_19, ...}
 let HUISARTSEN_SHEETS = []; // [{praktijk, bhk_pct, hpv_pct}] — optioneel via Google Sheets
@@ -1025,18 +1033,20 @@ async function laadAlleData() {
   ];
 
   const dataUrl      = useSheets ? sheetUrl('data')               : LOCAL_CSV + 'data.csv';
-  const farmaUrl        = useSheets ? sheetUrl('farmaflux')           : LOCAL_CSV + 'farmaflux.csv';
+  const farmaGroepUrl   = useSheets ? sheetUrl('farmaflux_groep')      : LOCAL_CSV + 'farmaflux_groep.csv';
+  const farmaIndivUrl   = useSheets ? sheetUrl('farmaflux_individueel'): LOCAL_CSV + 'farmaflux_individueel.csv';
   const vacDetailUrl    = useSheets ? sheetUrl('vaccinaties_detail')  : LOCAL_CSV + 'vaccinaties_detail.csv';
   const scrUrl          = useSheets ? sheetUrl('screening')           : LOCAL_CSV + 'screening.csv';
   const vacUrl          = useSheets ? sheetUrl('vaccinatie')          : LOCAL_CSV + 'vaccinatie.csv';
   const huisartsenUrl   = useSheets ? sheetUrl('Huisartsen')          : '';
   const apoGroepenUrl   = useSheets ? sheetUrl('apotheek_groepen')    : LOCAL_CSV + 'apotheek_groepen.csv';
 
-  const [geoResults, dataText, farmaText, vacDetailText, scrText, vacText, huisartsenText, apoGroepenText] = await Promise.all([
+  const [geoResults, dataText, farmaGroepText, farmaIndivText, vacDetailText, scrText, vacText, huisartsenText, apoGroepenText] = await Promise.all([
     Promise.all(geoFiles.map(([, url]) => fetch(url).then(r => { if(!r.ok) throw new Error(`Kan ${url} niet laden`); return r.json(); })))
       .then(res => { setProgress(50, 'Statistieken ophalen…'); return res; }),
     fetch(dataUrl).then(r => { if(!r.ok) throw new Error(`Kan data.csv niet laden`); return r.text(); }),
-    fetch(farmaUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
+    fetch(farmaGroepUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
+    fetch(farmaIndivUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
     fetch(vacDetailUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
     fetch(scrUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
     fetch(vacUrl).then(r => r.ok ? r.text() : '').catch(() => ''),
@@ -1067,7 +1077,8 @@ async function laadAlleData() {
     });
   });
 
-  if(farmaText) FARMAFLUX = csvNaarObjecten(farmaText);
+  if(farmaGroepText) FARMAFLUX_GROEP = csvNaarObjecten(farmaGroepText);
+  if(farmaIndivText) FARMAFLUX_INDIV = csvNaarObjecten(farmaIndivText).filter(r => r.apotheek);
   if(vacDetailText) VAC_DETAIL = parseVacDetail(csvNaarObjecten(vacDetailText));
   if(huisartsenText) HUISARTSEN_SHEETS = csvNaarObjecten(huisartsenText).filter(r => r.praktijk);
   if(apoGroepenText) APO_GROEPEN_SHEETS = csvNaarObjecten(apoGroepenText).filter(r => r.apotheek);
@@ -2596,8 +2607,8 @@ function initApotheken(){
 
   m.invalidateSize();
 
-  // ── FarmaFlux data ───────────────────────────────────────────────────────────
-  const rows = FARMAFLUX.length ? FARMAFLUX : [
+  // ── FarmaFlux data (Genk-totaal, evt. met groep) ─────────────────────────────
+  const rows = FARMAFLUX_GROEP.length ? FARMAFLUX_GROEP : [
     {periode:'sep-okt 2025', cnk_code:'5522289', product:'Sensibilisering HPV',       registraties:'8'},
     {periode:'sep-okt 2025', cnk_code:'5846761', product:'Folder HPV-awareness',       registraties:'5'},
     {periode:'sep-okt 2025', cnk_code:'5510185', product:'Doorverwijzing arts',        registraties:'6'},
@@ -2674,66 +2685,57 @@ function initApotheken(){
     tbody.appendChild(tr);
   });
 
-  // ── Uitsplitsing per apotheek / groep (optioneel, verschijnt zodra kolom "apotheek" data heeft) ──
-  const hasApotheekData = rows.some(r => r.apotheek && String(r.apotheek).trim());
-  const hasGroepen = Object.keys(apoGroepMap).length > 0;
-
-  if(hasApotheekData){
-    document.getElementById('apo-groep-placeholder').style.display='none';
-    document.getElementById('apo-groep-section').style.display='';
-
-    const typeOf = r=>{
-      const prod=(r.product||'').toLowerCase();
-      return APO_TYPE[r.cnk_code] || (prod.includes('vaccin')?'vac':prod.includes('doorverw')?'doorverw':prod.includes('folder')?'folder':'sensib');
-    };
-
-    const renderApoBreakdown = level => {
-      const keyFn = level==='groep'
-        ? r => apoGroepMap[(r.apotheek||'').trim()] || 'Overige'
-        : r => (r.apotheek||'').trim() || 'Onbekend';
-      const buckets = {};
-      rows.forEach(r=>{
-        const key = keyFn(r);
-        if(!buckets[key]) buckets[key] = {sensib:0,folder:0,doorverw:0,vac:0,totaal:0};
-        const n = parseInt(r.registraties)||0;
-        buckets[key][typeOf(r)] += n;
-        buckets[key].totaal += n;
-      });
-      const keys = Object.keys(buckets).sort((a,b)=>buckets[b].totaal-buckets[a].totaal);
-      document.getElementById('apo-groep-thead').innerHTML =
-        `<tr><th>${level==='groep'?'Groep':'Apotheek'}</th><th>Sensib.</th><th>Folder</th><th>Doorverw.</th><th>Vaccin</th><th>Totaal</th></tr>`;
-      const tbody2 = document.getElementById('apo-groep-tbody');
-      tbody2.innerHTML='';
-      keys.forEach(k=>{
-        const b = buckets[k];
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td style="font-weight:600">${k}</td><td style="text-align:right">${b.sensib}</td><td style="text-align:right">${b.folder}</td><td style="text-align:right">${b.doorverw}</td><td style="text-align:right">${b.vac}</td><td style="text-align:right;font-weight:700">${b.totaal}</td>`;
-        tbody2.appendChild(tr);
-      });
-      document.getElementById('apo-groep-info').textContent = level==='groep'
-        ? `Uitsplitsing over ${keys.length} groep(en), op basis van tab "apotheek_groepen".`
-        : `Uitsplitsing over ${keys.length} apothe(e)k(en) met geregistreerde data.`;
-    };
-
-    const toggleEl = document.getElementById('apo-groep-toggle');
-    toggleEl.innerHTML = '';
-    const levels = hasGroepen ? [['groep','Per groep'],['apotheek','Per apotheek']] : [['apotheek','Per apotheek']];
-    levels.forEach(([lvl,lbl],i)=>{
-      const span = document.createElement('span');
-      span.className = 'tgl-opt'+(i===0?' active':'');
-      span.textContent = lbl;
-      span.onclick = ()=>{
-        toggleEl.querySelectorAll('.tgl-opt').forEach(o=>o.classList.remove('active'));
-        span.classList.add('active');
-        renderApoBreakdown(lvl);
-      };
-      toggleEl.appendChild(span);
+  const typeOf = r=>{
+    const prod=(r.product||'').toLowerCase();
+    return APO_TYPE[r.cnk_code] || (prod.includes('vaccin')?'vac':prod.includes('doorverw')?'doorverw':prod.includes('folder')?'folder':'sensib');
+  };
+  const bucketRows = (sourceRows, keyFn) => {
+    const buckets = {};
+    sourceRows.forEach(r=>{
+      const key = keyFn(r);
+      if(!buckets[key]) buckets[key] = {sensib:0,folder:0,doorverw:0,vac:0,totaal:0};
+      const n = parseInt(r.registraties)||0;
+      buckets[key][typeOf(r)] += n;
+      buckets[key].totaal += n;
     });
-    renderApoBreakdown(levels[0][0]);
+    return buckets;
+  };
+  const renderBreakdownTable = (theadId, tbodyId, buckets, colLabel, extraCol) => {
+    const keys = Object.keys(buckets).sort((a,b)=>buckets[b].totaal-buckets[a].totaal);
+    document.getElementById(theadId).innerHTML =
+      `<tr><th>${colLabel}</th>${extraCol?`<th>${extraCol}</th>`:''}<th>Sensib.</th><th>Folder</th><th>Doorverw.</th><th>Vaccin</th><th>Totaal</th></tr>`;
+    const tb = document.getElementById(tbodyId);
+    tb.innerHTML='';
+    keys.forEach(k=>{
+      const b = buckets[k];
+      const extraCell = extraCol ? `<td style="color:#777">${apoGroepMap[k]||'—'}</td>` : '';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td style="font-weight:600">${k}</td>${extraCell}<td style="text-align:right">${b.sensib}</td><td style="text-align:right">${b.folder}</td><td style="text-align:right">${b.doorverw}</td><td style="text-align:right">${b.vac}</td><td style="text-align:right;font-weight:700">${b.totaal}</td>`;
+      tb.appendChild(tr);
+    });
+  };
+
+  // ── Uitsplitsing per groep (uit farmaflux_groep, kolom "groep") ─────────────────
+  const hasGroepData = rows.some(r => r.groep && String(r.groep).trim());
+  if(hasGroepData){
+    document.getElementById('apo-groep-section').style.display='';
+    const buckets = bucketRows(rows, r => (r.groep && String(r.groep).trim()) || 'Totaal (geen groep)');
+    renderBreakdownTable('apo-groep-thead','apo-groep-tbody', buckets, 'Groep');
   } else {
     document.getElementById('apo-groep-section').style.display='none';
-    document.getElementById('apo-groep-placeholder').style.display='';
   }
+
+  // ── Uitsplitsing per apotheek (uit farmaflux_individueel, los van farmaflux_groep) ──
+  if(FARMAFLUX_INDIV.length){
+    document.getElementById('apo-indiv-section').style.display='';
+    const buckets = bucketRows(FARMAFLUX_INDIV, r => (r.apotheek||'').trim() || 'Onbekend');
+    renderBreakdownTable('apo-indiv-thead','apo-indiv-tbody', buckets, 'Apotheek', 'Groep');
+  } else {
+    document.getElementById('apo-indiv-section').style.display='none';
+  }
+
+  document.getElementById('apo-groep-placeholder').style.display =
+    (hasGroepData || FARMAFLUX_INDIV.length) ? 'none' : '';
 }
 
 // ── HUISARTSEN ────────────────────────────────────────────────────────────────
