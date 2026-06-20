@@ -339,6 +339,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
     <div class="partners-grid">
       <div class="partner-chip">Apotheia</div>
       <div class="partner-chip">MSD Belgium</div>
+      <div class="partner-chip">Prometheus</div>
       <div class="partner-chip">Solidaris Limburg</div>
       <div class="partner-chip">Stad Genk</div>
     </div>
@@ -500,9 +501,13 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:8px;font-weight:700;">Evolutie vaccinatiegraad (%)</h4>
       <canvas id="chart-vaccinatie"></canvas>
     </div>
+    <div class="chart-wrap">
+      <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:8px;font-weight:700;">Vaccinatiegraad per onderwijsnet — Genk (schooljaar)</h4>
+      <canvas id="chart-vac-net"></canvas>
+    </div>
     <div class="panel-section" id="vac-detail-section" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <h4>Registratiegraad per geboortejaar</h4>
+        <h4>Registratiegraad per geboortejaar (Vaccinnet)</h4>
         <button class="expand-btn" onclick="openVacModal('regist')" title="Vergroot grafiek">⛶</button>
       </div>
       <div style="min-height:160px"><canvas id="chart-vac-regist"></canvas></div>
@@ -510,7 +515,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
     </div>
     <div class="panel-section" id="vac-clb-section" style="display:none">
       <div style="display:flex;justify-content:space-between;align-items:center">
-        <h4>CLB-aandeel bij gevaccineerden</h4>
+        <h4>CLB-aandeel bij gevaccineerden (Vaccinnet)</h4>
         <button class="expand-btn" onclick="openVacModal('clb')" title="Vergroot grafiek">⛶</button>
       </div>
       <div style="min-height:140px"><canvas id="chart-vac-clb"></canvas></div>
@@ -893,7 +898,6 @@ const PRAKTIJKEN = [
   {naam:"Dr. Mewis Annelies",adres:"Sledderlo 62",stadsdeel:"Genk-Zuid",wijk:"Oud-Sledderlo",lat:50.93142,lng:5.52111,artsen:["Dr. Mewis Annelies"]},
   {naam:"Dr. Van Aerde Herwig",adres:"Onderwijslaan 81",stadsdeel:"Genk-Oost",wijk:"Waterschei-Zuid",lat:50.99808,lng:5.51152,artsen:["Dr. Van Aerde Herwig"]},
   {naam:"Medebo",adres:"Heeldstraat 58",stadsdeel:"Bret-Gelieren-Kattevenne",wijk:"Bret",lat:50.97304,lng:5.52731,artsen:["Dr. Denier Willy"]},
-  {naam:"Dr. Vrancken Francis",adres:"Herenstraat 21",stadsdeel:"Genk-Oost",wijk:"Oud-Waterschei",lat:50.99298,lng:5.53145,artsen:["Dr. Vrancken Francis"]},
   {naam:"Groepspraktijk De Boxberg",adres:"Boxbergstraat 33",stadsdeel:"Genk-West",wijk:"Boxbergheide",lat:50.97250,lng:5.45620,artsen:["Dr. Bosmans Carmen","Dr. Bosmans Eva","Dr. Caponi Anselmo","Dr. Caponi Lara","Dr. Ieven Kaat","Dr. Paredis Laurien"]},
   {naam:"Medi-Mine",adres:"Buitenlaan 11",stadsdeel:"Genk-West",wijk:"Winterslag 2 en 4",lat:50.97460,lng:5.46686,artsen:["Dr. Claesen Maarten","Dr. Dezeure Jaak","Dr. Germeaux Jacques","Dr. Lierman Jolien","Dr. Matthys Jolien","Dr. Potargent Bram","Dr. Tournel Amber","Dr. Vanaenrode Michiele","Dr. Verhoeven Nancy"]},
   {naam:"Praktijk Zonhoverheide",adres:"Zonhoverweg 35",stadsdeel:"Genk-West",wijk:"Boxbergheide",lat:50.97440,lng:5.45631,artsen:["Dr. Ampe Emilienne","Dr. Avci Seher","Dr. Grouwels Yves","Dr. Meers Jana","Dr. Najma Manja"]},
@@ -1024,11 +1028,13 @@ async function laadAlleData() {
       });
     });
   });
-  // Normaliseer vaccinatie_hpv van 0-1 naar percentage (Google Sheets levert 0.56 i.p.v. 56)
-  Object.values(SHDATA).forEach(inds => {
-    const vac = inds['vaccinatie_hpv'];
-    if(vac) Object.keys(vac).forEach(yr => {
-      if(vac[yr] != null && vac[yr] <= 1) vac[yr] = Math.round(vac[yr] * 1000) / 10;
+  // Normaliseer vaccinatie_hpv* van 0-1 naar percentage (Google Sheets levert 0.56 i.p.v. 56)
+  ['vaccinatie_hpv','vaccinatie_hpv_vrijclb','vaccinatie_hpv_goclb'].forEach(vacInd => {
+    Object.values(SHDATA).forEach(inds => {
+      const vac = inds[vacInd];
+      if(vac) Object.keys(vac).forEach(yr => {
+        if(vac[yr] != null && vac[yr] <= 1) vac[yr] = Math.round(vac[yr] * 1000) / 10;
+      });
     });
   });
 
@@ -1060,6 +1066,7 @@ const maps = {}, inited = {}, layerState = {};
 function lerp(a,b,t){ return a+(b-a)*t; }
 function fmtPct(v){ return v!=null ? v.toFixed(1)+'%':'—'; }
 function fmtEuro(v){ return v!=null ? '€'+Math.round(v).toLocaleString('nl-BE'):'—'; }
+function schooljaarLabel(yr){ return `${String(yr%100).padStart(2,'0')}/${String((yr+1)%100).padStart(2,'0')}`; }
 
 function makeMap(id){
   if(maps[id]) return maps[id];
@@ -1361,7 +1368,7 @@ function initScreening(){
     borderColor:'#d7191c',borderWidth:1.5,borderDash:[3,4],pointRadius:2,backgroundColor:'transparent',spanGaps:true});
   evDs.push({label:'Vlaanderen', data:SCR_JAREN.map(yr=>{ const v=getRef('screening',yr,'vlaanderen'); return v!=null?+(v*100).toFixed(1):null; }),
     borderColor:'#1a9641',borderWidth:1.5,borderDash:[3,4],pointRadius:2,backgroundColor:'transparent',spanGaps:true});
-  evDs.push({label:'WHO doel. (75%)', data:SCR_JAREN.map(()=>75),
+  evDs.push({label:'WHO doel. (70%)', data:SCR_JAREN.map(()=>70),
     borderColor:'#7B3FBE',borderWidth:1.5,borderDash:[6,3],pointRadius:0,backgroundColor:'transparent',spanGaps:true});
   evDs.push({label:'EU doel. (90%)', data:SCR_JAREN.map(()=>90),
     borderColor:'#FF6B35',borderWidth:1.5,borderDash:[6,3],pointRadius:0,backgroundColor:'transparent',spanGaps:true});
@@ -2338,6 +2345,32 @@ function initVaccinatie(){
           scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}}}});
     }
   }
+
+  // Vaccinatiegraad per onderwijsnet (Genk-niveau, schooljaren)
+  const NET_INDS = [
+    {key:'vaccinatie_hpv_vrijclb', label:'Vrij CLB', color:'#4472C4'},
+    {key:'vaccinatie_hpv_goclb',   label:'GO! CLB',  color:'#ED7D31'}
+  ];
+  const netJarenAll = [...new Set(
+    NET_INDS.flatMap(ind=>Object.keys(SHDATA[STAD_CODE]?.[ind.key]||{}))
+  )].map(Number).sort();
+  if(netJarenAll.length){
+    const netDs = NET_INDS
+      .filter(ind=>netJarenAll.some(yr=>getVal(STAD_CODE,ind.key,yr)!=null))
+      .map(ind=>({
+        label:ind.label,
+        data:netJarenAll.map(yr=>getVal(STAD_CODE,ind.key,yr)),
+        borderColor:ind.color,
+        backgroundColor:'transparent',
+        borderWidth:1.5, pointRadius:2, tension:.3
+      }));
+    if(netDs.length){
+      const ctxNet = document.getElementById('chart-vac-net').getContext('2d');
+      new Chart(ctxNet,{type:'line',data:{labels:netJarenAll.map(schooljaarLabel),datasets:netDs},
+        options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},
+          scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}}}});
+    }
+  }
   initVacDetail();
 }
 
@@ -2588,7 +2621,7 @@ function initApotheken(){
       {label:'Sensibiliseringsgesprek', data:trendSensib,  borderColor:'#7B3FBE',backgroundColor:'rgba(123,63,190,.12)',fill:true,tension:.3,borderWidth:2,pointRadius:3},
       {label:'Folder HPV-awareness',    data:trendFolder,  borderColor:'#C084FC',backgroundColor:'rgba(192,132,252,.10)',fill:true,tension:.3,borderWidth:2,pointRadius:3},
       {label:'Doorverwijzing',          data:trendDoorverw,borderColor:'#4472C4',backgroundColor:'rgba(68,114,196,.10)',fill:true,tension:.3,borderWidth:2,pointRadius:3},
-      {label:'Vaccinatie',              data:trendVac,     borderColor:'#70AD47',backgroundColor:'rgba(112,173,71,.10)',fill:true,tension:.3,borderWidth:2,pointRadius:3},
+      {label:'Aangeleverede vaccines',              data:trendVac,     borderColor:'#70AD47',backgroundColor:'rgba(112,173,71,.10)',fill:true,tension:.3,borderWidth:2,pointRadius:3},
     ]},
     options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},
       scales:{y:{beginAtZero:true,ticks:{stepSize:5}}}}
