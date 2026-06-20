@@ -161,6 +161,8 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
 #pane-huisartsen.active{ display:flex; }
 #pane-apotheken .side-panel { width:560px; }
 #pane-huisartsen .side-panel { width:560px; }
+#pane-screening .side-panel { width:560px; }
+#pane-vaccinatie .side-panel { width:560px; }
 .proj-page { max-width:980px; margin:0 auto; padding:28px 24px 48px; }
 
 .proj-hero {
@@ -431,7 +433,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       <h4 id="scr-ref-hdr">Referentie 2024</h4>
       <div class="ref-box">
         <div class="ref-row">
-          <span class="ref-name">Genk (campagnebuurten) <span title="Schatting: gemiddelde van de 4 campagnebuurten (Noord, Oost, West, Centrum) op basis van geaggregeerde sectordata. Geen aparte CVKO-registratie per buurt." style="cursor:help;font-size:.8em">ⓘ</span></span>
+          <span class="ref-name">Genk (campagnebuurten) *</span>
           <span class="ref-val genk" id="scr-ref-camp">53.9%</span>
         </div>
         <div class="ref-row"><span class="ref-name">Genk (stad totaal)</span><span class="ref-val genk" id="scr-ref-genk">55.5%</span></div>
@@ -440,6 +442,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
         <div class="ref-row"><span class="ref-name">WHO doelstelling (2030)</span><span class="ref-val" style="color:#7B3FBE">75%</span></div>
         <div class="ref-row"><span class="ref-name">Europese doelstelling (2030)</span><span class="ref-val" style="color:#FF6B35">90%</span></div>
       </div>
+      <div style="font-size:.69rem;color:#888;margin:4px 4px 0;line-height:1.4">* Schatting: gemiddelde van de 4 campagnebuurten (Noord, Oost, West, Centrum) op basis van geaggregeerde sectordata. Geen aparte CVKO-registratie per buurt.</div>
       <div style="font-size:.72rem;font-weight:600;color:#666;margin:8px 4px 3px;text-transform:uppercase;letter-spacing:.5px">Gemiddelde meest recente 3 jaar <span id="scr-3jr-label" style="font-weight:400;text-transform:none;letter-spacing:0"></span></div>
       <div class="ref-box">
         <div class="ref-row"><span class="ref-name">Genk (stad totaal)</span><span class="ref-val genk" id="scr-ref-genk3j">—</span></div>
@@ -481,7 +484,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       <h5>% Gevaccineerd</h5>
       <div id="leg-vac"></div>
     </div>
-    <div class="datasource-badge"><strong>CLB Limburg</strong>HPV-vaccinatiegraad</div>
+    <div class="datasource-badge"><strong>Vaccinnet</strong>HPV-vaccinatiegraad</div>
   </div>
   <div class="side-panel">
     <div class="panel-header">💉 HPV-vaccinatie</div>
@@ -502,7 +505,10 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
       <canvas id="chart-vaccinatie"></canvas>
     </div>
     <div class="chart-wrap">
-      <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:8px;font-weight:700;">Vaccinatiegraad per onderwijsnet — Genk (schooljaar)</h4>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h4 style="font-size:.72rem;text-transform:uppercase;letter-spacing:.7px;color:#999;margin-bottom:8px;font-weight:700;">Vaccinatiegraad per onderwijsnet — Genk (schooljaar)</h4>
+        <button class="expand-btn" onclick="openExpandModal('Vaccinatiegraad per onderwijsnet — Genk (schooljaar)', 'chart-vac-net')" title="Vergroot grafiek">⛶</button>
+      </div>
       <canvas id="chart-vac-net"></canvas>
     </div>
     <div class="panel-section" id="vac-detail-section" style="display:none">
