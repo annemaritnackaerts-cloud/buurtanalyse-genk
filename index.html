@@ -1390,7 +1390,7 @@ function initScreening(){
   if(el3('scr-ref-vl3j'))   el3('scr-ref-vl3j').textContent   = fmt3(avg3(yr=>getRef('screening',yr,'vlaanderen')));
 
   new Chart(ectx,{type:'line',data:{labels:SCR_JAREN,datasets:evDs},
-    options:{responsive:true,
+    options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}},
                tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw+'%'}}},
       scales:{
@@ -1412,7 +1412,7 @@ function initScreening(){
       ]
     },
     options:{
-      indexAxis:'y',responsive:true,
+      indexAxis:'y',responsive:true,maintainAspectRatio:false,
       plugins:{legend:{position:'bottom',labels:{boxWidth:12,font:{size:10}}},
                tooltip:{callbacks:{label:c=>c.dataset.label+': '+c.raw.toFixed(1)+'%'}}},
       scales:{
@@ -1428,7 +1428,7 @@ function initScreening(){
   scrBarChart = new Chart(bctx,{type:'bar',
     data:{labels:d0.labels,datasets:[{data:d0.rates,
       backgroundColor:d0.buurten.map(b=>BCOLOR8[b]||'#999'),borderWidth:0}]},
-    options:{responsive:true,
+    options:{responsive:true,maintainAspectRatio:false,
       plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>c.raw.toFixed(1)+'%'}}},
       scales:{
         x:{display:false},
@@ -2347,7 +2347,7 @@ function initVaccinatie(){
     if(vacDs.length){
       const ctx = document.getElementById('chart-vaccinatie').getContext('2d');
       new Chart(ctx,{type:'line',data:{labels:vacJarenAll,datasets:vacDs},
-        options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},
           scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}}}});
     }
   }
@@ -2373,7 +2373,7 @@ function initVaccinatie(){
     if(netDs.length){
       const ctxNet = document.getElementById('chart-vac-net').getContext('2d');
       new Chart(ctxNet,{type:'line',data:{labels:netJarenAll.map(schooljaarLabel),datasets:netDs},
-        options:{responsive:true,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},
+        options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,font:{size:10}}}},
           scales:{y:{min:0,max:100,ticks:{callback:v=>v+'%'}}}}});
     }
   }
@@ -2430,6 +2430,7 @@ function buildVacDetailChartConfig(rows, type) {
     data: {labels, datasets},
     options: {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: {position:'bottom', labels:{boxWidth:10, font:{size:10}}},
         tooltip: {callbacks:{label: c => {
