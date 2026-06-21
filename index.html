@@ -884,7 +884,7 @@ nav { background:#fff; border-bottom:2px solid var(--border); display:flex; flex
 <script>
 // ── CONFIGURATIE ──────────────────────────────────────────────────────────────
 // Vul hier je Google Sheets ID in zodra de spreadsheet klaarstaat:
-const SHEET_ID = '14juUOmxxH02gDJU4XUU89fffOJm-aZBd';
+const SHEET_ID = '1_91IhRyDKoH0Z5mzYScYYKGAdoHum4hy';
 
 const LOCAL_CSV = 'data/csv/';
 const LOCAL_GEO = 'data/geojson/';
@@ -972,10 +972,22 @@ function csvNaarObjecten(text) {
     const obj = {};
     headers.forEach((h, i) => {
       const v = (vals[i] || '').replace(/"/g,'').trim();
-      obj[h] = v === '' ? null : isNaN(v) || v === '' ? v : Number(v);
+      obj[h] = v === '' ? null : parseCelWaarde(v);
     });
     return obj;
   });
+}
+
+// Sommige Google Sheets exporteren getallen met komma als decimaalteken (bv. "0,495"
+// i.p.v. "0.495") door de taalinstelling van het sheet-bestand. Number() snapt dat niet
+// en geeft NaN — vang dat hier op zodat data altijd correct ingelezen wordt.
+function parseCelWaarde(v) {
+  if (!isNaN(v)) return Number(v);
+  if (/^-?\d+,\d+$/.test(v)) {
+    const alt = v.replace(',', '.');
+    if (!isNaN(alt)) return Number(alt);
+  }
+  return v;
 }
 
 function buildLookup(rows) {
